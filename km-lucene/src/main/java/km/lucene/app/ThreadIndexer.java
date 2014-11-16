@@ -79,6 +79,7 @@ public class ThreadIndexer {
             FieldType fieldType = new FieldType();
             fieldType.setStoreTermVectors(true);
             fieldType.setStoreTermVectorPositions(true);
+            // fieldType.setStoreTermVectorOffsets(true);
             fieldType.setIndexed(true);
 
 			doc.add(new Field(FieldName.CONTENT, post.getContent(), fieldType));
