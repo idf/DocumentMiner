@@ -93,7 +93,7 @@ public class CollocationScorer
      * Relative Entropy
      * score = P(x) ln(P(x)/P(y))
      * P(x) = coincidenceDocCount / df_x
-     * P(y) = df_y / |V|
+     * P(y) = df_y / DF
      * @return
      */
     private float getEntropyScore() {
