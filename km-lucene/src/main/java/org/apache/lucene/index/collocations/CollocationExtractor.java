@@ -116,7 +116,7 @@ public class CollocationExtractor {
         int docSeq;
 		while ((docSeq = dpe.nextDoc())!=DocsEnum.NO_MORE_DOCS) {
             int docId = dpe.docID();
-            System.out.println("Processing docId: "+docId);
+            // System.out.println("Processing docId: "+docId);
 			numDocsAnalyzed++;
 			if (numDocsAnalyzed > maxNumDocsToAnalyze) {
 				break;

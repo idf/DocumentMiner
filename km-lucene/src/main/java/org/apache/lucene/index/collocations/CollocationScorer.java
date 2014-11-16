@@ -18,6 +18,8 @@ package org.apache.lucene.index.collocations;
  */
 
 
+import util.Formatter;
+
 /**
  * Records the total number of coincidences of two terms
  * @author MAHarwood
@@ -35,7 +37,7 @@ public class CollocationScorer
 
     private int termADocFreq;
     private int termBDocFreq;
-    private long totalVocabulary;
+    private long totalDocFreq;
 
     /**
      * @param coincidentalTerm
@@ -51,16 +53,16 @@ public class CollocationScorer
         this.coincidentalTerm = coincidentalTerm;
         this.termADocFreq = termADocFreq;
         this.termBDocFreq = termBDocFreq;
-        this.totalVocabulary = 0;
+        this.totalDocFreq = 0;
     }
 
-    public CollocationScorer(String term,String coincidentalTerm, int termADocFreq, int termBDocFreq, long totalVocabulary) {
+    public CollocationScorer(String term,String coincidentalTerm, int termADocFreq, int termBDocFreq, long totalDocFreq) {
         this(term, coincidentalTerm, termADocFreq, termBDocFreq);
-        this.totalVocabulary = totalVocabulary;
+        this.totalDocFreq = totalDocFreq;
     }
 
     public float getScore() {
-        if(this.totalVocabulary==0)
+        if(this.totalDocFreq ==0)
             return this.getSimpleScore();
         else
             return this.getEntropyScore();
@@ -70,32 +72,35 @@ public class CollocationScorer
         this.coIncidenceDocCount += 1;
     }
 
+    /**
+     * using just the termB intersection favours common words as
+     coincidents eg "new" food
+     return termBIntersectionPercent;
+     using just the overall intersection favours rare words as
+     coincidents eg "scezchuan" food
+
+     return overallIntersectionPercent;
+     so here we take an average of the two:
+     * @return
+     */
     private float getSimpleScore() {
         float overallIntersectionPercent = coIncidenceDocCount / (float) (termADocFreq + termBDocFreq);
         float termBIntersectionPercent = coIncidenceDocCount / (float) (termBDocFreq);
-
-        //using just the termB intersection favours common words as
-        // coincidents eg "new" food
-        //      return termBIntersectionPercent;
-        //using just the overall intersection favours rare words as
-        // coincidents eg "scezchuan" food
-        //        return overallIntersectionPercent;
-        // so here we take an average of the two:
         return (termBIntersectionPercent + overallIntersectionPercent) / 2;
     }
 
     /**
      * Relative Entropy
-     * score = P(x) log(P(x)/P(y))
-     * P(x) = coincidenceDocCount / tf_x
-     * P(y) = tf_y / |V|
+     * score = P(x) ln(P(x)/P(y))
+     * P(x) = coincidenceDocCount / df_x
+     * P(y) = df_y / |V|
      * @return
      */
     private float getEntropyScore() {
         double P_x = this.coIncidenceDocCount / (double) this.termADocFreq; // 1.0
-        double P_y = this.termBDocFreq/ (double) this.totalVocabulary;
+        double P_y = this.termBDocFreq/ (double) this.totalDocFreq;
         double score = P_x * Math.log(P_x/P_y);
-        return (float) score;  // 5.0588846?
+        return (float) score;
     }
 
 
@@ -112,6 +117,6 @@ public class CollocationScorer
 
     @Override
     public String toString() {
-        return ""+this.getScore();
+        return Formatter.toString(this);
     }
 }

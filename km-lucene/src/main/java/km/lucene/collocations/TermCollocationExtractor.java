@@ -25,7 +25,7 @@ public class TermCollocationExtractor {
     private IndexReader reader;
 
     // collocation
-    static int DEFAULT_MAX_NUM_DOCS_TO_ANALYZE = 1200;
+    static int DEFAULT_MAX_NUM_DOCS_TO_ANALYZE = 120000;
     static int maxNumDocsToAnalyze = DEFAULT_MAX_NUM_DOCS_TO_ANALYZE;
     String fieldName = FieldName.CONTENT;
     static float DEFAULT_MIN_TERM_POPULARITY = 0.0002f;
@@ -33,7 +33,7 @@ public class TermCollocationExtractor {
     static float DEFAULT_MAX_TERM_POPULARITY = 1f;
     float maxTermPopularity = DEFAULT_MAX_TERM_POPULARITY;
     int numCollocatedTermsPerTerm = 20;
-    int slopSize = 10;
+    int slopSize = 1;
     long totalVocabulary = 0;
     TermFilter filter = new TermFilter();
 
@@ -97,6 +97,7 @@ public class TermCollocationExtractor {
         Iterator it = sortedMap.entrySet().iterator();
         while(it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
+            System.out.println(pair.getKey()+" = "+((CollocationScorer) pair.getValue()).getScore());
             System.out.println(pair.getKey()+" = "+pair.getValue());
         }
     }
@@ -116,24 +117,49 @@ public class TermCollocationExtractor {
         return false;
     }
 
+    /**
+     * TODO
+     * @param docSeq: doc sequence (doc id?)
+     * @param term: term interested
+     * @param termPos: positions of the term
+     * @param tv: NIL
+     * @param terms: terms in the document
+     * @return: index in terms of the term interested
+     * @throws IOException
+     */
     private int recordAllPositionsOfTheTermInCurrentDocumentBitset(int docSeq, Term term, BitSet termPos, Terms tv, String[] terms) throws IOException {
-        // first record all of the positions of the term in a bitset which represents terms in the current doc.
-        int index = Arrays.binarySearch(terms, term.text());
-        if (index >= 0) {  // found
-            // Bits liveDocs = MultiFields.getLiveDocs(this.reader);
-            // int[] pos = tpv.getTermPositions(index);
-            DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, new BytesRef(terms[index]));
-            dpe.advance(docSeq);
-            // remember all positions of the term in this doc
-            for (int j = 0; j < dpe.freq(); j++) {
-                termPos.set(dpe.nextPosition());
-            }
-        }
+        int index = 0;
+        while(index<terms.length && terms[index]!=term.text()) index++;
+        if(index==terms.length)
+            return -1;
+        recordPosition(docSeq, terms[index], termPos);
         return index;
     }
 
+    private void recordPosition(int docSeq, String str, BitSet termPos) throws IOException {
+        termPos.clear();
+        DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, new BytesRef(str));
+        dpe.advance(docSeq);
+        // remember all positions of the term in this doc
+        for (int j = 0; j < dpe.freq(); j++) {
+            termPos.set(dpe.nextPosition());
+        }
+    }
+
+    /**
+     * Core, inc collocation count
+     * @param term
+     * @param totalNumDocs
+     * @param phraseTerms
+     * @param termPos
+     * @param terms
+     * @param j
+     * @param matchFound
+     * @param startpos
+     * @param endpos
+     * @throws IOException
+     */
     private void populateHashMapWithPhraseTerms(Term term,
-                                                int numDocsForTerm,
                                                 int totalNumDocs,
                                                 HashMap<String, CollocationScorer> phraseTerms,
                                                 BitSet termPos,
@@ -141,45 +167,34 @@ public class TermCollocationExtractor {
                                                 int j,
                                                 boolean[] matchFound,
                                                 int startpos,
-                                                int endpos
-    ) throws IOException {
-        for (int prevpos = startpos; (prevpos <= endpos) && (!matchFound[j]); prevpos++) {  // iterate the positions
-            if (termPos.get(prevpos)) {
+                                                int endpos ) throws IOException {
+        for (int curpos = startpos; (curpos <= endpos) && (!matchFound[j]); curpos++) {  // iterate the positions
+            if (termPos.get(curpos)) {
                 // Add term to hashmap containing co-occurrence
                 // counts for this term
                 CollocationScorer pt = (CollocationScorer) phraseTerms.get(terms[j]);
-                if (pt == null) {
-                    // TermEnum otherTe = reader.terms(new Term(fieldName, terms[j]));
 
+                if (pt==null) {  // if not exist
                     Term otherTe = new Term(this.fieldName, terms[j]);
+                    int numDocsForTerm = Math.min(this.reader.docFreq(term), maxNumDocsToAnalyze);
                     int numDocsForOtherTerm = Math.min(this.reader.docFreq(otherTe), maxNumDocsToAnalyze);
 
                     float otherPercent = (float) numDocsForOtherTerm / (float) totalNumDocs;
-
-
-                    // check other term is not too rare or frequent
-                    if (otherPercent < minTermPopularity) {
-                        System.out.println(term.text() + " not popular enough " + otherPercent);
+                    if(isTermTooPopularOrNotPopularEnough(otherTe, otherPercent)) {
                         matchFound[j] = true;
                         continue;
                     }
-                    if (otherPercent > maxTermPopularity) {
-                        System.out.println(term.text() + " too popular " + otherPercent);
-                        matchFound[j] = true;
-                        continue;
-                    }
-                    // public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq)
-                    pt = new CollocationScorer(term.text(), terms[j], numDocsForTerm, numDocsForOtherTerm, this.totalVocabulary);
+                    pt = new CollocationScorer(term.text(), terms[j], numDocsForTerm, numDocsForOtherTerm, this.reader.numDocs());
                     phraseTerms.put(pt.getCoincidentalTerm(), pt);
                 }
+
                 pt.incCoIncidenceDocCount();
-                // false, increase time complexity, true otherwise
-                matchFound[j] = true;
+                matchFound[j] = true;  // whether check the same doc multiple times
             }
         }
     }
 
-    private HashMap<String, CollocationScorer> processTerm(Term term, int slop) throws IOException {
+    private HashMap<String, CollocationScorer> processTerm(Term term, int slopSize) throws IOException {
         BytesRef bytesRef = term.bytes();
         System.out.println("Processing term: "+term);
 
@@ -197,17 +212,15 @@ public class TermCollocationExtractor {
         DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, bytesRef);
         HashMap<String, CollocationScorer> phraseTerms = new HashMap<String, CollocationScorer>();
         int MAX_TERMS_PER_DOC = 100000;
+
         BitSet termPos = new BitSet(MAX_TERMS_PER_DOC);
 
 
-        // for all docs that contain this term
+        // for all docs that CONTAIN this term
         int docSeq;
         while ((docSeq = dpe.nextDoc())!=DocsEnum.NO_MORE_DOCS) {
             int docId = dpe.docID();
-            System.out.println("Processing docId: "+docId);
-            // get TermPositions for matching doc
-            // TermPositionVector tpv = (TermPositionVector) reader.getTermFreqVector(docId, fieldName);
-            // String[] terms_str = tpv.getTerms();
+            // System.out.println("Processing docId: "+docId);
             Terms tv = this.reader.getTermVector(docId, this.fieldName);
             TermsEnum te = tv.iterator(null);
 
@@ -217,8 +230,8 @@ public class TermCollocationExtractor {
             }
             String[] terms_str = terms_list.toArray(new String[terms_list.size()]);
             // System.out.println("terms_str: "+Arrays.toString(terms_str));
-            termPos.clear();
-            int index = recordAllPositionsOfTheTermInCurrentDocumentBitset(docSeq, term, termPos, tv, terms_str);
+            // int index = recordAllPositionsOfTheTermInCurrentDocumentBitset(docSeq, term, termPos, tv, terms_str);
+            int index = -1;
 
             // now look at all OTHER terms_str in this doc and see if they are
             // positioned in a pre-defined sized window around the current term
@@ -227,25 +240,24 @@ public class TermCollocationExtractor {
             for(int j=0; j < matchFound.length; j++)
                 matchFound[j] = false;  // mask to whether count once or multiple times in a doc
 
-            for (int k = 0; (k < dpe.freq()); k++) {
+            for (int k = 0; (k < dpe.freq()); k++) {  // for term A
                 Integer position = dpe.nextPosition();
-                Integer startpos = Math.max(0, position - slop);
-                Integer endpos = position + slop;
+                Integer startpos = Math.max(0, position - slopSize);
+                Integer endpos = position + slopSize;
                 for (int j = 0; j < terms_str.length && !matchFound[j]; j++) {
-                    if (j == index) { // (item A)
+                    if (j == index) { // (term A)
                         continue;
                     }
-                    if (!filter.processTerm(terms_str[j])) {
+                    if (!this.filter.processTerm(terms_str[j])) {
                         continue;
                     }
                     if (!StringUtils.isAlpha(terms_str[j])) {
                         continue;
                     }
-                    // inefficient
+                    // inefficient, better algorithm exists
                     // iterate through all other items (item B)
                     populateHashMapWithPhraseTerms(
                             term,
-                            numDocsForTerm,
                             totalNumDocs,
                             phraseTerms,
                             termPos,
