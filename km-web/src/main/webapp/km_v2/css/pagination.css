@@ -1,0 +1,16 @@
+#pagination {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+    font-size: large;
+}
+
+#pagination a {
+    color: #777;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+#pagination a:hover {
+    color: #222;
+}

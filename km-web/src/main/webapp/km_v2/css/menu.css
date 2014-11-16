@@ -1,0 +1,45 @@
+.menu_panel {
+    height: 20px;
+    margin-left: 20px;
+    margin-top: 5px;
+}
+
+.menu_item_panel {
+    position: relative;
+    float: left;
+    margin-top: 2px;
+    margin-right: 30px;
+    cursor: pointer;
+    color: #777;
+    font-size: small;
+}
+
+.menu_item_panel:hover {
+    color: #222;
+}
+
+.menu_item_text {
+    position: relative;
+    float: left;
+}
+
+.menu_item_arrow {
+    position: relative;
+    float: left;
+    margin-top: 8px;
+    margin-left: 5px;
+}
+
+.mn-dwn-arw {
+    border-color: #909090 transparent;
+    border-style: solid;
+    border-width: 4px 4px 0 4px;
+    margin-left: -2px;
+    top: 50%;
+    margin-top: -2px;
+    position: absolute;
+}
+
+.menu_item_panel:hover .mn-dwn-arw {
+    border-color: #000 transparent;
+}

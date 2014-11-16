@@ -1,0 +1,34 @@
+.thread {
+    margin-top: 10px;
+}
+
+.title {
+    background-color: #fdf5ce;
+}
+
+.post {
+    margin-left: 15px;
+}
+
+.storey {
+    text-align: right;
+}
+
+.content_panel {
+    margin: 5px;
+    padding: 2px;
+    background-color: #ccc;
+}
+
+.quote {
+    margin: 5px;
+    padding: 2px;
+    background-color: #eee;
+}
+
+.content {
+    padding-left: 2px;
+}
+
+.poster {
+}

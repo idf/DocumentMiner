@@ -1,0 +1,266 @@
+package km.lucene.collocations;
+
+import km.common.Setting;
+import km.lucene.constants.FieldName;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.lucene.facet.FacetsConfig;
+import org.apache.lucene.index.*;
+import org.apache.lucene.index.collocations.CollocationScorer;
+import org.apache.lucene.index.collocations.TermFilter;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+/**
+ * User: Danyang
+ * Date: 10/7/14
+ * Time: 2:12 PM
+ */
+public class TermCollocationExtractor {
+    // refactor: later
+    private static final FacetsConfig config = new FacetsConfig();
+    private IndexReader reader;
+
+    // collocation
+    static int DEFAULT_MAX_NUM_DOCS_TO_ANALYZE = 1200;
+    static int maxNumDocsToAnalyze = DEFAULT_MAX_NUM_DOCS_TO_ANALYZE;
+    String fieldName = FieldName.CONTENT;
+    static float DEFAULT_MIN_TERM_POPULARITY = 0.0002f;
+    float minTermPopularity = DEFAULT_MIN_TERM_POPULARITY;
+    static float DEFAULT_MAX_TERM_POPULARITY = 1f;
+    float maxTermPopularity = DEFAULT_MAX_TERM_POPULARITY;
+    int numCollocatedTermsPerTerm = 20;
+    int slopSize = 10;
+    long totalVocabulary = 0;
+    TermFilter filter = new TermFilter();
+
+    public TermCollocationExtractor(String indexPath, String thindexPath, String taxoPath) throws IOException {
+        this.reader = DirectoryReader.open(FSDirectory.open(new File(thindexPath)));
+
+        Fields fields = MultiFields.getFields(this.reader);
+        Terms terms = fields.terms(this.fieldName);
+        // this.totalVocabulary = terms.size();  // ERROR -1
+        TermsEnum iterator = terms.iterator(null);
+        BytesRef byteRef = null;
+        while((byteRef = iterator.next()) != null) {
+            this.totalVocabulary++;
+        }
+    }
+
+    public static void main(String[] args) throws IOException, ParseException {
+        // test parameters
+        args = new String[3];
+        args[0] = Setting.INDEX_PATH;
+        args[1] = Setting.THINDEX_PATH;
+        args[2] = Setting.TAXOINDEX_PATH;
+
+        if (args.length < 3) {
+            System.out.println("Please specify data file, index folder, taxonomy index folder in sequence.");
+            System.exit(1);
+        }
+        System.out.println("Started");
+        String indexPath = args[0];
+        String thindexPath = args[1];
+        String taxoPath = args[2];
+
+        TermCollocationExtractor termCollocationExtractor = new TermCollocationExtractor(indexPath, thindexPath, taxoPath);
+        termCollocationExtractor.extract(new Term(FieldName.CONTENT, "ntu"));
+
+    }
+
+    public void extract(Term t) throws IOException, ParseException {
+        HashMap<String, CollocationScorer> phraseTerms = processTerm(t, this.slopSize);
+
+        class ValueComparator implements Comparator<String> {
+            Map<String, CollocationScorer> base;
+            public ValueComparator(Map<String, CollocationScorer> base) {
+                this.base = base;
+            }
+
+            // Note: this comparator imposes orderings that are inconsistent with equals.
+            @Override
+            public int compare(String a, String b) {
+                if (base.get(a).getScore() < base.get(b).getScore()) {
+                    return 1;
+                } else {
+                    return -1;
+                } // returning 0 would merge keys
+            }
+        }
+        ValueComparator bvc = new ValueComparator(phraseTerms);
+        TreeMap<String,CollocationScorer> sortedMap = new TreeMap<>(bvc);
+        sortedMap.putAll(phraseTerms);
+
+        Iterator it = sortedMap.entrySet().iterator();
+        while(it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            System.out.println(pair.getKey()+" = "+pair.getValue());
+        }
+    }
+
+
+
+    private boolean isTermTooPopularOrNotPopularEnough(Term term, float percent) {
+        // check term is not too rare or frequent
+        if (percent < minTermPopularity) {
+            System.out.println(term.text() + " not popular enough " + percent);
+            return true;
+        }
+        if (percent > maxTermPopularity) {
+            System.out.println(term.text() + " too popular " + percent);
+            return true;
+        }
+        return false;
+    }
+
+    private int recordAllPositionsOfTheTermInCurrentDocumentBitset(int docSeq, Term term, BitSet termPos, Terms tv, String[] terms) throws IOException {
+        // first record all of the positions of the term in a bitset which represents terms in the current doc.
+        int index = Arrays.binarySearch(terms, term.text());
+        if (index >= 0) {  // found
+            // Bits liveDocs = MultiFields.getLiveDocs(this.reader);
+            // int[] pos = tpv.getTermPositions(index);
+            DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, new BytesRef(terms[index]));
+            dpe.advance(docSeq);
+            // remember all positions of the term in this doc
+            for (int j = 0; j < dpe.freq(); j++) {
+                termPos.set(dpe.nextPosition());
+            }
+        }
+        return index;
+    }
+
+    private void populateHashMapWithPhraseTerms(Term term,
+                                                int numDocsForTerm,
+                                                int totalNumDocs,
+                                                HashMap<String, CollocationScorer> phraseTerms,
+                                                BitSet termPos,
+                                                String[] terms,
+                                                int j,
+                                                boolean[] matchFound,
+                                                int startpos,
+                                                int endpos
+    ) throws IOException {
+        for (int prevpos = startpos; (prevpos <= endpos) && (!matchFound[j]); prevpos++) {  // iterate the positions
+            if (termPos.get(prevpos)) {
+                // Add term to hashmap containing co-occurrence
+                // counts for this term
+                CollocationScorer pt = (CollocationScorer) phraseTerms.get(terms[j]);
+                if (pt == null) {
+                    // TermEnum otherTe = reader.terms(new Term(fieldName, terms[j]));
+
+                    Term otherTe = new Term(this.fieldName, terms[j]);
+                    int numDocsForOtherTerm = Math.min(this.reader.docFreq(otherTe), maxNumDocsToAnalyze);
+
+                    float otherPercent = (float) numDocsForOtherTerm / (float) totalNumDocs;
+
+
+                    // check other term is not too rare or frequent
+                    if (otherPercent < minTermPopularity) {
+                        System.out.println(term.text() + " not popular enough " + otherPercent);
+                        matchFound[j] = true;
+                        continue;
+                    }
+                    if (otherPercent > maxTermPopularity) {
+                        System.out.println(term.text() + " too popular " + otherPercent);
+                        matchFound[j] = true;
+                        continue;
+                    }
+                    // public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq)
+                    pt = new CollocationScorer(term.text(), terms[j], numDocsForTerm, numDocsForOtherTerm, this.totalVocabulary);
+                    phraseTerms.put(pt.getCoincidentalTerm(), pt);
+                }
+                pt.incCoIncidenceDocCount();
+                // false, increase time complexity, true otherwise
+                matchFound[j] = true;
+            }
+        }
+    }
+
+    private HashMap<String, CollocationScorer> processTerm(Term term, int slop) throws IOException {
+        BytesRef bytesRef = term.bytes();
+        System.out.println("Processing term: "+term);
+
+        int numDocsForTerm = this.reader.docFreq(term);
+        int totalNumDocs = reader.numDocs();
+        float percent = (float) numDocsForTerm / (float) totalNumDocs;
+
+        if(isTermTooPopularOrNotPopularEnough(term, percent)) {
+            return null;
+        }
+        // get a list of all the docs with this term
+        // Apache Lucene Migration Guide
+        // TermDocs td = reader.termDocs(term);
+        // get dpe in first hand
+        DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, bytesRef);
+        HashMap<String, CollocationScorer> phraseTerms = new HashMap<String, CollocationScorer>();
+        int MAX_TERMS_PER_DOC = 100000;
+        BitSet termPos = new BitSet(MAX_TERMS_PER_DOC);
+
+
+        // for all docs that contain this term
+        int docSeq;
+        while ((docSeq = dpe.nextDoc())!=DocsEnum.NO_MORE_DOCS) {
+            int docId = dpe.docID();
+            System.out.println("Processing docId: "+docId);
+            // get TermPositions for matching doc
+            // TermPositionVector tpv = (TermPositionVector) reader.getTermFreqVector(docId, fieldName);
+            // String[] terms_str = tpv.getTerms();
+            Terms tv = this.reader.getTermVector(docId, this.fieldName);
+            TermsEnum te = tv.iterator(null);
+
+            List<String> terms_list = new ArrayList<>();
+            while(te.next()!=null) {
+                terms_list.add(te.term().utf8ToString());
+            }
+            String[] terms_str = terms_list.toArray(new String[terms_list.size()]);
+            // System.out.println("terms_str: "+Arrays.toString(terms_str));
+            termPos.clear();
+            int index = recordAllPositionsOfTheTermInCurrentDocumentBitset(docSeq, term, termPos, tv, terms_str);
+
+            // now look at all OTHER terms_str in this doc and see if they are
+            // positioned in a pre-defined sized window around the current term
+            // sequential code
+            boolean[] matchFound = new boolean[terms_str.length]; // single match is sufficient, no duplicate process
+            for(int j=0; j < matchFound.length; j++)
+                matchFound[j] = false;  // mask to whether count once or multiple times in a doc
+
+            for (int k = 0; (k < dpe.freq()); k++) {
+                Integer position = dpe.nextPosition();
+                Integer startpos = Math.max(0, position - slop);
+                Integer endpos = position + slop;
+                for (int j = 0; j < terms_str.length && !matchFound[j]; j++) {
+                    if (j == index) { // (item A)
+                        continue;
+                    }
+                    if (!filter.processTerm(terms_str[j])) {
+                        continue;
+                    }
+                    if (!StringUtils.isAlpha(terms_str[j])) {
+                        continue;
+                    }
+                    // inefficient
+                    // iterate through all other items (item B)
+                    populateHashMapWithPhraseTerms(
+                            term,
+                            numDocsForTerm,
+                            totalNumDocs,
+                            phraseTerms,
+                            termPos,
+                            terms_str, j,
+                            matchFound,
+                            startpos,
+                            endpos);
+                }
+
+            }
+        }// end docs loop
+        return phraseTerms;
+    }
+
+
+
+
+}

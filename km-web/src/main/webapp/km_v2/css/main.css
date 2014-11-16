@@ -1,0 +1,32 @@
+html {
+    font-family: arial, sans-serif;
+}
+
+body {
+    margin: 0px;
+}
+
+.hr {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: solid 1px #ccc;
+    height: 1px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.result {
+    margin-left: 20px;
+    margin-top: 5px;
+    color: #808080;
+    font-size: small;
+}
+
+.footer {
+    font-size: small;
+    color: #999;
+    padding-top: 5px;
+    padding-left: 20px;
+    padding-bottom: 5px;
+}

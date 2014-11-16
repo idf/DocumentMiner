@@ -1,0 +1,12 @@
+#facets {
+    margin-left: 10px;
+    border: solid 1px #0000ff;
+    width: 500px;
+    padding: 2px;
+}
+
+.chart {
+    margin: 5px;
+    height: 300px;
+}
+

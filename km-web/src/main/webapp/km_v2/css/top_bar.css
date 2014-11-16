@@ -1,0 +1,40 @@
+.top_bar_panel {
+    background-color: #eee;
+    padding-top: 5px;
+    padding-left: 5px;
+    padding-bottom: 10px;
+}
+
+.top_bar_logo {
+    display: inline-block;
+    margin-left: 10px;
+    color: #666;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    font-weight: bold;
+    font-size: 20px;
+    text-shadow: 3px 3px 3px #ccc;
+}
+
+.top_bar_keyword_panel {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.top_bar_input_keyword {
+    font-size: medium;
+    padding: 2px;
+    width: 540px;
+    height: 28px;
+}
+
+.top_bar_search_panel {
+    display: inline-block;
+    margin-left: -5px;
+    margin-top: 7px;
+}
+
+.top_bar_button_search {
+    width: 80px;
+    height: 28px;
+    font-size: medium;
+}
