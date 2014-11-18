@@ -2,7 +2,6 @@ package km.lucene.collocations;
 
 import km.common.Setting;
 import km.lucene.constants.FieldName;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.index.*;
 import org.apache.lucene.index.collocations.CollocationScorer;
@@ -176,9 +175,9 @@ public class TermCollocationExtractor {
                     if (!this.filter.processTerm(termB.bytes().utf8ToString())) {
                         continue;
                     }
-                    if (!StringUtils.isAlpha(termB.bytes().utf8ToString())) {
-                        continue;
-                    }
+//                    if (!StringUtils.isAlpha(termB.bytes().utf8ToString())) {
+//                        continue;
+//                    }
 
                     CollocationScorer pt = (CollocationScorer) phraseTerms.get(termB.bytes().utf8ToString());
 
