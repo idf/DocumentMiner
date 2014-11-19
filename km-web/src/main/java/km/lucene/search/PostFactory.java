@@ -1,7 +1,5 @@
 package km.lucene.search;
 
-import java.io.IOException;
-import java.util.Date;
 import km.common.util.DateUtil;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
@@ -20,6 +18,9 @@ import org.apache.lucene.search.highlight.Highlighter;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 import org.apache.lucene.search.highlight.QueryScorer;
 import org.apache.lucene.util.Version;
+
+import java.io.IOException;
+import java.util.Date;
 
 public class PostFactory {
 
@@ -89,7 +90,7 @@ public class PostFactory {
         Highlighter highlighter = new Highlighter(scorer);
         String fragment = null;
         try {
-            fragment = highlighter.getBestFragment(analyzer, field, content);
+            fragment = highlighter.getBestFragment(analyzer, field, content);  // IndexableField
         } catch (IOException | InvalidTokenOffsetsException e) {
         }
         if (fragment == null) {

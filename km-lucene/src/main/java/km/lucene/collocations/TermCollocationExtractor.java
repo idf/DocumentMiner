@@ -70,7 +70,7 @@ public class TermCollocationExtractor {
     }
 
     public void extract(Term t) throws IOException, ParseException {
-        HashMap<String, CollocationScorer> phraseTerms = processTerm(t, this.slopSize);
+        HashMap<String, CollocationScorer> phraseTerms = processTerm(t);
 
         class ValueComparator implements Comparator<String> {
             Map<String, CollocationScorer> base;
@@ -125,7 +125,7 @@ public class TermCollocationExtractor {
         }
     }
 
-    private HashMap<String, CollocationScorer> processTerm(Term term, int slopSize) throws IOException {
+    private HashMap<String, CollocationScorer> processTerm(Term term) throws IOException {
         System.out.println("Processing term: "+term);
 
         if(isTermTooPopularOrNotPopularEnough(term, this.reader.docFreq(term)/ (float) this.reader.numDocs())) {
@@ -139,68 +139,71 @@ public class TermCollocationExtractor {
 
         // for all docs that CONTAIN this term
         while (dpe.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
-            int docId = dpe.docID();
-            System.out.println("Processing docId: "+docId);
-            Terms tv = this.reader.getTermVector(docId, this.fieldName);
-            TermsEnum te = tv.iterator(null);
-
-            // now look at all OTHER terms_str in this doc and see if they are
-            // restore the structure
-            HashMap<Integer, Term> pos2term = new HashMap<>();
-            while(te.next()!=null) {
-                DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, te.term());
-                dpeB.advance(docId);
-                // remember all positions of the term in this doc
-                for (int j = 0; j < dpeB.freq(); j++) {
-                    pos2term.put(dpeB.nextPosition(), new Term(FieldName.CONTENT, te.term().utf8ToString()));
-                }
-            }
-
-
-            HashSet<Term> termsFound = new HashSet<>();
-            for (int k = 0; (k < dpe.freq()); k++) {  // for term A
-                Integer position = dpe.nextPosition();
-                Integer startpos = Math.max(0, position - slopSize);
-                Integer endpos = position + slopSize;
-                for(int curpos = startpos; curpos<=endpos; curpos++) {  // for term B
-                    if(curpos==position)
-                        continue;
-                    Term termB = pos2term.get(curpos);
-                    if(termB==null)
-                        continue;
-                    // System.out.println("around: "+termB);
-                    if(termsFound.contains(termB))
-                        continue;
-
-                    if (!this.filter.processTerm(termB.bytes().utf8ToString())) {
-                        continue;
-                    }
-//                    if (!StringUtils.isAlpha(termB.bytes().utf8ToString())) {
-//                        continue;
-//                    }
-
-                    CollocationScorer pt = (CollocationScorer) phraseTerms.get(termB.bytes().utf8ToString());
-
-                    if (pt==null) {  // if not exist
-                        float percentB = (float) this.reader.docFreq(termB) / (float) this.reader.numDocs();
-                        if(isTermTooPopularOrNotPopularEnough(termB, percentB)) {
-                            termsFound.add(termB);
-                            continue;
-                        }
-                        pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.numDocs());
-                        phraseTerms.put(pt.getCoincidentalTerm(), pt);
-                    }
-
-                    pt.incCoIncidenceDocCount();
-                    termsFound.add(termB);  // whether check the same doc multiple times
-                }
-
-            } // term positions loop for term A
+            processDocForTerm(term, dpe, phraseTerms);
         }// end docs loop
         return phraseTerms;
     }
 
+    private void processDocForTerm(Term term, DocsAndPositionsEnum dpeA, HashMap<String, CollocationScorer> phraseTerms) throws IOException {
+        int docId = dpeA.docID();
+        System.out.println("Processing docId: "+docId);
+        // now look at all OTHER terms_str in this doc and see if they are
+        // restore the structure
+        Terms tv = this.reader.getTermVector(docId, this.fieldName);
+        TermsEnum te = tv.iterator(null);
 
+        HashMap<Integer, Term> pos2term = new HashMap<>();
+        while(te.next()!=null) {
+            DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, te.term());
+            dpeB.advance(docId);
+            // remember all positions of the term in this doc
+            for (int j = 0; j < dpeB.freq(); j++) {
+                pos2term.put(dpeB.nextPosition(), new Term(FieldName.CONTENT, te.term().utf8ToString()));
+            }
+        }
+
+
+        // update scorer
+        HashSet<Term> termsFound = new HashSet<>();
+        for (int k = 0; (k < dpeA.freq()); k++) {  // for term A
+            Integer position = dpeA.nextPosition();
+            Integer startpos = Math.max(0, position - this.slopSize);
+            Integer endpos = position + this.slopSize;
+            for(int curpos = startpos; curpos<=endpos; curpos++) {  // for term B
+                if(curpos==position)
+                    continue;
+                Term termB = pos2term.get(curpos);  // how to get termB
+                if(termB==null)
+                    continue;
+                // System.out.println("around: "+termB);
+                if(termsFound.contains(termB))
+                    continue;
+
+                if (!this.filter.processTerm(termB.bytes().utf8ToString())) {
+                    continue;
+                }
+//                    if (!StringUtils.isAlpha(termB.bytes().utf8ToString())) {
+//                        continue;
+//                    }
+
+                CollocationScorer pt = (CollocationScorer) phraseTerms.get(termB.bytes().utf8ToString());
+
+                if (pt==null) {  // if not exist
+                    float percentB = (float) this.reader.docFreq(termB) / (float) this.reader.numDocs();
+                    if(isTermTooPopularOrNotPopularEnough(termB, percentB)) {
+                        termsFound.add(termB);
+                        continue;
+                    }
+                    pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.numDocs());
+                    phraseTerms.put(pt.getCoincidentalTerm(), pt);
+                }
+
+                pt.incCoIncidenceDocCount();
+                termsFound.add(termB);  // whether to check the same doc multiple times
+            }
+
+        } // END term positions loop for term A
+    }
 
 
 }
