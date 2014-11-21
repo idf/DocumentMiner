@@ -11,6 +11,7 @@ import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
+import util.Timestamper;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,8 +75,10 @@ public class TermCollocationExtractor {
     }
 
     public void extract(Term t) throws IOException, ParseException {
+        Timestamper timestamper = new Timestamper();
+        timestamper.start();
         HashMap<String, CollocationScorer> phraseTerms = processTerm(t);
-
+        timestamper.end();
         class ValueComparator implements Comparator<String> {
             Map<String, CollocationScorer> base;
             public ValueComparator(Map<String, CollocationScorer> base) {
@@ -119,32 +122,19 @@ public class TermCollocationExtractor {
         return false;
     }
 
-    private void recordPosition(int docSeq, String str, BitSet termPos) throws IOException {
-        termPos.clear();
-        DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, new BytesRef(str));
-        dpe.advance(docSeq);
-        // remember all positions of the term in this doc
-        for (int j = 0; j < dpe.freq(); j++) {
-            termPos.set(dpe.nextPosition());
-        }
-    }
-
     private HashMap<String, CollocationScorer> processTerm(Term term) throws IOException {
         System.out.println("Processing term: "+term);
 
         if(isTermTooPopularOrNotPopularEnough(term, this.reader.docFreq(term)/ (float) this.reader.numDocs())) {
             return null;
         }
-        // get a list of all the docs with this term
-        // Apache Lucene Migration Guide 4.0
         // get dpe in first hand
         DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, term.bytes());
         HashMap<String, CollocationScorer> phraseTerms = new HashMap<String, CollocationScorer>();
 
-        // for all docs that CONTAIN this term
         while (dpe.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
             processDocForTerm(term, dpe, phraseTerms);
-        }// end docs loop
+        }
         return phraseTerms;
     }
 
