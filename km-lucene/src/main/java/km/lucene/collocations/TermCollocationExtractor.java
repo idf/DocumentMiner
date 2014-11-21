@@ -7,6 +7,8 @@ import org.apache.lucene.index.*;
 import org.apache.lucene.index.collocations.CollocationScorer;
 import org.apache.lucene.index.collocations.TermFilter;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.DocIdSetIterator;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 
@@ -22,6 +24,7 @@ public class TermCollocationExtractor {
     // refactor: later
     private static final FacetsConfig config = new FacetsConfig();
     private IndexReader reader;
+    private IndexSearcher searcher;
 
     // collocation
     static int DEFAULT_MAX_NUM_DOCS_TO_ANALYZE = 120000;
@@ -37,6 +40,7 @@ public class TermCollocationExtractor {
 
     public TermCollocationExtractor(String indexPath, String thindexPath, String taxoPath) throws IOException {
         this.reader = DirectoryReader.open(FSDirectory.open(new File(thindexPath)));
+        this.searcher = new IndexSearcher(this.reader);
 
         Fields fields = MultiFields.getFields(this.reader);
         Terms terms = fields.terms(this.fieldName);
@@ -154,11 +158,14 @@ public class TermCollocationExtractor {
 
         HashMap<Integer, Term> pos2term = new HashMap<>();
         while(te.next()!=null) {
-            DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, te.term());
-            dpeB.advance(docId);
-            // remember all positions of the term in this doc
-            for (int j = 0; j < dpeB.freq(); j++) {
-                pos2term.put(dpeB.nextPosition(), new Term(FieldName.CONTENT, te.term().utf8ToString()));
+            // DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, te.term());
+            // dpeB.advance(docId);
+            DocsAndPositionsEnum dpeB = te.docsAndPositions(null, null); // to speed up, rather than advance
+            if (dpeB.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
+                // remember all positions of the term in this doc
+                for (int j = 0; j < dpeB.freq(); j++) {
+                    pos2term.put(dpeB.nextPosition(), new Term(FieldName.CONTENT, te.term().utf8ToString()));
+                }
             }
         }
 
