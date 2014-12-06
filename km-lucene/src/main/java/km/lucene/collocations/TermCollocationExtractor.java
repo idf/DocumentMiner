@@ -9,13 +9,19 @@ import org.apache.lucene.index.collocations.TermFilter;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.spans.SpanTermQuery;
+import org.apache.lucene.search.spans.Spans;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
 import util.Timestamper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * User: Danyang
  * Date: 10/7/14
@@ -70,15 +76,110 @@ public class TermCollocationExtractor {
         String taxoPath = args[2];
 
         TermCollocationExtractor termCollocationExtractor = new TermCollocationExtractor(indexPath, thindexPath, taxoPath);
-        termCollocationExtractor.extract(new Term(FieldName.CONTENT, "ntu"));
+        // termCollocationExtractor.extract(new Term(FieldName.CONTENT, "ntu"), termCollocationExtractor.reader);
+        // termCollocationExtractor.atomicExtract(new Term(FieldName.CONTENT, "ntu"));
+        termCollocationExtractor.readerThreadMgr(new Term(FieldName.CONTENT, "ntu"));
 
     }
 
-    public void extract(Term t) throws IOException, ParseException {
+    /**
+     * spans (docs) -> doc -> terms -> term
+     * @param t
+     * @throws IOException
+     */
+    public void atomicExtract(Term t) throws IOException {
+        SpanTermQuery spanTermQuery = new SpanTermQuery(t);
+        //this is not the best way of doing this, but it works for the example. See http://www.slideshare.net/lucenerevolution/is-your-index-atomicReader-really-atomic-or-maybe-slow for higher performance approaches
+        AtomicReader wrapper = SlowCompositeReaderWrapper.wrap(this.reader);
+        Map<Term, TermContext> termContexts = new HashMap<Term, TermContext>();
+        Spans spans = spanTermQuery.getSpans(wrapper.getContext(), new Bits.MatchAllBits(this.reader.numDocs()), termContexts);
+        while (spans.next()) {
+            // too slow
+            Map<Integer, String> entries = new TreeMap<Integer, String>();
+            int start = spans.start() - this.slopSize;
+            int end = spans.end() + this.slopSize;
+            Terms tv = this.reader.getTermVector(spans.doc(), this.fieldName);  // multiple access to the same document
+            TermsEnum te = tv.iterator(null);
+            BytesRef term;
+            while ((term = te.next()) != null) {
+                //could store the BytesRef here, but String is easier for this example
+                String s = new String(term.bytes, term.offset, term.length);
+                DocsAndPositionsEnum dpe = te.docsAndPositions(null, null);
+                if (dpe.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
+                    int i = 0;
+                    int position = -1;
+                    while (i < dpe.freq() && (position = dpe.nextPosition()) != -1) {
+                        if (position >= start && position <= end) {
+                            entries.put(position, s);
+                        }
+                        i++;
+                    }
+                }
+            }
+            System.out.println("Entries:" + entries);
+        }
+    }
+
+    private void readerThreadMgr(Term t) throws IOException {
         Timestamper timestamper = new Timestamper();
         timestamper.start();
-        HashMap<String, CollocationScorer> phraseTerms = processTerm(t);
+        HashMap<String, CollocationScorer> phraseTerms = new HashMap<>();
+        Collections.synchronizedMap(phraseTerms);
+        ExecutorService executor = Executors.newFixedThreadPool(8);
+        for(AtomicReaderContext atomicReaderContext: this.reader.leaves()) {
+//            executor.execute(
+//                    new ReaderThread(t, atomicReaderContext.reader(), phraseTerms)
+//            );
+            processTerm(phraseTerms, t, atomicReaderContext.reader());
+        }
+        executor.shutdown();
+        while (!executor.isTerminated()) {};
         timestamper.end();
+        this.sortPhraseTerms(phraseTerms);
+
+    }
+
+    class ReaderThread implements Runnable {
+        private Thread thread;
+        private HashMap<String, CollocationScorer> phraseTerms;
+        private Term t;
+        private AtomicReader atomicReader;
+
+        ReaderThread(Term t, AtomicReader atomicReader, HashMap<String, CollocationScorer> phraseTerms){
+            this.phraseTerms = phraseTerms;
+            this.t = t;
+            this.atomicReader = atomicReader;
+        }
+
+        public void run() {
+            System.out.println("Creating "+this.atomicReader);
+            try {
+                TermCollocationExtractor.this.processTerm(this.phraseTerms, t, this.atomicReader);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void start () {
+            System.out.println("Starting "+this.atomicReader);
+            if (thread == null) {
+                thread = new Thread (this, this.atomicReader.toString());
+                thread.start ();
+            }
+        }
+    }
+
+    //// OLD
+    public void extract(Term t, IndexReader reader) throws IOException, ParseException {
+        Timestamper timestamper = new Timestamper();
+        timestamper.start();
+        HashMap<String, CollocationScorer> phraseTerms = new HashMap<>();
+        processTerm(phraseTerms, t, reader);
+        timestamper.end();
+        this.sortPhraseTerms(phraseTerms);
+    }
+
+    private TreeMap<String,CollocationScorer> sortPhraseTerms(HashMap<String, CollocationScorer> phraseTerms) {
         class ValueComparator implements Comparator<String> {
             Map<String, CollocationScorer> base;
             public ValueComparator(Map<String, CollocationScorer> base) {
@@ -105,6 +206,7 @@ public class TermCollocationExtractor {
             System.out.println(pair.getKey()+" = "+((CollocationScorer) pair.getValue()).getScore());
             // System.out.println(pair.getKey()+" = "+pair.getValue());
         }
+        return sortedMap;
     }
 
 
@@ -122,33 +224,30 @@ public class TermCollocationExtractor {
         return false;
     }
 
-    private HashMap<String, CollocationScorer> processTerm(Term term) throws IOException {
+    private HashMap<String, CollocationScorer> processTerm(HashMap<String, CollocationScorer> phraseTerms, Term term, IndexReader reader) throws IOException {
         System.out.println("Processing term: "+term);
 
-        if(isTermTooPopularOrNotPopularEnough(term, this.reader.docFreq(term)/ (float) this.reader.numDocs())) {
+        if(isTermTooPopularOrNotPopularEnough(term, reader.docFreq(term)/ (float) reader.numDocs())) {
             return null;
         }
         // get dpe in first hand
-        DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, term.bytes());
-        HashMap<String, CollocationScorer> phraseTerms = new HashMap<String, CollocationScorer>();
-
+        DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(reader, null, this.fieldName, term.bytes());
         while (dpe.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
-            processDocForTerm(term, dpe, phraseTerms);
+            processDocForTerm(term, dpe, phraseTerms, reader);
         }
         return phraseTerms;
     }
 
-    private void processDocForTerm(Term term, DocsAndPositionsEnum dpeA, HashMap<String, CollocationScorer> phraseTerms) throws IOException {
-        int docId = dpeA.docID();
-        System.out.println("Processing docId: "+docId);
+    private void processDocForTerm(Term term, DocsAndPositionsEnum dpeA, HashMap<String, CollocationScorer> phraseTerms, IndexReader reader) throws IOException {
+        // System.out.println("Processing docId: "+dpeA.docID());
         // now look at all OTHER terms_str in this doc and see if they are
         // restore the structure
-        Terms tv = this.reader.getTermVector(docId, this.fieldName);
+        Terms tv = reader.getTermVector(dpeA.docID(), this.fieldName);
         TermsEnum te = tv.iterator(null);
 
         HashMap<Integer, Term> pos2term = new HashMap<>();
         while(te.next()!=null) {
-            // DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, te.term());
+            // DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.atomicReader, null, this.fieldName, te.term());
             // dpeB.advance(docId);
             DocsAndPositionsEnum dpeB = te.docsAndPositions(null, null); // to speed up, rather than advance
             if (dpeB.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
@@ -183,18 +282,18 @@ public class TermCollocationExtractor {
 //                        continue;
 //                    }
 
-                CollocationScorer pt = (CollocationScorer) phraseTerms.get(termB.bytes().utf8ToString());
+
+                CollocationScorer pt = phraseTerms.get(termB.bytes().utf8ToString());
 
                 if (pt==null) {  // if not exist
-                    float percentB = (float) this.reader.docFreq(termB) / (float) this.reader.numDocs();
+                    float percentB = (float) reader.docFreq(termB) / (float) reader.numDocs();
                     if(isTermTooPopularOrNotPopularEnough(termB, percentB)) {
                         termsFound.add(termB);
                         continue;
                     }
-                    pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.numDocs());
+                    pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), reader.docFreq(term), reader.docFreq(termB), reader.numDocs());
                     phraseTerms.put(pt.getCoincidentalTerm(), pt);
                 }
-
                 pt.incCoIncidenceDocCount();
                 termsFound.add(termB);  // whether to check the same doc multiple times
             }

@@ -104,15 +104,8 @@ public class CollocationScorer
     }
 
 
-
-
-
     public String getCoincidentalTerm() {
         return coincidentalTerm;
-    }
-
-    public void setCoincidentalTerm(String coincidentalTerm) {
-        this.coincidentalTerm = coincidentalTerm;
     }
 
     @Override
