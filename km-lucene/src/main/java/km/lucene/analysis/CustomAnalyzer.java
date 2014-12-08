@@ -5,6 +5,7 @@ import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.en.KStemFilter;
+import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.util.CharArraySet;
@@ -57,6 +58,8 @@ public class CustomAnalyzer extends StopwordAnalyzerBase {
         tok = new StopFilter(matchVersion, tok, stopwords);
         // tok = new PorterStemFilter(tok);
         tok = new KStemFilter(tok);  // got get nus rather than nu
+        tok = new ShingleFilter(tok, 5, 10);
+
         return new TokenStreamComponents(src, tok) {
             @Override
             protected void setReader(final Reader reader) throws IOException {
