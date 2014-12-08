@@ -68,7 +68,7 @@ public class CollocationScorer
             return this.getEntropyScore();
     }
 
-    public void incCoIncidenceDocCount() {
+    public synchronized void incCoIncidenceDocCount() {
         this.coIncidenceDocCount += 1;
     }
 

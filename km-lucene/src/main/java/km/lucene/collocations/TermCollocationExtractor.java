@@ -19,6 +19,7 @@ import util.Timestamper;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -91,7 +92,7 @@ public class TermCollocationExtractor {
         SpanTermQuery spanTermQuery = new SpanTermQuery(t);
         //this is not the best way of doing this, but it works for the example. See http://www.slideshare.net/lucenerevolution/is-your-index-atomicReader-really-atomic-or-maybe-slow for higher performance approaches
         AtomicReader wrapper = SlowCompositeReaderWrapper.wrap(this.reader);
-        Map<Term, TermContext> termContexts = new HashMap<Term, TermContext>();
+        Map<Term, TermContext> termContexts = new HashMap<>();
         Spans spans = spanTermQuery.getSpans(wrapper.getContext(), new Bits.MatchAllBits(this.reader.numDocs()), termContexts);
         while (spans.next()) {
             // too slow
@@ -123,14 +124,13 @@ public class TermCollocationExtractor {
     private void readerThreadMgr(Term t) throws IOException {
         Timestamper timestamper = new Timestamper();
         timestamper.start();
-        HashMap<String, CollocationScorer> phraseTerms = new HashMap<>();
-        Collections.synchronizedMap(phraseTerms);
+        ConcurrentHashMap<String, CollocationScorer> phraseTerms = new ConcurrentHashMap<>();
         ExecutorService executor = Executors.newFixedThreadPool(8);
         for(AtomicReaderContext atomicReaderContext: this.reader.leaves()) {
-//            executor.execute(
-//                    new ReaderThread(t, atomicReaderContext.reader(), phraseTerms)
-//            );
-            processTerm(phraseTerms, t, atomicReaderContext.reader());
+            executor.execute(
+                    new ReaderThread(t, atomicReaderContext.reader(), phraseTerms)
+            );
+//            processTerm(phraseTerms, t, atomicReaderContext.reader());
         }
         executor.shutdown();
         while (!executor.isTerminated()) {};
@@ -141,11 +141,11 @@ public class TermCollocationExtractor {
 
     class ReaderThread implements Runnable {
         private Thread thread;
-        private HashMap<String, CollocationScorer> phraseTerms;
+        private ConcurrentHashMap<String, CollocationScorer> phraseTerms;
         private Term t;
         private AtomicReader atomicReader;
 
-        ReaderThread(Term t, AtomicReader atomicReader, HashMap<String, CollocationScorer> phraseTerms){
+        ReaderThread(Term t, AtomicReader atomicReader, ConcurrentHashMap<String, CollocationScorer> phraseTerms){
             this.phraseTerms = phraseTerms;
             this.t = t;
             this.atomicReader = atomicReader;
@@ -173,13 +173,13 @@ public class TermCollocationExtractor {
     public void extract(Term t, IndexReader reader) throws IOException, ParseException {
         Timestamper timestamper = new Timestamper();
         timestamper.start();
-        HashMap<String, CollocationScorer> phraseTerms = new HashMap<>();
+        ConcurrentHashMap<String, CollocationScorer> phraseTerms = new ConcurrentHashMap<>();
         processTerm(phraseTerms, t, reader);
         timestamper.end();
         this.sortPhraseTerms(phraseTerms);
     }
 
-    private TreeMap<String,CollocationScorer> sortPhraseTerms(HashMap<String, CollocationScorer> phraseTerms) {
+    private TreeMap<String,CollocationScorer> sortPhraseTerms(ConcurrentHashMap<String, CollocationScorer> phraseTerms) {
         class ValueComparator implements Comparator<String> {
             Map<String, CollocationScorer> base;
             public ValueComparator(Map<String, CollocationScorer> base) {
@@ -224,7 +224,7 @@ public class TermCollocationExtractor {
         return false;
     }
 
-    private HashMap<String, CollocationScorer> processTerm(HashMap<String, CollocationScorer> phraseTerms, Term term, IndexReader reader) throws IOException {
+    private ConcurrentHashMap<String, CollocationScorer> processTerm(ConcurrentHashMap<String, CollocationScorer> phraseTerms, Term term, IndexReader reader) throws IOException {
         System.out.println("Processing term: "+term);
 
         if(isTermTooPopularOrNotPopularEnough(term, reader.docFreq(term)/ (float) reader.numDocs())) {
@@ -238,14 +238,14 @@ public class TermCollocationExtractor {
         return phraseTerms;
     }
 
-    private void processDocForTerm(Term term, DocsAndPositionsEnum dpeA, HashMap<String, CollocationScorer> phraseTerms, IndexReader reader) throws IOException {
+    private void processDocForTerm(Term term, DocsAndPositionsEnum dpeA, ConcurrentHashMap<String, CollocationScorer> phraseTerms, IndexReader reader) throws IOException {
         // System.out.println("Processing docId: "+dpeA.docID());
         // now look at all OTHER terms_str in this doc and see if they are
         // restore the structure
         Terms tv = reader.getTermVector(dpeA.docID(), this.fieldName);
         TermsEnum te = tv.iterator(null);
 
-        HashMap<Integer, Term> pos2term = new HashMap<>();
+        ConcurrentHashMap<Integer, Term> pos2term = new ConcurrentHashMap<>();
         while(te.next()!=null) {
             // DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.atomicReader, null, this.fieldName, te.term());
             // dpeB.advance(docId);
@@ -282,19 +282,21 @@ public class TermCollocationExtractor {
 //                        continue;
 //                    }
 
+//                synchronized (phraseTerms) {
+                    CollocationScorer pt = phraseTerms.get(termB.bytes().utf8ToString());
 
-                CollocationScorer pt = phraseTerms.get(termB.bytes().utf8ToString());
-
-                if (pt==null) {  // if not exist
-                    float percentB = (float) reader.docFreq(termB) / (float) reader.numDocs();
-                    if(isTermTooPopularOrNotPopularEnough(termB, percentB)) {
-                        termsFound.add(termB);
-                        continue;
+                    if (pt==null) {  // if not exist
+                        float percentB = (float) reader.docFreq(termB) / (float) reader.numDocs();
+                        if(isTermTooPopularOrNotPopularEnough(termB, percentB)) {
+                            termsFound.add(termB);
+                            continue;
+                        }
+                        pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), reader.docFreq(term), reader.docFreq(termB), reader.numDocs());
+                        phraseTerms.putIfAbsent(pt.getCoincidentalTerm(), pt);
                     }
-                    pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), reader.docFreq(term), reader.docFreq(termB), reader.numDocs());
-                    phraseTerms.put(pt.getCoincidentalTerm(), pt);
-                }
-                pt.incCoIncidenceDocCount();
+                    pt.incCoIncidenceDocCount();
+
+//                }
                 termsFound.add(termB);  // whether to check the same doc multiple times
             }
 
