@@ -1,16 +1,18 @@
 package km.lucene.collocations;
 
 import km.common.Setting;
+import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
 import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.index.*;
 import org.apache.lucene.index.collocations.CollocationScorer;
 import org.apache.lucene.index.collocations.TermFilter;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.DocIdSetIterator;
-import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.*;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.util.Version;
 import util.Timestamper;
 
 import java.io.File;
@@ -35,7 +37,7 @@ public class TermCollocationExtractor {
     float minTermPopularity = DEFAULT_MIN_TERM_POPULARITY;
     static float DEFAULT_MAX_TERM_POPULARITY = 1f;
     float maxTermPopularity = DEFAULT_MAX_TERM_POPULARITY;
-    int slopSize = 5;
+    int slopSize = 10;
     long totalVocabulary = 0;
     TermFilter filter = new TermFilter();
 
@@ -69,8 +71,40 @@ public class TermCollocationExtractor {
         String thindexPath = args[1];
         String taxoPath = args[2];
 
-        TermCollocationExtractor termCollocationExtractor = new TermCollocationExtractor(indexPath, thindexPath, taxoPath);
-        termCollocationExtractor.extract(new Term(FieldName.CONTENT, "ntu"));
+        TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, thindexPath, taxoPath);
+        tce.extract(new Term(tce.fieldName, "ntu"));
+        // tce.search("ntu");
+
+
+    }
+
+    public void search(String queryString) throws ParseException, IOException {
+        Timestamper timestamper = new Timestamper();
+        timestamper.start();
+        int numHits = 100; // docId 8
+        QueryParser queryParser = new QueryParser(Version.LUCENE_48, this.fieldName, new CustomAnalyzer(Version.LUCENE_48));
+        Query query = queryParser.parse(queryString);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(numHits, true);
+        this.searcher.search(query, collector);
+        Set<Term> terms = new HashSet<>();
+        query.extractTerms(terms);
+        Term t = (Term) terms.toArray()[0];
+
+        TopDocs topDocs = collector.topDocs();
+        System.out.println(topDocs.totalHits);
+        System.out.println(terms.size());
+
+        HashMap<String, CollocationScorer> phraseTerms = new HashMap<>();
+        for (int j = 0; j < Math.min(numHits, topDocs.totalHits); j++) {
+
+            DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, t.bytes());
+            int docID = topDocs.scoreDocs[j].doc;
+            // Document d = searcher.doc(docID);
+            dpe.advance(docID);
+            this.processDocForTerm(t, dpe, phraseTerms);
+        }
+        sortPhraseTerms(phraseTerms);
+        timestamper.end();
 
     }
 
@@ -79,6 +113,10 @@ public class TermCollocationExtractor {
         timestamper.start();
         HashMap<String, CollocationScorer> phraseTerms = processTerm(t);
         timestamper.end();
+        sortPhraseTerms(phraseTerms);
+    }
+
+    private void sortPhraseTerms(HashMap<String, CollocationScorer> phraseTerms) {
         class ValueComparator implements Comparator<String> {
             Map<String, CollocationScorer> base;
             public ValueComparator(Map<String, CollocationScorer> base) {
@@ -103,10 +141,9 @@ public class TermCollocationExtractor {
         while(it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
             System.out.println(pair.getKey()+" = "+((CollocationScorer) pair.getValue()).getScore());
-            // System.out.println(pair.getKey()+" = "+pair.getValue());
+            System.out.println(pair.getKey()+" = "+pair.getValue());  // details
         }
     }
-
 
 
     private boolean isTermTooPopularOrNotPopularEnough(Term term, float percent) {
@@ -140,7 +177,7 @@ public class TermCollocationExtractor {
 
     private void processDocForTerm(Term term, DocsAndPositionsEnum dpeA, HashMap<String, CollocationScorer> phraseTerms) throws IOException {
         int docId = dpeA.docID();
-        System.out.println("Processing docId: "+docId);
+        // System.out.println("Processing docId: "+docId);
         // now look at all OTHER terms_str in this doc and see if they are
         // restore the structure
         Terms tv = this.reader.getTermVector(docId, this.fieldName);
