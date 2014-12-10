@@ -41,6 +41,10 @@ public class TermCollocationExtractor {
     long totalVocabulary = 0;
     TermFilter filter = new TermFilter();
 
+    // top k
+    BitSet liveDocs = new BitSet();
+    int k = 100;
+
     public TermCollocationExtractor(String indexPath, String thindexPath, String taxoPath) throws IOException {
         this.reader = DirectoryReader.open(FSDirectory.open(new File(thindexPath)));
         this.searcher = new IndexSearcher(this.reader);
@@ -53,6 +57,8 @@ public class TermCollocationExtractor {
         while((byteRef = iterator.next()) != null) {
             this.totalVocabulary++;
         }
+
+        this.liveDocs = new BitSet(this.reader.numDocs());
     }
 
     public static void main(String[] args) throws IOException, ParseException {
@@ -72,8 +78,8 @@ public class TermCollocationExtractor {
         String taxoPath = args[2];
 
         TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, thindexPath, taxoPath);
-        tce.extract(new Term(tce.fieldName, "ntu"));
-        // tce.search("ntu");
+        // tce.extract(new Term(tce.fieldName, "ntu"));
+        tce.search("ntu");
 
 
     }
@@ -81,10 +87,9 @@ public class TermCollocationExtractor {
     public void search(String queryString) throws ParseException, IOException {
         Timestamper timestamper = new Timestamper();
         timestamper.start();
-        int numHits = 100; // docId 8
         QueryParser queryParser = new QueryParser(Version.LUCENE_48, this.fieldName, new CustomAnalyzer(Version.LUCENE_48));
         Query query = queryParser.parse(queryString);
-        TopScoreDocCollector collector = TopScoreDocCollector.create(numHits, true);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(this.k, true);
         this.searcher.search(query, collector);
         Set<Term> terms = new HashSet<>();
         query.extractTerms(terms);
@@ -94,14 +99,18 @@ public class TermCollocationExtractor {
         System.out.println(topDocs.totalHits);
         System.out.println(terms.size());
 
+        for(int j=0; j<Math.min(this.k, topDocs.totalHits); j++) {
+            this.liveDocs.set(topDocs.scoreDocs[j].doc);
+        }
+
         HashMap<String, CollocationScorer> phraseTerms = new HashMap<>();
-        for (int j = 0; j < Math.min(numHits, topDocs.totalHits); j++) {
+        for (int j = 0; j < Math.min(this.k, topDocs.totalHits); j++) {
 
             DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, t.bytes());
             int docID = topDocs.scoreDocs[j].doc;
             // Document d = searcher.doc(docID);
             dpe.advance(docID);
-            this.processDocForTerm(t, dpe, phraseTerms);
+            this.processDocForTerm(t, dpe, phraseTerms, true);
         }
         sortPhraseTerms(phraseTerms);
         timestamper.end();
@@ -141,7 +150,7 @@ public class TermCollocationExtractor {
         while(it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
             System.out.println(pair.getKey()+" = "+((CollocationScorer) pair.getValue()).getScore());
-            System.out.println(pair.getKey()+" = "+pair.getValue());  // details
+            // System.out.println(pair.getKey()+" = "+pair.getValue());  // details
         }
     }
 
@@ -170,12 +179,12 @@ public class TermCollocationExtractor {
         HashMap<String, CollocationScorer> phraseTerms = new HashMap<String, CollocationScorer>();
 
         while (dpe.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
-            processDocForTerm(term, dpe, phraseTerms);
+            processDocForTerm(term, dpe, phraseTerms, false);
         }
         return phraseTerms;
     }
 
-    private void processDocForTerm(Term term, DocsAndPositionsEnum dpeA, HashMap<String, CollocationScorer> phraseTerms) throws IOException {
+    private void processDocForTerm(Term term, DocsAndPositionsEnum dpeA, HashMap<String, CollocationScorer> phraseTerms, boolean top) throws IOException {
         int docId = dpeA.docID();
         // System.out.println("Processing docId: "+docId);
         // now look at all OTHER terms_str in this doc and see if they are
@@ -209,6 +218,8 @@ public class TermCollocationExtractor {
                 Term termB = pos2term.get(curpos);  // how to get termB
                 if(termB==null)
                     continue;
+                if(termB.bytes().equals(term.bytes()))
+                    continue;
                 // System.out.println("around: "+termB);
                 if(termsFound.contains(termB))
                     continue;
@@ -228,7 +239,21 @@ public class TermCollocationExtractor {
                         termsFound.add(termB);
                         continue;
                     }
-                    pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.numDocs());
+                    if(top) {
+                        /*
+                        top 100 strategy
+                         */
+                        int tfB = 0;
+                        DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, termB.bytes());
+                        while (dpeB.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
+                            if(this.liveDocs.get(dpeB.docID()))
+                                tfB ++;
+                        }
+                        pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), this.k, tfB, this.reader.numDocs());
+                    }
+                    else {
+                        pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.numDocs());
+                    }
                     phraseTerms.put(pt.getCoincidentalTerm(), pt);
                 }
 
