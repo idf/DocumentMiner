@@ -150,7 +150,7 @@ public class TermCollocationExtractor {
         while(it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
             System.out.println(pair.getKey()+" = "+((CollocationScorer) pair.getValue()).getScore());
-            // System.out.println(pair.getKey()+" = "+pair.getValue());  // details
+            System.out.println(pair.getKey()+" = "+pair.getValue());  // details
         }
     }
 
@@ -243,13 +243,13 @@ public class TermCollocationExtractor {
                         /*
                         top 100 strategy
                          */
-                        int tfB = 0;
+                        int dfB = 0;
                         DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, termB.bytes());
                         while (dpeB.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
                             if(this.liveDocs.get(dpeB.docID()))
-                                tfB ++;
+                                dfB ++;
                         }
-                        pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), this.k, tfB, this.reader.numDocs());
+                        pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), this.k, dfB, this.reader.numDocs());
                     }
                     else {
                         pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.numDocs());

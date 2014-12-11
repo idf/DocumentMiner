@@ -94,11 +94,13 @@ public class CollocationScorer
      * score = P(x) ln(P(x)/P(y))
      * P(x) = coincidenceDocCount / df_x
      * P(y) = df_y / DF
+     *
+     * score = P(x)ln P(x) - P(x)ln dfB + P(x)ln |V|
      * @return
      */
     private float getEntropyScore() {
-        double P_x = this.coIncidenceDocCount / (double) this.termADocFreq; // 1.0
-        double P_y = this.termBDocFreq/ (double) this.totalDocFreq;
+        double P_x = this.coIncidenceDocCount / (double) this.termADocFreq;
+        double P_y = this.termBDocFreq/ (double) (this.totalDocFreq);
         double score = P_x * Math.log(P_x/P_y);
         return (float) score;
     }
