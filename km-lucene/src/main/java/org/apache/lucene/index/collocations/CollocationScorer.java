@@ -68,6 +68,9 @@ public class CollocationScorer
             return this.getEntropyScore();
     }
 
+    public int getCoIncidenceDocCount() {
+        return this.coIncidenceDocCount;
+    }
     public void incCoIncidenceDocCount() {
         this.coIncidenceDocCount += 1;
     }
@@ -103,6 +106,7 @@ public class CollocationScorer
         double P_y = this.termBDocFreq/ (double) (this.totalDocFreq);
         double score = P_x * Math.log(P_x/P_y);
         return (float) score;
+
     }
 
 

@@ -50,7 +50,6 @@ public class TermCollocationExtractor {
 
         Fields fields = MultiFields.getFields(this.reader);
         Terms terms = fields.terms(this.fieldName);
-        // this.totalVocabulary = terms.size();  // ERROR -1
         TermsEnum iterator = terms.iterator(null);
         BytesRef byteRef = null;
         while((byteRef = iterator.next()) != null) {
@@ -111,17 +110,18 @@ public class TermCollocationExtractor {
             dpe.advance(docID);
             this.processDocForTerm(t, dpe, phraseTerms, true);
         }
+        phraseTerms = this.helper.filterCollocationCount(phraseTerms, 5);
         this.helper.sortPhraseTerms(phraseTerms);
         timestamper.end();
-
     }
 
     public void extract(Term t) throws IOException, ParseException {
         Timestamper timestamper = new Timestamper();
         timestamper.start();
         HashMap<String, CollocationScorer> phraseTerms = processTerm(t);
-        timestamper.end();
+        phraseTerms = this.helper.filterCollocationCount(phraseTerms, 5);
         this.helper.sortPhraseTerms(phraseTerms);
+        timestamper.end();
     }
 
 
@@ -129,7 +129,7 @@ public class TermCollocationExtractor {
     private HashMap<String, CollocationScorer> processTerm(Term term) throws IOException {
         System.out.println("Processing term: "+term);
 
-        if(this.helper.isTermTooPopularOrNotPopularEnough(term, this.reader.docFreq(term)/ (float) this.reader.numDocs())) {
+        if(this.helper.isTermTooPopularOrNotPopularEnough(term, this.reader.docFreq(term) / (float) this.reader.numDocs())) {
             return null;
         }
         // get dpe in first hand
@@ -180,6 +180,9 @@ public class TermCollocationExtractor {
                     continue;
                 // System.out.println("around: "+termB);
                 if(termsFound.contains(termB))
+                    continue;
+
+                if(CustomStopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(termB.text()))
                     continue;
 
                 if (!this.filter.processTerm(termB.bytes().utf8ToString())) {
