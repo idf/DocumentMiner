@@ -33,10 +33,6 @@ public class TermCollocationExtractor {
     static int DEFAULT_MAX_NUM_DOCS_TO_ANALYZE = 120000;
     static int maxNumDocsToAnalyze = DEFAULT_MAX_NUM_DOCS_TO_ANALYZE;
     String fieldName = FieldName.CONTENT;
-    static float DEFAULT_MIN_TERM_POPULARITY = 0.0002f;
-    float minTermPopularity = DEFAULT_MIN_TERM_POPULARITY;
-    static float DEFAULT_MAX_TERM_POPULARITY = 1f;
-    float maxTermPopularity = DEFAULT_MAX_TERM_POPULARITY;
     int slopSize = 10;
     long totalVocabulary = 0;
     TermFilter filter = new TermFilter();
@@ -44,6 +40,9 @@ public class TermCollocationExtractor {
     // top k
     BitSet liveDocs = new BitSet();
     int k = 100;
+
+    // delegation
+    TermCollocationHelper helper = new TermCollocationHelper();
 
     public TermCollocationExtractor(String indexPath, String thindexPath, String taxoPath) throws IOException {
         this.reader = DirectoryReader.open(FSDirectory.open(new File(thindexPath)));
@@ -112,7 +111,7 @@ public class TermCollocationExtractor {
             dpe.advance(docID);
             this.processDocForTerm(t, dpe, phraseTerms, true);
         }
-        sortPhraseTerms(phraseTerms);
+        this.helper.sortPhraseTerms(phraseTerms);
         timestamper.end();
 
     }
@@ -122,56 +121,15 @@ public class TermCollocationExtractor {
         timestamper.start();
         HashMap<String, CollocationScorer> phraseTerms = processTerm(t);
         timestamper.end();
-        sortPhraseTerms(phraseTerms);
-    }
-
-    private void sortPhraseTerms(HashMap<String, CollocationScorer> phraseTerms) {
-        class ValueComparator implements Comparator<String> {
-            Map<String, CollocationScorer> base;
-            public ValueComparator(Map<String, CollocationScorer> base) {
-                this.base = base;
-            }
-
-            // Note: this comparator imposes orderings that are inconsistent with equals.
-            @Override
-            public int compare(String a, String b) {
-                if (base.get(a).getScore() < base.get(b).getScore()) {
-                    return 1;
-                } else {
-                    return -1;
-                } // returning 0 would merge keys
-            }
-        }
-        ValueComparator bvc = new ValueComparator(phraseTerms);
-        TreeMap<String,CollocationScorer> sortedMap = new TreeMap<>(bvc);
-        sortedMap.putAll(phraseTerms);
-
-        Iterator it = sortedMap.entrySet().iterator();
-        while(it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            System.out.println(pair.getKey()+" = "+((CollocationScorer) pair.getValue()).getScore());
-            System.out.println(pair.getKey()+" = "+pair.getValue());  // details
-        }
+        this.helper.sortPhraseTerms(phraseTerms);
     }
 
 
-    private boolean isTermTooPopularOrNotPopularEnough(Term term, float percent) {
-        // check term is not too rare or frequent
-        if (percent < minTermPopularity) {
-            System.out.println(term.text() + " not popular enough " + percent);
-            return true;
-        }
-        if (percent > maxTermPopularity) {
-            System.out.println(term.text() + " too popular " + percent);
-            return true;
-        }
-        return false;
-    }
 
     private HashMap<String, CollocationScorer> processTerm(Term term) throws IOException {
         System.out.println("Processing term: "+term);
 
-        if(isTermTooPopularOrNotPopularEnough(term, this.reader.docFreq(term)/ (float) this.reader.numDocs())) {
+        if(this.helper.isTermTooPopularOrNotPopularEnough(term, this.reader.docFreq(term)/ (float) this.reader.numDocs())) {
             return null;
         }
         // get dpe in first hand
@@ -235,7 +193,7 @@ public class TermCollocationExtractor {
 
                 if (pt==null) {  // if not exist
                     float percentB = (float) this.reader.docFreq(termB) / (float) this.reader.numDocs();
-                    if(isTermTooPopularOrNotPopularEnough(termB, percentB)) {
+                    if(this.helper.isTermTooPopularOrNotPopularEnough(termB, percentB)) {
                         termsFound.add(termB);
                         continue;
                     }
@@ -249,7 +207,7 @@ public class TermCollocationExtractor {
                             if(this.liveDocs.get(dpeB.docID()))
                                 dfB ++;
                         }
-                        pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), this.k, dfB, this.reader.numDocs());
+                        pt = new CollocationScorer(term.text(), termB.text(), this.k,  this.reader.docFreq(termB), this.reader.numDocs());
                     }
                     else {
                         pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.numDocs());
