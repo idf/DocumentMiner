@@ -28,6 +28,11 @@ public class CustomStopAnalyzer extends StopwordAnalyzerBase {
     // http://www.lextek.com/manuals/onix/stopwords2.html
     static {
         final List<String> stopWords = Arrays.asList(
+                "abt",
+                "btw",
+                "dun",
+                "dunno",
+
                 "a",
                 "a's",
                 "able",
