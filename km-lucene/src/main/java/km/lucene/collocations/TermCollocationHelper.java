@@ -55,7 +55,7 @@ public class TermCollocationHelper {
         while(it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
             System.out.println(pair.getKey()+" = "+((CollocationScorer) pair.getValue()).getScore());
-            System.out.println(pair.getKey()+" = "+pair.getValue());  // details
+            // System.out.println(pair.getKey()+" = "+pair.getValue());  // details
         }
     }
 

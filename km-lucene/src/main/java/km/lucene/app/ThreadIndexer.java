@@ -76,13 +76,13 @@ public class ThreadIndexer {
 			doc.add(new IntField(FieldName.POST_MONTH, Integer.parseInt(monthStr), Field.Store.NO));
 
             // Daniel: add posting list
-            FieldType fieldType = new FieldType();
-            fieldType.setStoreTermVectors(true);
-            fieldType.setStoreTermVectorPositions(true);
-            // fieldType.setStoreTermVectorOffsets(true); // no need char offset
-            fieldType.setIndexed(true);
+            FieldType fieldTypeDoc = new FieldType();
+            fieldTypeDoc.setStoreTermVectors(true);
+            fieldTypeDoc.setStoreTermVectorPositions(true);
+            fieldTypeDoc.setStoreTermVectorOffsets(true); // for highlighting
+            fieldTypeDoc.setIndexed(true);
 
-			doc.add(new Field(FieldName.CONTENT, post.getContent(), fieldType));
+			doc.add(new Field(FieldName.CONTENT, post.getContent(), fieldTypeDoc));
 			doc.add(new IntField(FieldName.STOREY, post.getStorey(), Field.Store.YES));
 
 			String poster = post.getPoster().isEmpty() ? "Anonymous" : post.getPoster();
@@ -99,10 +99,10 @@ public class ThreadIndexer {
 			doc.add(new IntField(FieldName.TOPIC_ID, docTopics.get(post.getId()), Field.Store.NO));
 
 			System.out.println(String.format("added post %d, %d", (i++), post.getId()));
-		}
+		}  // END for posts
 		jr.close();
 
-		indexWriter.addDocument(doc);
+		indexWriter.addDocument(doc); // one last dangling
 
 		System.out.println(String.format("Number of files indexed: %d", indexWriter.numDocs()));
 		indexWriter.close();
