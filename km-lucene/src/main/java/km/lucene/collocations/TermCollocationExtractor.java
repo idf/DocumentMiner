@@ -282,7 +282,7 @@ public class TermCollocationExtractor {
 //                        continue;
 //                    }
 
-//                synchronized (phraseTerms) {
+                synchronized (this) {
                     CollocationScorer pt = phraseTerms.get(termB.bytes().utf8ToString());
 
                     if (pt==null) {  // if not exist
@@ -295,9 +295,8 @@ public class TermCollocationExtractor {
                         phraseTerms.putIfAbsent(pt.getCoincidentalTerm(), pt);
                     }
                     pt.incCoIncidenceDocCount();
-
-//                }
-                termsFound.add(termB);  // whether to check the same doc multiple times
+                    termsFound.add(termB);  // whether to check the same doc multiple times
+                }
             }
 
         } // END term positions loop for term A
