@@ -79,7 +79,7 @@ public class ThreadIndexer {
             FieldType fieldTypeDoc = new FieldType();
             fieldTypeDoc.setStoreTermVectors(true);
             fieldTypeDoc.setStoreTermVectorPositions(true);
-            fieldTypeDoc.setStoreTermVectorOffsets(true); // for highlighting
+            fieldTypeDoc.setStoreTermVectorOffsets(true); // for highlighting, rake
             fieldTypeDoc.setIndexed(true);
 
 			doc.add(new Field(FieldName.CONTENT, post.getContent(), fieldTypeDoc));

@@ -30,7 +30,7 @@ public class TermCollocationHelper {
         return result;
     }
 
-    public void sortPhraseTerms(HashMap<String, CollocationScorer> phraseTerms) {
+    public void sortScores(HashMap<String, CollocationScorer> phraseTerms) {
         class ValueComparator implements Comparator<String> {
             Map<String, CollocationScorer> base;
             public ValueComparator(Map<String, CollocationScorer> base) {

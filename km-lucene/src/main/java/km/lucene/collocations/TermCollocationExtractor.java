@@ -3,6 +3,8 @@ package km.lucene.collocations;
 import km.common.Setting;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.index.*;
 import org.apache.lucene.index.collocations.CollocationScorer;
@@ -18,6 +20,7 @@ import util.Timestamper;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+
 /**
  * User: Danyang
  * Date: 10/7/14
@@ -101,31 +104,36 @@ public class TermCollocationExtractor {
             this.liveDocs.set(topDocs.scoreDocs[j].doc);
         }
 
-        HashMap<String, CollocationScorer> phraseTerms = new HashMap<>();
+        HashMap<String, CollocationScorer> termBScores = new HashMap<>();
         for (int j = 0; j < Math.min(this.k, topDocs.totalHits); j++) {
 
             DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, t.bytes());
             int docID = topDocs.scoreDocs[j].doc;
             // Document d = searcher.doc(docID);
             dpe.advance(docID);
-            this.processDocForTerm(t, dpe, phraseTerms, true);
+            this.processDocForTerm(t, dpe, termBScores, true);
         }
-        phraseTerms = this.helper.filterCollocationCount(phraseTerms, 5);
-        this.helper.sortPhraseTerms(phraseTerms);
+        termBScores = this.helper.filterCollocationCount(termBScores, 5);
+        this.helper.sortScores(termBScores);
         timestamper.end();
     }
 
     public void extract(Term t) throws IOException, ParseException {
         Timestamper timestamper = new Timestamper();
         timestamper.start();
-        HashMap<String, CollocationScorer> phraseTerms = processTerm(t);
-        phraseTerms = this.helper.filterCollocationCount(phraseTerms, 5);
-        this.helper.sortPhraseTerms(phraseTerms);
+        HashMap<String, CollocationScorer> termBScores = processTerm(t);
+        termBScores = this.helper.filterCollocationCount(termBScores, 5);
+        this.helper.sortScores(termBScores);
         timestamper.end();
     }
 
 
-
+    /**
+     * looking at the term level
+     * @param term
+     * @return
+     * @throws IOException
+     */
     private HashMap<String, CollocationScorer> processTerm(Term term) throws IOException {
         System.out.println("Processing term: "+term);
 
@@ -134,23 +142,32 @@ public class TermCollocationExtractor {
         }
         // get dpe in first hand
         DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, term.bytes());
-        HashMap<String, CollocationScorer> phraseTerms = new HashMap<String, CollocationScorer>();
+        HashMap<String, CollocationScorer> termBScores = new HashMap<String, CollocationScorer>();
 
         while (dpe.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
-            processDocForTerm(term, dpe, phraseTerms, false);
+            processDocForTerm(term, dpe, termBScores, false);
         }
-        return phraseTerms;
+        return termBScores;
     }
 
-    private void processDocForTerm(Term term, DocsAndPositionsEnum dpeA, HashMap<String, CollocationScorer> phraseTerms, boolean top) throws IOException {
+    /**
+     * looking at the document&term level
+     * now look at all OTHER terms_str in this doc and see if they are collocated 
+     * @param term
+     * @param dpeA
+     * @param termBScores
+     * @param top
+     * @throws IOException
+     */
+    private void processDocForTerm(Term term, DocsAndPositionsEnum dpeA, HashMap<String, CollocationScorer> termBScores, boolean top) throws IOException {
         int docId = dpeA.docID();
         // System.out.println("Processing docId: "+docId);
-        // now look at all OTHER terms_str in this doc and see if they are
+        
         // restore the structure
         Terms tv = this.reader.getTermVector(docId, this.fieldName);
         TermsEnum te = tv.iterator(null);
-
         HashMap<Integer, Term> pos2term = new HashMap<>();
+        HashMap<Integer, Pair<Integer, Integer>> pos2offset = new HashMap<>();
         while(te.next()!=null) {
             // DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, te.term());
             // dpeB.advance(docId);
@@ -158,7 +175,10 @@ public class TermCollocationExtractor {
             if (dpeB.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
                 // remember all positions of the term in this doc
                 for (int j = 0; j < dpeB.freq(); j++) {
-                    pos2term.put(dpeB.nextPosition(), new Term(FieldName.CONTENT, te.term().utf8ToString()));
+                    int pos = dpeB.nextPosition();
+                    Pair<Integer, Integer> offsets = new ImmutablePair<>(dpeB.startOffset(), dpeB.endOffset());
+                    pos2offset.put(pos, offsets);
+                    pos2term.put(pos, new Term(FieldName.CONTENT, te.term().utf8ToString()));
                 }
             }
         }
@@ -192,7 +212,7 @@ public class TermCollocationExtractor {
 //                        continue;
 //                    }
 
-                CollocationScorer pt = (CollocationScorer) phraseTerms.get(termB.bytes().utf8ToString());
+                CollocationScorer pt = (CollocationScorer) termBScores.get(termB.bytes().utf8ToString());
 
                 if (pt==null) {  // if not exist
                     float percentB = (float) this.reader.docFreq(termB) / (float) this.reader.numDocs();
@@ -215,7 +235,7 @@ public class TermCollocationExtractor {
                     else {
                         pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.numDocs());
                     }
-                    phraseTerms.put(pt.getCoincidentalTerm(), pt);
+                    termBScores.put(pt.getCoincidentalTerm(), pt);
                 }
 
                 pt.incCoIncidenceDocCount();
