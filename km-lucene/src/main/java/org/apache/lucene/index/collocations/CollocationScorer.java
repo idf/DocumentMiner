@@ -17,8 +17,7 @@ package org.apache.lucene.index.collocations;
  * limitations under the License.
  */
 
-
-import util.Formatter;
+import io.deepreader.java.commons.util.Formatter;
 
 /**
  * Records the total number of coincidences of two terms

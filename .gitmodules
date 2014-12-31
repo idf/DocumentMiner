@@ -1,3 +1,6 @@
 [submodule "rake4j"]
 	path = rake4j
 	url = git@github.com:zhangdanyangg/rake4j.git
+[submodule "commons-util"]
+	path = commons-util
+	url = git@github.com:zhangdanyangg/commons-util.git

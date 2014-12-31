@@ -1,5 +1,6 @@
 package km.lucene.collocations;
 
+import io.deepreader.java.commons.util.Timestamper;
 import km.common.Setting;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
@@ -15,11 +16,13 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.Version;
-import util.Timestamper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.BitSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * User: Danyang
