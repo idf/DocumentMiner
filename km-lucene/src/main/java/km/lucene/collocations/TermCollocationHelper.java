@@ -1,5 +1,6 @@
 package km.lucene.collocations;
 
+import io.deepreader.java.commons.util.Sorter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.collocations.CollocationScorer;
 
@@ -31,25 +32,16 @@ public class TermCollocationHelper {
     }
 
     public void sortScores(HashMap<String, CollocationScorer> phraseTerms) {
-        class ValueComparator implements Comparator<String> {
-            Map<String, CollocationScorer> base;
-            public ValueComparator(Map<String, CollocationScorer> base) {
-                this.base = base;
-            }
-
-            // Note: this comparator imposes orderings that are inconsistent with equals.
+        TreeMap<String, CollocationScorer> sortedMap = Sorter.sortByValues(phraseTerms, new Sorter.ValueComparator<String, CollocationScorer>(phraseTerms) {
             @Override
             public int compare(String a, String b) {
-                if (base.get(a).getScore() < base.get(b).getScore()) {
+                if (base.get(a).getScore()<base.get(b).getScore()) {
                     return 1;
                 } else {
                     return -1;
                 } // returning 0 would merge keys
             }
-        }
-        ValueComparator bvc = new ValueComparator(phraseTerms);
-        TreeMap<String,CollocationScorer> sortedMap = new TreeMap<>(bvc);
-        sortedMap.putAll(phraseTerms);
+        });
 
         Iterator it = sortedMap.entrySet().iterator();
         while(it.hasNext()) {
