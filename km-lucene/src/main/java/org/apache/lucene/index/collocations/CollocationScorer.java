@@ -17,7 +17,7 @@ package org.apache.lucene.index.collocations;
  * limitations under the License.
  */
 
-import io.deepreader.java.commons.util.Formatter;
+import io.deepreader.java.commons.util.Displayer;
 
 /**
  * Records the total number of coincidences of two terms
@@ -122,6 +122,6 @@ public class CollocationScorer
 
     @Override
     public String toString() {
-        return Formatter.toString(this);
+        return Displayer.toString(this);
     }
 }
