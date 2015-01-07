@@ -40,4 +40,10 @@ public class Setting {
         public static final String TERMS_PATH = ROOT_FOLDER+"terms.json";
     }
 
+    // RAKE
+    public class RakeSetting {
+        public static final String ROOT_FOLDER = DATA_FOLDER+"rake/";
+        public static final String INDEX_PATH = ROOT_FOLDER+"index.ser";
+    }
+
 }

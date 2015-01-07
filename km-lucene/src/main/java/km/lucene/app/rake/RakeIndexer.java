@@ -1,9 +1,13 @@
 package km.lucene.app.rake;
 
+import io.deepreader.java.commons.util.Displayer;
+import io.deepreader.java.commons.util.IOHandler;
 import io.deepreader.java.commons.util.Timestamper;
 import km.common.Setting;
 import km.common.json.JsonReader;
 import km.lucene.entities.Post;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rake4j.core.IndexWriter;
 import rake4j.core.RakeAnalyzer;
 import rake4j.core.index.Index;
@@ -25,9 +29,10 @@ public class RakeIndexer {
      */
     public static void main(String[] args) throws IOException {
         String postPath = Setting.SORTED_POSTS_PATH;
-        String indexPath = ""; // storing path
+        String indexPath = Setting.RakeSetting.INDEX_PATH; // storing path
         Timestamper timestamper = new Timestamper();
         Index index = new Index();
+        Logger logger = LoggerFactory.getLogger(RakeIndexer.class);
 
         timestamper.start();
         RakeAnalyzer rake = null;
@@ -42,12 +47,30 @@ public class RakeIndexer {
         Post post;
 
         int i = 1;
-        while ((post = jr.next()) != null && i<100) {
+        int maxDocs = 1<<31-1;
+        while ((post = jr.next()) != null && i<maxDocs) { // debug
             Document doc = new Document(post.getContent());
-            iw.addDocument(doc);System.out.println(String.format("added post %d, %d", (i++), post.getId()));
+            iw.addDocument(doc);
+            System.out.println(String.format("added post %d, %d", (i++), post.getId()));
         }
-        // TODO
-        System.out.println(index);
+
+
+        try {
+            IOHandler.serialize(indexPath, index);
+            logger.info("Serialized data is saved in " + indexPath);
+        }
+        catch (IOException e) {
+            logger.error(Displayer.display(e));
+        }
+
+        try {
+            Index index1 = (Index) IOHandler.deserialize(indexPath);
+            logger.info("Deserialized data is from " + indexPath);
+            System.out.println(index1);
+        }
+        catch (Exception e) {
+            logger.error(Displayer.display(e));
+        }
         timestamper.end();
     }
 }
