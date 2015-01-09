@@ -25,18 +25,24 @@ public class TermCollocationHelper {
         return phraseTerms.entrySet()
                 .parallelStream()
                 .filter(e -> e.getValue().getCoIncidenceDocCount() > count)
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public void sortScores(Map<String, CollocationScorer> phraseTerms) {
         TreeMap<String, CollocationScorer> sortedMap = Sorter.sortByValues(phraseTerms, new Sorter.ValueComparator<String, CollocationScorer>(phraseTerms) {
             @Override
             public int compare(String a, String b) {
-                if (base.get(a).getScore()<base.get(b).getScore()) {
-                    return 1;
-                } else {
+                try {
+                    if (base.get(a).getScore()<base.get(b).getScore())
+                        return 1;
+                    else if(a.equals(b))
+                        return 0;
+                    else
+                        return -1;
+                }
+                catch (NullPointerException e) {
                     return -1;
-                } // returning 0 would merge keys
+                }
             }
         });
 
@@ -52,11 +58,9 @@ public class TermCollocationHelper {
     public boolean isTooPopularOrNotPopularEnough(float percent) {
         // check term is not too rare or frequent
         if (percent < minTermPopularity) {
-            // System.out.println(term.text() + " not popular enough " + percent);
             return true;
         }
         if (percent > maxTermPopularity) {
-            // System.out.println(term.text() + " too popular " + percent);
             return true;
         }
         return false;
