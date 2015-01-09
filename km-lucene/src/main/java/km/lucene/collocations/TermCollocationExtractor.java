@@ -1,11 +1,13 @@
 package km.lucene.collocations;
 
+import io.deepreader.java.commons.util.IOHandler;
 import io.deepreader.java.commons.util.Timestamper;
 import km.common.Setting;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.lucene.document.Document;
 import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.index.*;
 import org.apache.lucene.index.collocations.CollocationScorer;
@@ -16,13 +18,13 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.net.URISyntaxException;
+import java.util.*;
 
 /**
  * User: Danyang
@@ -31,9 +33,10 @@ import java.util.Set;
  */
 public class TermCollocationExtractor {
     // refactor: later
-    private static final FacetsConfig config = new FacetsConfig();
-    private IndexReader reader;
-    private IndexSearcher searcher;
+    static final FacetsConfig config = new FacetsConfig();
+    IndexReader reader;
+    IndexSearcher searcher;
+    private Logger logger = LoggerFactory.getLogger(TermCollocationExtractor.class);
 
     // collocation
     static int DEFAULT_MAX_NUM_DOCS_TO_ANALYZE = 120000;
@@ -43,6 +46,10 @@ public class TermCollocationExtractor {
     long totalVocabulary = 0;
     TermFilter filter = new TermFilter();
 
+    rake4j.core.index.Index rakeIndex;
+    rake4j.core.index.Index topKRakeIndex;
+    rake4j.core.RakeAnalyzer rake;
+
     // top k
     BitSet liveDocs = new BitSet();
     int k = 100;
@@ -50,7 +57,7 @@ public class TermCollocationExtractor {
     // delegation
     TermCollocationHelper helper = new TermCollocationHelper();
 
-    public TermCollocationExtractor(String indexPath, String thindexPath, String taxoPath) throws IOException {
+    public TermCollocationExtractor(String indexPath, String thindexPath, String taxoPath, String rakeIndexPath) throws IOException, ClassNotFoundException, URISyntaxException {
         this.reader = DirectoryReader.open(FSDirectory.open(new File(thindexPath)));
         this.searcher = new IndexSearcher(this.reader);
 
@@ -63,14 +70,21 @@ public class TermCollocationExtractor {
         }
 
         this.liveDocs = new BitSet(this.reader.numDocs());
+
+        // rake
+        this.rakeIndex = (rake4j.core.index.Index) IOHandler.deserialize(rakeIndexPath);
+        logger.info("Deserialized data is from " + indexPath);
+        this.rake = new rake4j.core.RakeAnalyzer();
+        this.rake.setMinWordsForPhrase(2);
     }
 
-    public static void main(String[] args) throws IOException, ParseException {
+    public static void main(String[] args) throws Exception {
         // test parameters
-        args = new String[3];
+        args = new String[4];
         args[0] = Setting.INDEX_PATH;
         args[1] = Setting.THINDEX_PATH;
         args[2] = Setting.TAXOINDEX_PATH;
+        args[3] = Setting.RakeSetting.INDEX_PATH;
 
         if (args.length < 3) {
             System.out.println("Please specify data file, index folder, taxonomy index folder in sequence.");
@@ -80,15 +94,15 @@ public class TermCollocationExtractor {
         String indexPath = args[0];
         String thindexPath = args[1];
         String taxoPath = args[2];
+        String rakeIndexPath = args[3];
 
-        TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, thindexPath, taxoPath);
-        // tce.extract(new Term(tce.fieldName, "ntu"));
+        TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, thindexPath, taxoPath, rakeIndexPath);
         tce.search("ntu");
 
 
     }
 
-    public void search(String queryString) throws ParseException, IOException {
+    public void search(String queryString) throws ParseException, IOException, URISyntaxException {
         Timestamper timestamper = new Timestamper();
         timestamper.start();
         QueryParser queryParser = new QueryParser(Version.LUCENE_48, this.fieldName, new CustomAnalyzer(Version.LUCENE_48));
@@ -100,31 +114,48 @@ public class TermCollocationExtractor {
         Term t = (Term) terms.toArray()[0];
 
         TopDocs topDocs = collector.topDocs();
-        System.out.println(topDocs.totalHits);
-        System.out.println(terms.size());
 
         for(int j=0; j<Math.min(this.k, topDocs.totalHits); j++) {
             this.liveDocs.set(topDocs.scoreDocs[j].doc);
         }
 
-        HashMap<String, CollocationScorer> termBScores = new HashMap<>();
+        // Rake, search pre-process
+        this.topKRakeIndex = new rake4j.core.index.Index();
+        rake4j.core.IndexWriter iw = new rake4j.core.IndexWriter(this.topKRakeIndex, this.rake , (float) 0.8);
         for (int j = 0; j < Math.min(this.k, topDocs.totalHits); j++) {
+            Document doc = this.searcher.doc(topDocs.scoreDocs[j].doc);
+            iw.addDocument(new rake4j.core.model.Document(doc.get(FieldName.CONTENT)));
+        }
+        this.logger.trace(this.topKRakeIndex.toString());
 
+
+        Map<String, CollocationScorer> termBScores = new HashMap<>();
+        Map<String, CollocationScorer> phraseBScores = new HashMap<>();
+        for (int j = 0; j < Math.min(this.k, topDocs.totalHits); j++) {
             DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, t.bytes());
             int docID = topDocs.scoreDocs[j].doc;
             // Document d = searcher.doc(docID);
             dpe.advance(docID);
-            this.processDocForTerm(t, dpe, termBScores, true);
+            this.processDocForTerm(t, dpe, termBScores, phraseBScores, true);
         }
         termBScores = this.helper.filterCollocationCount(termBScores, 5);
-        this.helper.sortScores(termBScores);
+        // this.helper.sortScores(termBScores);
+        this.helper.sortScores(phraseBScores);
+
         timestamper.end();
     }
 
-    public void extract(Term t) throws IOException, ParseException {
+    /**
+     * Sample: tce.extract(new Term(tce.fieldName, "ntu"));
+     * extract collocations from all the documents
+     * @param t
+     * @throws IOException
+     * @throws ParseException
+     */
+    private void extract(Term t) throws IOException, ParseException {
         Timestamper timestamper = new Timestamper();
         timestamper.start();
-        HashMap<String, CollocationScorer> termBScores = processTerm(t);
+        Map<String, CollocationScorer> termBScores = processTerm(t);
         termBScores = this.helper.filterCollocationCount(termBScores, 5);
         this.helper.sortScores(termBScores);
         timestamper.end();
@@ -132,23 +163,23 @@ public class TermCollocationExtractor {
 
 
     /**
-     * looking at the term level
+     * looking at the term level,
      * @param term
      * @return
      * @throws IOException
      */
     private HashMap<String, CollocationScorer> processTerm(Term term) throws IOException {
-        System.out.println("Processing term: "+term);
-
-        if(this.helper.isTermTooPopularOrNotPopularEnough(term, this.reader.docFreq(term) / (float) this.reader.numDocs())) {
+        this.logger.debug("Processing term: "+term);
+        if(this.helper.isTooPopularOrNotPopularEnough(this.reader.docFreq(term) / (float) this.reader.numDocs())) {
             return null;
         }
         // get dpe in first hand
         DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, term.bytes());
-        HashMap<String, CollocationScorer> termBScores = new HashMap<String, CollocationScorer>();
+        HashMap<String, CollocationScorer> termBScores = new HashMap<>();
+        HashMap<String, CollocationScorer> phraseBScores = new HashMap<>();
 
         while (dpe.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
-            processDocForTerm(term, dpe, termBScores, false);
+            processDocForTerm(term, dpe, termBScores, phraseBScores, false);
         }
         return termBScores;
     }
@@ -159,13 +190,18 @@ public class TermCollocationExtractor {
      * @param term
      * @param dpeA
      * @param termBScores
+     * @param phraseBScores
      * @param top
      * @throws IOException
      */
-    private void processDocForTerm(Term term, DocsAndPositionsEnum dpeA, HashMap<String, CollocationScorer> termBScores, boolean top) throws IOException {
+    private void processDocForTerm(Term term,
+                                   DocsAndPositionsEnum dpeA,
+                                   Map<String, CollocationScorer> termBScores,
+                                   Map<String, CollocationScorer> phraseBScores,
+                                   boolean top) throws IOException {
         int docId = dpeA.docID();
-        // System.out.println("Processing docId: "+docId);
-        
+        this.logger.debug("Processing docId: "+docId);
+
         // restore the structure
         Terms tv = this.reader.getTermVector(docId, this.fieldName);
         TermsEnum te = tv.iterator(null);
@@ -186,9 +222,14 @@ public class TermCollocationExtractor {
             }
         }
 
+        // rake
+        rake4j.core.model.Document rake_doc = new rake4j.core.model.Document(this.searcher.doc(docId).get(FieldName.CONTENT));
+        this.rake.loadDocument(rake_doc);
+        this.rake.run();
 
         // update scorer
-        HashSet<Term> termsFound = new HashSet<>();
+        Set<Term> termsFound = new HashSet<>();
+        Set<String> phraseFound = new HashSet<>();
         for (int k = 0; (k < dpeA.freq()); k++) {  // for term A
             Integer position = dpeA.nextPosition();
             Integer startpos = Math.max(0, position - this.slopSize);
@@ -196,57 +237,84 @@ public class TermCollocationExtractor {
             for(int curpos = startpos; curpos<=endpos; curpos++) {  // for term B
                 if(curpos==position)
                     continue;
-                Term termB = pos2term.get(curpos);  // how to get termB
-                if(termB==null)
-                    continue;
-                if(termB.bytes().equals(term.bytes()))
-                    continue;
-                // System.out.println("around: "+termB);
-                if(termsFound.contains(termB))
-                    continue;
-
-                if(CustomStopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(termB.text()))
-                    continue;
-
-                if (!this.filter.processTerm(termB.bytes().utf8ToString())) {
-                    continue;
-                }
-//                    if (!StringUtils.isAlpha(termB.bytes().utf8ToString())) {
-//                        continue;
-//                    }
-
-                CollocationScorer pt = (CollocationScorer) termBScores.get(termB.bytes().utf8ToString());
-
-                if (pt==null) {  // if not exist
-                    float percentB = (float) this.reader.docFreq(termB) / (float) this.reader.numDocs();
-                    if(this.helper.isTermTooPopularOrNotPopularEnough(termB, percentB)) {
-                        termsFound.add(termB);
-                        continue;
-                    }
-                    if(top) {
-                        /*
-                        top 100 strategy
-                         */
-                        int dfB = 0;
-                        DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, termB.bytes());
-                        while (dpeB.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
-                            if(this.liveDocs.get(dpeB.docID()))
-                                dfB ++;
-                        }
-                        pt = new CollocationScorer(term.text(), termB.text(), this.k,  this.reader.docFreq(termB), this.reader.numDocs());
-                    }
-                    else {
-                        pt = new CollocationScorer(term.text(), termB.bytes().utf8ToString(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.numDocs());
-                    }
-                    termBScores.put(pt.getCoincidentalTerm(), pt);
-                }
-
-                pt.incCoIncidenceDocCount();
-                termsFound.add(termB);  // whether to check the same doc multiple times
+                incrementCollocationScore(term, termBScores, top, pos2term, termsFound, curpos);
+                if(pos2offset.containsKey(curpos))
+                    incrementCollocationScore(term, phraseBScores, top, rake_doc, phraseFound, pos2offset.get(curpos).getLeft());
             }
 
         } // END term positions loop for term A
     }
 
+    private void incrementCollocationScore(Term term, Map<String, CollocationScorer> scores, boolean top, Map<Integer, Term> map, Set<Term> termsFound, int cur_position) throws IOException {
+        Term termB = map.get(cur_position);  // how to get termB
+        if(termB==null)
+            return;
+        if(termB.bytes().equals(term.bytes()))
+            return;
+        if(CustomStopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(termB.text()))
+            return;
+        if (!this.filter.processTerm(termB.bytes().utf8ToString())) {
+            return;
+        }
+        /*
+        if (!StringUtils.isAlpha(termB.bytes().utf8ToString())) {
+            return;
+        }
+        */
+        if(termsFound.contains(termB))
+            return;
+        CollocationScorer pt = scores.get(termB.bytes().utf8ToString());
 
+        if (pt==null) {  // if not exist
+            float percentB = (float) this.reader.docFreq(termB) / (float) this.reader.numDocs();
+            if(this.helper.isTooPopularOrNotPopularEnough(percentB)) {
+                termsFound.add(termB);
+                return;
+            }
+            if(top) {
+                /* top 100 strategy */
+                int dfB = 0;
+                DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, termB.bytes());
+                while (dpeB.nextDoc()!= DocsEnum.NO_MORE_DOCS) {
+                    if(this.liveDocs.get(dpeB.docID()))
+                        dfB ++;
+                }
+                pt = new CollocationScorer(term.text(), termB.text(), this.k,  this.reader.docFreq(termB), this.reader.numDocs());
+            }
+            else {
+                pt = new CollocationScorer(term.text(), termB.text(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.numDocs());
+            }
+            scores.put(pt.getCoincidentalTerm(), pt);
+        }
+
+        pt.incCoIncidenceDocCount();
+        termsFound.add(termB);  // whether to check the same doc multiple times
+    }
+
+    private void incrementCollocationScore(Term term, Map<String, CollocationScorer> scores, boolean top, rake4j.core.model.Document doc, Set<String> phrasesFound, int cur_offset) throws IOException {
+        if(!doc.getTermMap().containsKey(cur_offset))
+            return ;
+
+        String phraseB = doc.getTermMap().get(cur_offset).getTermText();
+        this.logger.trace("collocation: "+phraseB);
+        if(phraseB==null)
+            return;
+        if(phraseB.equals(term.bytes()))
+            return;
+        if(phrasesFound.contains(phraseB))
+            return;
+        CollocationScorer pt = scores.get(phraseB);
+
+        if (pt==null) {  // if not exist
+            if(top) {
+                pt = new CollocationScorer(term.text(), phraseB, this.k,  this.rakeIndex.docFreq(phraseB), this.reader.numDocs());
+            }
+            else {
+                pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeIndex.docFreq(phraseB), this.reader.numDocs());
+            }
+            scores.put(pt.getCoincidentalTerm(), pt);
+        }
+        pt.incCoIncidenceDocCount();
+        phrasesFound.add(phraseB);  // whether to check the same doc multiple times
+    }
 }

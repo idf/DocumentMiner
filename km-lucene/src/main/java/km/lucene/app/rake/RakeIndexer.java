@@ -47,7 +47,7 @@ public class RakeIndexer {
         Post post;
 
         int i = 1;
-        int maxDocs = 1<<31-1;
+        int maxDocs = 1<<31-1; //1<<31-1;
         while ((post = jr.next()) != null && i<maxDocs) { // debug
             Document doc = new Document(post.getContent());
             iw.addDocument(doc);
@@ -63,14 +63,7 @@ public class RakeIndexer {
             logger.error(Displayer.display(e));
         }
 
-        try {
-            Index index1 = (Index) IOHandler.deserialize(indexPath);
-            logger.info("Deserialized data is from " + indexPath);
-            System.out.println(index1);
-        }
-        catch (Exception e) {
-            logger.error(Displayer.display(e));
-        }
+        System.out.println(index);
         timestamper.end();
     }
 }

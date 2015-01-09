@@ -1,10 +1,12 @@
 package km.lucene.collocations;
 
 import io.deepreader.java.commons.util.Sorter;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.index.collocations.CollocationScorer;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 /**
  * “Measuring programming progress by lines of code is like measuring aircraft building progress by weight.”
@@ -19,19 +21,14 @@ public class TermCollocationHelper {
     static float DEFAULT_MAX_TERM_POPULARITY = 1f;
     float maxTermPopularity = DEFAULT_MAX_TERM_POPULARITY;
 
-    public HashMap<String, CollocationScorer> filterCollocationCount(HashMap<String, CollocationScorer> phraseTerms, int count) {
-        HashMap<String, CollocationScorer> result = new HashMap<>();
-        Iterator it = phraseTerms.entrySet().iterator();
-        while(it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            if(((CollocationScorer) pair.getValue()).getCoIncidenceDocCount()>count) {
-                result.put((String) pair.getKey(), (CollocationScorer) pair.getValue());
-            }
-        }
-        return result;
+    public Map<String, CollocationScorer> filterCollocationCount(Map<String, CollocationScorer> phraseTerms, int count) {
+        return phraseTerms.entrySet()
+                .parallelStream()
+                .filter(e -> e.getValue().getCoIncidenceDocCount() > count)
+                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
     }
 
-    public void sortScores(HashMap<String, CollocationScorer> phraseTerms) {
+    public void sortScores(Map<String, CollocationScorer> phraseTerms) {
         TreeMap<String, CollocationScorer> sortedMap = Sorter.sortByValues(phraseTerms, new Sorter.ValueComparator<String, CollocationScorer>(phraseTerms) {
             @Override
             public int compare(String a, String b) {
@@ -52,7 +49,7 @@ public class TermCollocationHelper {
     }
 
 
-    public boolean isTermTooPopularOrNotPopularEnough(Term term, float percent) {
+    public boolean isTooPopularOrNotPopularEnough(float percent) {
         // check term is not too rare or frequent
         if (percent < minTermPopularity) {
             // System.out.println(term.text() + " not popular enough " + percent);

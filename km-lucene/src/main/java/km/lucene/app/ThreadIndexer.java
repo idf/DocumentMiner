@@ -81,6 +81,7 @@ public class ThreadIndexer {
             fieldTypeDoc.setStoreTermVectorPositions(true);
             fieldTypeDoc.setStoreTermVectorOffsets(true); // for highlighting, rake4j
             fieldTypeDoc.setIndexed(true);
+			fieldTypeDoc.setStored(true);  //for Rake to re-analyze the content
 
 			doc.add(new Field(FieldName.CONTENT, post.getContent(), fieldTypeDoc));
 			doc.add(new IntField(FieldName.STOREY, post.getStorey(), Field.Store.YES));

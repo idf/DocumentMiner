@@ -26,8 +26,7 @@ import io.deepreader.java.commons.util.Displayer;
  * @author iprovalov (minor refactoring)
  * 
  */
-public class CollocationScorer
-{
+public class CollocationScorer {
     String term;
     String coincidentalTerm;
 
@@ -107,10 +106,6 @@ public class CollocationScorer
         return (float) score;
 
     }
-
-
-
-
 
     public String getCoincidentalTerm() {
         return coincidentalTerm;
