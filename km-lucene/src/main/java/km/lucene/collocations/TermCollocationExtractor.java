@@ -1,6 +1,5 @@
 package km.lucene.collocations;
 
-import io.deepreader.java.commons.util.IOHandler;
 import io.deepreader.java.commons.util.Timestamper;
 import km.common.Setting;
 import km.lucene.analysis.CustomAnalyzer;
@@ -46,9 +45,8 @@ public class TermCollocationExtractor {
     long totalVocabulary = 0;
     TermFilter filter = new TermFilter();
 
-    rake4j.core.index.Index rakeIndex;
-    rake4j.core.index.Index topKRakeIndex;
-    rake4j.core.RakeAnalyzer rake;
+    // rake
+    RakeCollocationMgr rakeMgr;
 
     // top k
     BitSet liveDocs = new BitSet();
@@ -68,14 +66,8 @@ public class TermCollocationExtractor {
         while((byteRef = iterator.next()) != null) {
             this.totalVocabulary++;
         }
-
         this.liveDocs = new BitSet(this.reader.numDocs());
-
-        // rake
-        this.rakeIndex = (rake4j.core.index.Index) IOHandler.deserialize(rakeIndexPath);
-        logger.info("Deserialized data is from " + indexPath);
-        this.rake = new rake4j.core.RakeAnalyzer();
-        this.rake.setMinWordsForPhrase(2);
+        this.rakeMgr = new RakeCollocationMgr(rakeIndexPath);
     }
 
     public static void main(String[] args) throws Exception {
@@ -86,8 +78,8 @@ public class TermCollocationExtractor {
         args[2] = Setting.TAXOINDEX_PATH;
         args[3] = Setting.RakeSetting.INDEX_PATH;
 
-        if (args.length < 3) {
-            System.out.println("Please specify data file, index folder, taxonomy index folder in sequence.");
+        if (args.length < 4) {
+            System.out.println("Please specify 4 params.");
             System.exit(1);
         }
         System.out.println("Started");
@@ -98,8 +90,6 @@ public class TermCollocationExtractor {
 
         TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, thindexPath, taxoPath, rakeIndexPath);
         tce.search("ntu");
-
-
     }
 
     public void search(String queryString) throws ParseException, IOException, URISyntaxException {
@@ -120,13 +110,12 @@ public class TermCollocationExtractor {
         }
 
         // Rake, search pre-process
-        this.topKRakeIndex = new rake4j.core.index.Index();
-        rake4j.core.IndexWriter iw = new rake4j.core.IndexWriter(this.topKRakeIndex, this.rake , (float) 0.8);
+        rake4j.core.IndexWriter iw = this.rakeMgr.renewPreIndex();
         for (int j = 0; j < Math.min(this.k, topDocs.totalHits); j++) {
             Document doc = this.searcher.doc(topDocs.scoreDocs[j].doc);
             iw.addDocument(new rake4j.core.model.Document(doc.get(FieldName.CONTENT)));
         }
-        this.logger.trace(this.topKRakeIndex.toString());
+        this.logger.trace(this.rakeMgr.preIndex.toString());
 
 
         Map<String, CollocationScorer> termBScores = new HashMap<>();
@@ -134,7 +123,6 @@ public class TermCollocationExtractor {
         for (int j = 0; j < Math.min(this.k, topDocs.totalHits); j++) {
             DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, t.bytes());
             int docID = topDocs.scoreDocs[j].doc;
-            // Document d = searcher.doc(docID);
             dpe.advance(docID);
             this.processDocForTerm(t, dpe, termBScores, phraseBScores, true);
         }
@@ -223,10 +211,7 @@ public class TermCollocationExtractor {
         }
 
         // rake
-        rake4j.core.model.Document rake_doc = new rake4j.core.model.Document(this.searcher.doc(docId).get(FieldName.CONTENT));
-        this.rake.loadDocument(rake_doc);
-        this.rake.run();
-
+        rake4j.core.model.Document rake_doc = this.rakeMgr.analyze(this.searcher.doc(docId).get(FieldName.CONTENT));
         // update scorer
         Set<Term> termsFound = new HashSet<>();
         Set<String> phraseFound = new HashSet<>();
@@ -235,14 +220,12 @@ public class TermCollocationExtractor {
             Integer startpos = Math.max(0, position - this.slopSize);
             Integer endpos = position + this.slopSize;
             for(int curpos = startpos; curpos<=endpos; curpos++) {  // for term B
-                if(curpos==position)
-                    continue;
-                incrementCollocationScore(term, termBScores, top, pos2term, termsFound, curpos);
+                if(curpos!=position)
+                    incrementCollocationScore(term, termBScores, top, pos2term, termsFound, curpos);
                 if(pos2offset.containsKey(curpos))
                     incrementCollocationScore(term, phraseBScores, top, rake_doc, phraseFound, pos2offset.get(curpos).getLeft());
             }
-
-        } // END term positions loop for term A
+        }
     }
 
     private void incrementCollocationScore(Term term, Map<String, CollocationScorer> scores, boolean top, Map<Integer, Term> map, Set<Term> termsFound, int cur_position) throws IOException {
@@ -294,11 +277,12 @@ public class TermCollocationExtractor {
     private void incrementCollocationScore(Term term, Map<String, CollocationScorer> scores, boolean top, rake4j.core.model.Document doc, Set<String> phrasesFound, int cur_offset) throws IOException {
         if(!doc.getTermMap().containsKey(cur_offset))
             return ;
-
         String phraseB = doc.getTermMap().get(cur_offset).getTermText();
         this.logger.trace("collocation: "+phraseB);
         if(phraseB==null)
             return;
+        if(this.rakeMgr.index.docFreq(phraseB)<=0)
+            return ;
         if(phraseB.equals(term.bytes()))
             return;
         if(phrasesFound.contains(phraseB))
@@ -307,10 +291,10 @@ public class TermCollocationExtractor {
 
         if (pt==null) {  // if not exist
             if(top) {
-                pt = new CollocationScorer(term.text(), phraseB, this.k,  this.rakeIndex.docFreq(phraseB), this.reader.numDocs());
+                pt = new CollocationScorer(term.text(), phraseB, this.k, this.rakeMgr.index.docFreq(phraseB), this.reader.numDocs());
             }
             else {
-                pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeIndex.docFreq(phraseB), this.reader.numDocs());
+                pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeMgr.index.docFreq(phraseB), this.reader.numDocs());
             }
             scores.put(pt.getCoincidentalTerm(), pt);
         }
