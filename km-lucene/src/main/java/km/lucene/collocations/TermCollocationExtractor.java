@@ -7,7 +7,6 @@ import km.lucene.constants.FieldName;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.index.*;
 import org.apache.lucene.index.collocations.CollocationScorer;
 import org.apache.lucene.index.collocations.TermFilter;
@@ -32,7 +31,6 @@ import java.util.*;
  */
 public class TermCollocationExtractor {
     // refactor: later
-    static final FacetsConfig config = new FacetsConfig();
     IndexReader reader;
     IndexSearcher searcher;
     private Logger logger = LoggerFactory.getLogger(TermCollocationExtractor.class);
@@ -108,7 +106,6 @@ public class TermCollocationExtractor {
         for(int j=0; j<Math.min(this.k, topDocs.totalHits); j++) {
             this.liveDocs.set(topDocs.scoreDocs[j].doc);
         }
-
         // Rake, search pre-process
         rake4j.core.IndexWriter iw = this.rakeMgr.renewPreIndex();
         for (int j = 0; j < Math.min(this.k, topDocs.totalHits); j++) {
@@ -116,8 +113,7 @@ public class TermCollocationExtractor {
             iw.addDocument(new rake4j.core.model.Document(doc.get(FieldName.CONTENT)));
         }
         this.logger.trace(this.rakeMgr.preIndex.toString());
-
-
+        // Processing
         Map<String, CollocationScorer> termBScores = new HashMap<>();
         Map<String, CollocationScorer> phraseBScores = new HashMap<>();
         for (int j = 0; j < Math.min(this.k, topDocs.totalHits); j++) {
