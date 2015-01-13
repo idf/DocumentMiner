@@ -34,8 +34,6 @@ public class DrillDownSearch {
 	public static void main(String[] args) throws IOException, ParseException {
 		// test parameters
 		args = new String[2];
-		// args[0] = "E:/project/kd/index";
-		// args[1] = "E:/project/kd/taxoindex";
         args[0] = Settings.INDEX_PATH;
         args[1] = Settings.TAXOINDEX_PATH;
 

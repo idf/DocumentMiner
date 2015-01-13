@@ -28,14 +28,24 @@ public class JsonReader<T> {
 	}
 	
 	public static <T> List<T> getList(String filename, Class<T> cls) throws IOException {
-		JsonReader<T> jr = new JsonReader<T>(filename, cls);
-		List<T> tList = new ArrayList<T>();
+		JsonReader<T> jr = new JsonReader<>(filename, cls);
+		List<T> tList = new ArrayList<>();
 		T t;
 		while ((t=jr.next()) != null) {
 			tList.add(t);
 		}
 		jr.close();
 		return tList;
+	}
+
+	public List<T> getList() throws IOException {
+		List<T> lst = new ArrayList<>();
+		T t;
+		while((t=this.next())!=null) {
+			lst.add(t);
+		}
+		this.close();
+		return lst;
 	}
 
 	public T next() throws IOException {

@@ -4,8 +4,6 @@ import io.deepreader.java.commons.util.Displayer;
 import io.deepreader.java.commons.util.IOHandler;
 import io.deepreader.java.commons.util.Timestamper;
 import km.common.Settings;
-import km.common.json.JsonReader;
-import km.lucene.entities.Post;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rake4j.core.IndexWriter;
@@ -15,21 +13,24 @@ import rake4j.core.model.Document;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 
 /**
  * User: Danyang
- * Date: 12/30/2014
- * Time: 20:34
+ * Date: 1/13/2015
+ * Time: 16:16
  */
-public class RakeIndexer {
-    /**
-     * Does not need the position of the phrase, just need to store the scores of the words.
-     * @param args
-     * @throws IOException
-     */
-    public static void main(String[] args) throws IOException {
-        String postPath = Settings.SORTED_POSTS_PATH;
-        String indexPath = Settings.RakeSettings.BASIC_INDEX_PATH; // storing path
+public class RakeIndexer implements Runnable {
+    String indexPath;
+    Iterator<String> itr;
+
+    public RakeIndexer(String indexPath, Iterator<String> itr) {
+        this.indexPath = indexPath;
+        this.itr = itr;
+    }
+
+    @Override
+    public void run() {
         Timestamper timestamper = new Timestamper();
         Index index = new Index();
         Logger logger = LoggerFactory.getLogger(RakeIndexer.class);
@@ -42,18 +43,16 @@ public class RakeIndexer {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        IndexWriter iw = new IndexWriter(index, rake , (float) Settings.RakeSettings.TOP_PERCENT);
-        JsonReader<Post> jr = new JsonReader<Post>(postPath, Post.class);
-        Post post;
+        IndexWriter iw = new IndexWriter(index, rake , Settings.RakeSettings.TOP_PERCENT);
 
         int i = 1;
         int maxDocs = 1<<31-1; //1<<31-1;
-        while ((post = jr.next()) != null && i<maxDocs) { // debug
-            Document doc = new Document(post.getContent());
+        while (itr.hasNext() && i<maxDocs) { // debug
+            String content = itr.next();
+            Document doc = new Document(content);
             iw.addDocument(doc);
-            System.out.println(String.format("added post %d, %d", (i++), post.getId()));
+            logger.info(String.format("added document count %d", (i++)));
         }
-
 
         try {
             IOHandler.serialize(indexPath, index);
@@ -63,7 +62,7 @@ public class RakeIndexer {
             logger.error(Displayer.display(e));
         }
 
-        System.out.println(index);
+        logger.info(index.toString());
         timestamper.end();
     }
 }

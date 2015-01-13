@@ -53,7 +53,7 @@ public class ThreadIndexer {
 					indexWriter.addDocument(doc);
 				}
 
-				doc = new Document();
+				doc = new Document(); // Shared Thread data
 				doc.add(new IntField(FieldName.FORUM_ID, post.getForumId(), Field.Store.NO));
 				doc.add(new IntField(FieldName.THREAD_ID, post.getThreadId(), Field.Store.YES));
 				doc.add(new TextField(FieldName.THREAD_TITLE, ts.getTitle(post.getThreadId()), Field.Store.NO));
@@ -75,12 +75,12 @@ public class ThreadIndexer {
 			doc.add(new IntField(FieldName.POST_YEAR, Integer.parseInt(yearStr), Field.Store.NO));
 			doc.add(new IntField(FieldName.POST_MONTH, Integer.parseInt(monthStr), Field.Store.NO));
 
-            // Daniel: add posting list
-            FieldType fieldTypeDoc = new FieldType();
-            fieldTypeDoc.setStoreTermVectors(true);
-            fieldTypeDoc.setStoreTermVectorPositions(true);
-            fieldTypeDoc.setStoreTermVectorOffsets(true); // for highlighting, rake4j
-            fieldTypeDoc.setIndexed(true);
+			// Daniel: add posting list
+			FieldType fieldTypeDoc = new FieldType();
+			fieldTypeDoc.setStoreTermVectors(true);
+			fieldTypeDoc.setStoreTermVectorPositions(true);
+			fieldTypeDoc.setStoreTermVectorOffsets(true); // for highlighting, rake4j
+			fieldTypeDoc.setIndexed(true);
 			fieldTypeDoc.setStored(true);  //for Rake to re-analyze the content
 
 			doc.add(new Field(FieldName.CONTENT, post.getContent(), fieldTypeDoc));
