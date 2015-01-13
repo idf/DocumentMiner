@@ -1,6 +1,6 @@
 package km.lucene.app;
 
-import km.common.Setting;
+import km.common.Settings;
 import km.common.json.JsonReader;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.entities.DocWithTopic;
@@ -30,14 +30,14 @@ public class Indexer {
     private final static FacetsConfig config = new FacetsConfig();
 
     public static void main(String[] args) throws IOException, ParseException {
-        ThreadService.init(Setting.THREADS_PATH);
-        Map<Integer, DocWithTopic> docTopics = DocWithTopicParser.parse(Setting.MalletSetting.TOPICS_PATH);
+        ThreadService.init(Settings.THREADS_PATH);
+        Map<Integer, DocWithTopic> docTopics = DocWithTopicParser.parse(Settings.MalletSettings.TOPICS_PATH);
 
         // test parameters
         args = new String[3];
-        args[0] = Setting.POSTS_PATH;
-        args[1] = Setting.INDEX_PATH;
-        args[2] = Setting.TAXOINDEX_PATH;
+        args[0] = Settings.POSTS_PATH;
+        args[1] = Settings.INDEX_PATH;
+        args[2] = Settings.TAXOINDEX_PATH;
 
         if (args.length < 3) {
             System.out.println("Please specify data file, index folder, taxonomy index folder in sequence.");

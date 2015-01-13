@@ -1,6 +1,6 @@
 package km.crawler.postprocess;
 
-import km.common.Setting;
+import km.common.Settings;
 import km.common.json.JsonReader;
 import km.common.json.JsonWriter;
 import km.crawler.entities.Post;
@@ -13,13 +13,13 @@ import java.util.List;
 public class SortPostPerThread {
 
 	public static void main(String[] args) throws IOException {
-		List<Post> posts = JsonReader.getList(Setting.POSTS_PATH, Post.class);
+		List<Post> posts = JsonReader.getList(Settings.POSTS_PATH, Post.class);
 		System.out.println("read done");
 		
 		Collections.sort(posts, comparator);
 		System.out.println("sort done");
 		
-		JsonWriter.saveList(posts, Setting.SORTED_POSTS_PATH);
+		JsonWriter.saveList(posts, Settings.SORTED_POSTS_PATH);
 		System.out.println("write done");
 	}
 

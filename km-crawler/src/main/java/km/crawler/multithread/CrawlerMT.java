@@ -1,6 +1,6 @@
 package km.crawler.multithread;
 
-import km.common.Setting;
+import km.common.Settings;
 import km.crawler.entities.Page;
 import km.crawler.enums.PageType;
 
@@ -13,8 +13,8 @@ public class CrawlerMT {
         
         // testing parameters
         args = new String[3];
-        args[0] = Setting.DATA_FOLDER;
-        args[1] = Setting.RAW_HTML_FOLDER;
+        args[0] = Settings.DATA_FOLDER;
+        args[1] = Settings.RAW_HTML_FOLDER;
         args[2] = "50";
         
         if (args.length < 3) {

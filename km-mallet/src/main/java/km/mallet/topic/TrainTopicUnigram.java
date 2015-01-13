@@ -3,7 +3,7 @@ package km.mallet.topic;
 import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.types.FeatureSequence;
 import cc.mallet.types.InstanceList;
-import km.common.Setting;
+import km.common.Settings;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -14,10 +14,10 @@ public class TrainTopicUnigram {
 
 	public static void main(String[] args) throws IOException {
 		// String path = "E:/project/kd/data/mallet/";
-		String inputFile = Setting.MalletSetting.POSTS_MALLET_PATH;
-		int numTopics = Setting.MalletSetting.TOPIC_CNT; // 50
-		String topicKeysFile = Setting.MalletSetting.KEYS_PATH; // Setting.MalletSetting.ROOT_FOLDER + numTopics + "_keys.txt";
-		String docTopicsFile = Setting.MalletSetting.TOPICS_PATH; // Setting.MalletSetting.ROOT_FOLDER + numTopics + "_topics.txt";
+		String inputFile = Settings.MalletSettings.POSTS_MALLET_PATH;
+		int numTopics = Settings.MalletSettings.TOPIC_CNT; // 50
+		String topicKeysFile = Settings.MalletSettings.KEYS_PATH; // Setting.MalletSetting.ROOT_FOLDER + numTopics + "_keys.txt";
+		String docTopicsFile = Settings.MalletSettings.TOPICS_PATH; // Setting.MalletSetting.ROOT_FOLDER + numTopics + "_topics.txt";
 
 		int showTopicsInterval = 100;
 		int topWords = 10;

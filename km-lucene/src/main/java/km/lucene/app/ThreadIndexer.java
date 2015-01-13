@@ -1,6 +1,6 @@
 package km.lucene.app;
 
-import km.common.Setting;
+import km.common.Settings;
 import km.common.json.JsonReader;
 import km.common.util.DateUtil;
 import km.lucene.analysis.CustomAnalyzer;
@@ -27,11 +27,11 @@ public class ThreadIndexer {
 	private final static ThreadService ts = new ThreadService();
 
 	public static void main(String[] args) throws IOException {
-		ThreadService.init(Setting.THREADS_PATH);
-		Map<Integer, Integer> docTopics = DocWithTopicParser.parseSimple(Setting.MalletSetting.TOPICS_PATH);
+		ThreadService.init(Settings.THREADS_PATH);
+		Map<Integer, Integer> docTopics = DocWithTopicParser.parseSimple(Settings.MalletSettings.TOPICS_PATH);
 
-		String postPath = Setting.SORTED_POSTS_PATH;
-		String indexPath = Setting.THINDEX_PATH;
+		String postPath = Settings.SORTED_POSTS_PATH;
+		String indexPath = Settings.THINDEX_PATH;
 
 		System.out.println(String.format("Indexing to directory '%s'...", indexPath));
 		Directory dir = FSDirectory.open(new File(indexPath));

@@ -1,6 +1,6 @@
 package km.crawler.parsers;
 
-import km.common.Setting;
+import km.common.Settings;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 public class PostParserTest {
 	public static void main(String[] args) throws IOException {
-		File file = new File(Setting.RAW_HTML_FOLDER, "textbook-garage-306/sim-rmit-2nd-hand-textbooks-marketing-bus-management-2398214.html");
+		File file = new File(Settings.RAW_HTML_FOLDER, "textbook-garage-306/sim-rmit-2nd-hand-textbooks-marketing-bus-management-2398214.html");
 		Document doc = Jsoup.parse(file, StandardCharsets.ISO_8859_1.name());
 		Element postContainer = doc.select("div#posts").first();
 		Elements posts = postContainer.select("table[id^=post38856198]");

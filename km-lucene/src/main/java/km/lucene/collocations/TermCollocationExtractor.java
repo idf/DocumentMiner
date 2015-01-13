@@ -2,7 +2,7 @@ package km.lucene.collocations;
 
 import io.deepreader.java.commons.util.Sorter;
 import io.deepreader.java.commons.util.Timestamper;
-import km.common.Setting;
+import km.common.Settings;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -72,10 +72,10 @@ public class TermCollocationExtractor {
     public static void main(String[] args) throws Exception {
         // test parameters
         args = new String[4];
-        args[0] = Setting.INDEX_PATH;
-        args[1] = Setting.THINDEX_PATH;
-        args[2] = Setting.TAXOINDEX_PATH;
-        args[3] = Setting.RakeSetting.INDEX_PATH;
+        args[0] = Settings.INDEX_PATH;
+        args[1] = Settings.THINDEX_PATH;
+        args[2] = Settings.TAXOINDEX_PATH;
+        args[3] = Settings.RakeSettings.BASIC_INDEX_PATH;
 
         if (args.length < 4) {
             System.out.println("Please specify 4 params.");

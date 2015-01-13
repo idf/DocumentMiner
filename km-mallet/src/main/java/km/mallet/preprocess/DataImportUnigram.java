@@ -4,7 +4,7 @@ import cc.mallet.pipe.*;
 import cc.mallet.pipe.iterator.CsvIterator;
 import cc.mallet.types.InstanceList;
 import cc.mallet.util.CharSequenceLexer;
-import km.common.Setting;
+import km.common.Settings;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -17,10 +17,10 @@ public class DataImportUnigram {
 	public static String defaultTokenRegex = "\\p{L}[\\p{L}\\p{P}]+\\p{L}";
 
 	public static void main(String[] args) throws IOException {
-		File inputFile = new File(Setting.MalletSetting.POSTS_PATH); // "E:/project/kd/data/mallet/posts.csv"
+		File inputFile = new File(Settings.MalletSettings.POSTS_PATH); // "E:/project/kd/data/mallet/posts.csv"
 		// File extraStopwordFile = new File(Setting.MalletSetting.ROOT_FOLDER, "extra_stopwords.txt");
-        File extraStopwordFile = new File(Setting.MalletSetting.ROOT_FOLDER, "stoplist/en.txt");
-		File outputFile = new File(Setting.MalletSetting.POSTS_MALLET_PATH);
+        File extraStopwordFile = new File(Settings.MalletSettings.ROOT_FOLDER, "stoplist/en.txt");
+		File outputFile = new File(Settings.MalletSettings.POSTS_MALLET_PATH);
 
 		Pipe instancePipe;
 

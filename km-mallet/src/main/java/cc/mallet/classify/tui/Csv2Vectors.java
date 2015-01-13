@@ -13,7 +13,7 @@ import cc.mallet.types.InstanceList;
 import cc.mallet.util.CharSequenceLexer;
 import cc.mallet.util.CommandOption;
 import cc.mallet.util.MalletLogger;
-import km.common.Setting;
+import km.common.Settings;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -79,9 +79,9 @@ public class Csv2Vectors {
 		// testing parameters
 		List<String> param = new ArrayList<>();
 		param.add("--input");
-		param.add(Setting.MalletSetting.POSTS_FOLDER+"posts_69.csv");
+		param.add(Settings.MalletSettings.POSTS_FOLDER+"posts_69.csv");
 		param.add("--output");
-		param.add(Setting.MalletSetting.OAC_69_FOLDER+"posts_bigram.mallet");
+		param.add(Settings.MalletSettings.OAC_69_FOLDER+"posts_bigram.mallet");
 		param.add("--keep-sequence");
 		param.add("--remove-stopwords");
 		param.add("TRUE");

@@ -1,6 +1,6 @@
 package km.web.filters;
 
-import km.common.Setting;
+import km.common.Settings;
 import km.lucene.services.ForumService;
 import km.lucene.services.ThreadService;
 import km.lucene.services.TopicService;
@@ -19,10 +19,10 @@ public class AppContextListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         LOGGER.log(Level.INFO, "application started");
-        ForumService.init(Setting.FORUMS_PATH);
-        ThreadService.init(Setting.THREADS_PATH);
+        ForumService.init(Settings.FORUMS_PATH);
+        ThreadService.init(Settings.THREADS_PATH);
         // TopicService.init(Setting.TopicSetting.TOPICS_PATH);
-        TopicService.init(Setting.MalletSetting.TOPICS_PATH);
+        TopicService.init(Settings.MalletSettings.TOPICS_PATH);
     }
 
 

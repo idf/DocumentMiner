@@ -1,6 +1,6 @@
 package km.lucene.app;
 
-import km.common.Setting;
+import km.common.Settings;
 import km.common.util.DateUtil;
 import km.common.util.StringUtil;
 import km.lucene.analysis.CustomAnalyzer;
@@ -36,8 +36,8 @@ public class DrillDownSearch {
 		args = new String[2];
 		// args[0] = "E:/project/kd/index";
 		// args[1] = "E:/project/kd/taxoindex";
-        args[0] = Setting.INDEX_PATH;
-        args[1] = Setting.TAXOINDEX_PATH;
+        args[0] = Settings.INDEX_PATH;
+        args[1] = Settings.TAXOINDEX_PATH;
 
 		if (args.length < 2) {
 			System.out.println("Please specify the index folder, taxonomy index folder in sequence.");

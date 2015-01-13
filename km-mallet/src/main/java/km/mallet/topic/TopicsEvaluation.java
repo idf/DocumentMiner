@@ -1,6 +1,6 @@
 package km.mallet.topic;
 
-import km.common.Setting;
+import km.common.Settings;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 public class TopicsEvaluation {
 
 	public static void main(String[] args) throws IOException {
-		String filename = Setting.MalletSetting.TOPICS_PATH; // "E:/project/kd/data/mallet/50_topics.txt";
+		String filename = Settings.MalletSettings.TOPICS_PATH; // "E:/project/kd/data/mallet/50_topics.txt";
 		int docs = 0;
 		float props = 0;
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filename)), StandardCharsets.UTF_8))) {

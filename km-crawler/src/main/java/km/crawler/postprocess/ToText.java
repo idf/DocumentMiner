@@ -2,7 +2,7 @@ package km.crawler.postprocess;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import km.common.Setting;
+import km.common.Settings;
 import km.crawler.entities.Post;
 
 import java.io.*;
@@ -11,8 +11,8 @@ import java.nio.charset.StandardCharsets;
 public class ToText {
 
 	public static void main(String[] args) throws JsonSyntaxException, IOException {
-		String sourceFilename = Setting.POSTS_PATH;
-        String targetFilename = Setting.CONTENTS_PATH;
+		String sourceFilename = Settings.POSTS_PATH;
+        String targetFilename = Settings.CONTENTS_PATH;
         toSingleFile(sourceFilename, targetFilename);
 	}
 

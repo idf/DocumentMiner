@@ -1,6 +1,6 @@
 package km.crawler.postprocess;
 
-import km.common.Setting;
+import km.common.Settings;
 import km.common.json.JsonReader;
 import km.crawler.entities.Forum;
 import km.crawler.entities.Post;
@@ -13,9 +13,9 @@ import java.util.Map;
 public class ToCSVPerForum {
 
 	public static void main(String[] args) throws IOException {
-		String forumFilename = Setting.FORUMS_PATH;
-        String postFilename = Setting.POSTS_PATH;
-		String outputFolder = Setting.MalletSetting.POSTS_FOLDER;
+		String forumFilename = Settings.FORUMS_PATH;
+        String postFilename = Settings.POSTS_PATH;
+		String outputFolder = Settings.MalletSettings.POSTS_FOLDER;
 
 		List<Forum> forums = JsonReader.getList(forumFilename, Forum.class);
 

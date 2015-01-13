@@ -3,7 +3,7 @@ package km.lucene.app.rake;
 import io.deepreader.java.commons.util.Displayer;
 import io.deepreader.java.commons.util.IOHandler;
 import io.deepreader.java.commons.util.Timestamper;
-import km.common.Setting;
+import km.common.Settings;
 import km.common.json.JsonReader;
 import km.lucene.entities.Post;
 import org.slf4j.Logger;
@@ -28,8 +28,8 @@ public class RakeIndexer {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        String postPath = Setting.SORTED_POSTS_PATH;
-        String indexPath = Setting.RakeSetting.INDEX_PATH; // storing path
+        String postPath = Settings.SORTED_POSTS_PATH;
+        String indexPath = Settings.RakeSettings.BASIC_INDEX_PATH; // storing path
         Timestamper timestamper = new Timestamper();
         Index index = new Index();
         Logger logger = LoggerFactory.getLogger(RakeIndexer.class);
@@ -42,7 +42,7 @@ public class RakeIndexer {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        IndexWriter iw = new IndexWriter(index, rake , (float) 0.8);
+        IndexWriter iw = new IndexWriter(index, rake , (float) Settings.RakeSettings.TOP_PERCENT);
         JsonReader<Post> jr = new JsonReader<Post>(postPath, Post.class);
         Post post;
 

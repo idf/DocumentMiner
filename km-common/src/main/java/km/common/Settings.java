@@ -1,13 +1,12 @@
 package km.common;
 
 /**
- * “Measuring programming progress by lines of code is like measuring aircraft building progress by weight.”
- * - Bill Gates
  * User: Danyang
  * Date: 8/27/14
  * Time: 3:50 PM
  */
-public class Setting {
+public class Settings {
+    // Raw Data
     public static final String DATA_FOLDER = "D:/Programming/java/kd/data/";
 
     public static final String POSTS_PATH = DATA_FOLDER +"posts.txt";
@@ -18,7 +17,7 @@ public class Setting {
 
     public static final String RAW_HTML_FOLDER = "D:/Programming/java/kd/html/";
 
-    public class MalletSetting {
+    public class MalletSettings {
         public static final String ROOT_FOLDER = DATA_FOLDER +"mallet/";
         public static final String POSTS_FOLDER = ROOT_FOLDER+"posts/";
         public static final String OAC_69_FOLDER = ROOT_FOLDER+"69_OAC/";
@@ -35,15 +34,18 @@ public class Setting {
     public static final String TAXOINDEX_PATH = DATA_FOLDER+"taxoindex";
     public static final String THINDEX_PATH = DATA_FOLDER+"thindex";
 
-    public class TopicSetting {
+    public class TopicSettings {
         public static final String ROOT_FOLDER = DATA_FOLDER+"topic/";
         public static final String TERMS_PATH = ROOT_FOLDER+"terms.json";
     }
 
     // RAKE
-    public class RakeSetting {
+    public class RakeSettings {
+        public static final float TOP_PERCENT = 0.8f;
         public static final String ROOT_FOLDER = DATA_FOLDER+"rake/";
-        public static final String INDEX_PATH = ROOT_FOLDER+"index.ser";
+        public static final String BASIC_INDEX_PATH = ROOT_FOLDER+"basic_index.ser";
+        public static final String THREADED_INDEX_PATH = ROOT_FOLDER+"threaded_index.ser";
+        public static final String CLUSTERED_INDEX_PATH = ROOT_FOLDER+"clustered_index.ser";
     }
 
 }

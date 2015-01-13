@@ -1,6 +1,6 @@
 package km.lucene.app;
 
-import km.common.Setting;
+import km.common.Settings;
 import km.common.util.DateUtil;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
@@ -29,9 +29,9 @@ public class Searcher {
 	public static void main(String[] args) throws IOException, ParseException {
 		// test parameters
 		args = new String[3];
-		args[0] = Setting.INDEX_PATH;
-		args[1] = Setting.THINDEX_PATH;
-		args[2] = Setting.TAXOINDEX_PATH;
+		args[0] = Settings.INDEX_PATH;
+		args[1] = Settings.THINDEX_PATH;
+		args[2] = Settings.TAXOINDEX_PATH;
 
 		if (args.length < 3) {
 			System.out.println("Please specify data file, index folder, taxonomy index folder in sequence.");
