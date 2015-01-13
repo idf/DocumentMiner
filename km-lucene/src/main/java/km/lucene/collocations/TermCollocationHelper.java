@@ -21,14 +21,21 @@ public class TermCollocationHelper {
     static float DEFAULT_MAX_TERM_POPULARITY = 1f;
     float maxTermPopularity = DEFAULT_MAX_TERM_POPULARITY;
 
-    public Map<String, CollocationScorer> filterCollocationCount(Map<String, CollocationScorer> phraseTerms, int count) {
-        return phraseTerms.entrySet()
+    public Map<String, CollocationScorer> filterCollocationCount(Map<String, CollocationScorer> map, int count) {
+        return map.entrySet()
                 .parallelStream()
-                .filter(e -> e.getValue().getCoIncidenceDocCount() > count)
+                .filter(e -> e.getValue().getCoIncidenceDocCount()>=count)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public void sortScores(Map<String, CollocationScorer> phraseTerms) {
+    public Map<String, CollocationScorer> filterDocFreq(Map<String, CollocationScorer> map, int count) {
+        return map.entrySet()
+                .parallelStream()
+                .filter(e -> e.getValue().getTermBDocFreq()>=count)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public TreeMap<String, CollocationScorer> sortScores(Map<String, CollocationScorer> phraseTerms) {
         TreeMap<String, CollocationScorer> sortedMap = Sorter.sortByValues(phraseTerms, new Sorter.ValueComparator<String, CollocationScorer>(phraseTerms) {
             @Override
             public int compare(String a, String b) {
@@ -45,11 +52,17 @@ public class TermCollocationHelper {
                 }
             }
         });
+        return sortedMap;
+    }
 
+    public void display(TreeMap<String, CollocationScorer> sortedMap) {
         Iterator it = sortedMap.entrySet().iterator();
+        int i = 0;
         while(it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            System.out.println(pair.getKey()+" = "+((CollocationScorer) pair.getValue()).getScore());
+            Map.Entry<String, CollocationScorer> pair = (Map.Entry) it.next();
+            i ++;
+            System.out.println("# "+i);
+            System.out.println(pair.getKey()+" = "+pair.getValue().getScore());
             System.out.println(pair.getKey()+" = "+pair.getValue());  // details
         }
     }

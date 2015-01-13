@@ -111,6 +111,10 @@ public class CollocationScorer {
         return coincidentalTerm;
     }
 
+    public int getTermBDocFreq() {
+        return termBDocFreq;
+    }
+
     public void setCoincidentalTerm(String coincidentalTerm) {
         this.coincidentalTerm = coincidentalTerm;
     }

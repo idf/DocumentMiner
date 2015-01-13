@@ -10,6 +10,7 @@ import rake4j.core.model.Document;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * User: Danyang
@@ -34,11 +35,11 @@ public class RakeCollocationMgr {
         return new IndexWriter(index, this.rake, (float) 0.8);
     }
 
-    public IndexWriter renewPreIndex() {
+    public void renewPreIndex(List<String> docs) {
         this.preIndex = new Index();
         IndexWriter iw = this.getIndexWriter(this.preIndex);
         this.logger.trace("Renewed preIndex");
-        return iw;
+        docs.forEach(e -> iw.addDocument(new Document(e)));
     }
 
     public Document analyze(String text) {

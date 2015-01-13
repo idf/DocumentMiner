@@ -1,5 +1,6 @@
 package km.lucene.collocations;
 
+import io.deepreader.java.commons.util.Sorter;
 import io.deepreader.java.commons.util.Timestamper;
 import km.common.Setting;
 import km.lucene.analysis.CustomAnalyzer;
@@ -107,12 +108,8 @@ public class TermCollocationExtractor {
             this.liveDocs.set(topDocs.scoreDocs[j].doc);
         }
         // Rake, search pre-process
-        rake4j.core.IndexWriter iw = this.rakeMgr.renewPreIndex();
-        for (int j = 0; j < Math.min(this.k, topDocs.totalHits); j++) {
-            Document doc = this.searcher.doc(topDocs.scoreDocs[j].doc);
-            iw.addDocument(new rake4j.core.model.Document(doc.get(FieldName.CONTENT)));
-        }
-        this.logger.trace(this.rakeMgr.preIndex.toString());
+        // rakePreprocess(topDocs);
+
         // Processing
         Map<String, CollocationScorer> termBScores = new HashMap<>();
         Map<String, CollocationScorer> phraseBScores = new HashMap<>();
@@ -123,10 +120,23 @@ public class TermCollocationExtractor {
             this.processDocForTerm(t, dpe, termBScores, phraseBScores, true);
         }
         termBScores = this.helper.filterCollocationCount(termBScores, 5);
-        // this.helper.sortScores(termBScores);
-        this.helper.sortScores(phraseBScores);
-
+        phraseBScores = this.helper.filterDocFreq(phraseBScores, 2);
+        // termBScores = this.helper.sortScores(termBScores);
+        TreeMap<String, CollocationScorer> sortedPhraseBScores = this.helper.sortScores(phraseBScores);
+        this.helper.display(Sorter.topEntries(sortedPhraseBScores, 10,
+                (e1, e2) -> Float.compare(e1.getValue().getScore(), e2.getValue().getScore())));
         timestamper.end();
+    }
+
+    private void rakePreprocess(TopDocs topDocs) throws IOException {
+        List<String> docs = new ArrayList<>();
+        for (int j = 0; j < Math.min(this.k, topDocs.totalHits); j++) {
+            Document doc = this.searcher.doc(topDocs.scoreDocs[j].doc);
+            docs.add(doc.get(FieldName.CONTENT));
+        }
+        this.rakeMgr.renewPreIndex(docs);
+        this.logger.debug("pre-processing");
+        this.logger.debug(this.rakeMgr.preIndex.toString());
     }
 
     /**
@@ -184,7 +194,7 @@ public class TermCollocationExtractor {
                                    Map<String, CollocationScorer> phraseBScores,
                                    boolean top) throws IOException {
         int docId = dpeA.docID();
-        this.logger.debug("Processing docId: "+docId);
+        this.logger.trace("Processing docId: "+docId);
 
         // restore the structure
         Terms tv = this.reader.getTermVector(docId, this.fieldName);
