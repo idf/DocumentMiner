@@ -54,21 +54,6 @@ public class TermCollocationExtractor {
     // delegation
     TermCollocationHelper helper = new TermCollocationHelper();
 
-    public TermCollocationExtractor(String indexPath, String thindexPath, String taxoPath, String rakeIndexPath) throws IOException, ClassNotFoundException, URISyntaxException {
-        this.reader = DirectoryReader.open(FSDirectory.open(new File(thindexPath)));
-        this.searcher = new IndexSearcher(this.reader);
-
-        Fields fields = MultiFields.getFields(this.reader);
-        Terms terms = fields.terms(this.fieldName);
-        TermsEnum iterator = terms.iterator(null);
-        BytesRef byteRef = null;
-        while((byteRef = iterator.next()) != null) {
-            this.totalVocabulary++;
-        }
-        this.liveDocs = new BitSet(this.reader.numDocs());
-        this.rakeMgr = new RakeCollocationMgr(rakeIndexPath);
-    }
-
     public static void main(String[] args) throws Exception {
         // test parameters
         args = new String[4];
@@ -90,6 +75,22 @@ public class TermCollocationExtractor {
         TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, thindexPath, taxoPath, rakeIndexPath);
         tce.search("ntu");
     }
+
+    public TermCollocationExtractor(String indexPath, String thindexPath, String taxoPath, String rakeIndexPath) throws IOException, ClassNotFoundException, URISyntaxException {
+        this.reader = DirectoryReader.open(FSDirectory.open(new File(thindexPath)));
+        this.searcher = new IndexSearcher(this.reader);
+
+        Fields fields = MultiFields.getFields(this.reader);
+        Terms terms = fields.terms(this.fieldName);
+        TermsEnum iterator = terms.iterator(null);
+        BytesRef byteRef = null;
+        while((byteRef = iterator.next()) != null) {
+            this.totalVocabulary++;
+        }
+        this.liveDocs = new BitSet(this.reader.numDocs());
+        this.rakeMgr = new RakeCollocationMgr(rakeIndexPath);
+    }
+
 
     public void search(String queryString) throws ParseException, IOException, URISyntaxException {
         Timestamper timestamper = new Timestamper();
@@ -120,7 +121,7 @@ public class TermCollocationExtractor {
             this.processDocForTerm(t, dpe, termBScores, phraseBScores, true);
         }
         termBScores = this.helper.filterCollocationCount(termBScores, 5);
-        phraseBScores = this.helper.filterDocFreq(phraseBScores, 2);
+        phraseBScores = this.helper.filterDocFreq(phraseBScores, 5);
         // termBScores = this.helper.sortScores(termBScores);
         TreeMap<String, CollocationScorer> sortedPhraseBScores = this.helper.sortScores(phraseBScores);
         this.helper.display(Sorter.topEntries(sortedPhraseBScores, 10,

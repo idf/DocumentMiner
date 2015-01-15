@@ -48,4 +48,11 @@ public class Settings {
         public static final String CLUSTERED_INDEX_PATH = ROOT_FOLDER+"clustered_index.ser";
     }
 
+    // CLUTO
+    public class ClutoSettings {
+        public static final String ROOT_FOLDER = DATA_FOLDER+"cluto/";
+        public static final String DOCS_MAT = ROOT_FOLDER+"docs.mat";
+
+    }
+
 }

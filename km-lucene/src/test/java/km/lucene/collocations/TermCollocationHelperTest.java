@@ -29,7 +29,7 @@ public class TermCollocationHelperTest {
         Map<String, Integer> collect = map.entrySet()
                 .parallelStream()
                 .filter(e -> e.getValue() > 1)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
 
         System.out.println(Displayer.display(collect));
 
@@ -47,7 +47,7 @@ public class TermCollocationHelperTest {
         map1 = map1.entrySet()
                 .parallelStream()
                 .filter(e->e.getValue().cnt>1)
-                .collect(Collectors.toMap(e->e.getKey(), e->e.getValue()));
+                .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
         System.out.println(map1);
     }
 }

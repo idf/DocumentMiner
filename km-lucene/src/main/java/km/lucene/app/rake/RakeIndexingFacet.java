@@ -23,7 +23,7 @@ public class RakeIndexingFacet {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        new RakeIndexingFacet().threadedIndex();
+        new RakeIndexingFacet().threadedIndexing();
     }
 
 
@@ -38,7 +38,7 @@ public class RakeIndexingFacet {
         indexer.run();
     }
 
-    private void threadedIndex() throws IOException {
+    private void threadedIndexing() throws IOException {
         JsonReader<Post> jr = new JsonReader<Post>(postPath, Post.class);
         String indexPath = Settings.RakeSettings.THREADED_INDEX_PATH;
 
@@ -64,7 +64,7 @@ public class RakeIndexingFacet {
         indexer.run();
     }
 
-    private void clustered() throws IOException {
+    private void clusteredIndexing() throws IOException {
         // Cluto interface
 
 

@@ -25,14 +25,14 @@ public class TermCollocationHelper {
         return map.entrySet()
                 .parallelStream()
                 .filter(e -> e.getValue().getCoIncidenceDocCount()>=count)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public Map<String, CollocationScorer> filterDocFreq(Map<String, CollocationScorer> map, int count) {
         return map.entrySet()
                 .parallelStream()
                 .filter(e -> e.getValue().getTermBDocFreq()>=count)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public TreeMap<String, CollocationScorer> sortScores(Map<String, CollocationScorer> phraseTerms) {

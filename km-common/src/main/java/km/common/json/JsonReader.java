@@ -29,13 +29,7 @@ public class JsonReader<T> {
 	
 	public static <T> List<T> getList(String filename, Class<T> cls) throws IOException {
 		JsonReader<T> jr = new JsonReader<>(filename, cls);
-		List<T> tList = new ArrayList<>();
-		T t;
-		while ((t=jr.next()) != null) {
-			tList.add(t);
-		}
-		jr.close();
-		return tList;
+		return jr.getList();
 	}
 
 	public List<T> getList() throws IOException {
