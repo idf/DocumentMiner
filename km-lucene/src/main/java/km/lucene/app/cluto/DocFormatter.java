@@ -26,28 +26,44 @@ public class DocFormatter {
     }
     public void index2matrix() throws IOException {
         IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(Settings.THINDEX_PATH)));
-        int[][] mat = getVectorSpaceMatrix(reader, FieldName.CONTENT);
-        IOHandler.write(Settings.ClutoSettings.DOCS_MAT, Displayer.display(mat));
+        String ret = getVectorSpaceMatrix(reader, FieldName.CONTENT);
+        IOHandler.write(Settings.ClutoSettings.DOCS_MAT, ret);
     }
 
     /**
-     * Future: streaming
+     * TODO: streaming
+     * 12GB Barely helps
+     * VM Options -Xmx12g -d64
+     *
+     * The non-zero entries of each row are specified as a space-separated list of pairs. Each pair contains the column
+     * number followed by the value for that particular column (i.e., feature)
+     *
      * @param reader
      * @param fieldName
      * @return
      * @throws IOException
      */
-    private int[][] getVectorSpaceMatrix(IndexReader reader, String fieldName) throws IOException {
+    String getVectorSpaceMatrix(IndexReader reader, String fieldName) throws IOException {
         Fields fields = MultiFields.getFields(reader);
         Terms terms = fields.terms(fieldName);
         int m = 0;
         TermsEnum te = terms.iterator(null);
         while(te.next()!=null)
             m++;
+        assert m>0;
+
         int n = reader.numDocs();
-        int[][] mat = new int[n][m];  // n*m
+        int[][] mat = new int[n][2*m];  // n*m
+        // TODO debug 1073741819
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<m; j++) {
+                mat[i][2*j] = 1;
+                mat[i][2*j+1] = 0;
+            }
+        }
 
         int i=0;
+        int cntNonZero = 0;
         te = terms.iterator(te);
         BytesRef t;
         while((t=te.next())!=null) {
@@ -55,10 +71,13 @@ public class DocFormatter {
             while(de.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
                 int docId = de.docID();
                 int tf = de.freq();
-                mat[docId][i] = tf;
+                mat[docId][2*i] = i+1;
+                mat[docId][2*i+1] = tf;
+                if(tf!=0)
+                    cntNonZero++;
             }
             i++;
         }
-        return mat;
+        return String.format("%d %d %d\n", n, m, cntNonZero)+Displayer.display(mat);
     }
 }
