@@ -1,6 +1,5 @@
 package km.lucene.app.cluto;
 
-import io.deepreader.java.commons.util.Displayer;
 import io.deepreader.java.commons.util.IOHandler;
 import km.common.Settings;
 import km.lucene.constants.FieldName;
@@ -31,8 +30,8 @@ public class DocFormatter {
     }
 
     /**
-     * TODO: streaming
-     * 12GB Barely helps
+     * 12GB Barely helps for sparse matrix with all entries
+     * 4GB is more than sufficient for sparse matrix with non-zero entries
      * VM Options -Xmx12g -d64
      *
      * The non-zero entries of each row are specified as a space-separated list of pairs. Each pair contains the column
@@ -51,14 +50,14 @@ public class DocFormatter {
         while(te.next()!=null)
             m++;
         assert m>0;
-
+        int max_col = Integer.MAX_VALUE;  // for debug
+        m = Math.min(m, max_col);
         int n = reader.numDocs();
         int[][] mat = new int[n][2*m];  // n*m
-        // TODO debug 1073741819
         for(int i=0; i<n; i++) {
             for(int j=0; j<m; j++) {
-                mat[i][2*j] = 1;
-                mat[i][2*j+1] = 0;
+                mat[i][2*j] = j+1;
+                mat[i][2*j+1] = 0; // must be non-zero entries.
             }
         }
 
@@ -66,7 +65,7 @@ public class DocFormatter {
         int cntNonZero = 0;
         te = terms.iterator(te);
         BytesRef t;
-        while((t=te.next())!=null) {
+        while((t=te.next())!=null && i<max_col) {
             DocsEnum de = te.docs(null, null, DocsEnum.FLAG_FREQS);
             while(de.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
                 int docId = de.docID();
@@ -78,6 +77,33 @@ public class DocFormatter {
             }
             i++;
         }
-        return String.format("%d %d %d\n", n, m, cntNonZero)+Displayer.display(mat);
+        return String.format("%d %d %d\n", n, m, cntNonZero)+display(mat);
+    }
+
+    /**
+     * Get all non-zero entries
+     * for sparse matrix, it can significantly reduce the file size
+     * @param mat
+     * @return
+     */
+    String display(int[][] mat) {
+        StringBuilder sb = new StringBuilder();  // faster than StringBuffer
+        int n = mat.length;
+        if(n==0)
+            return null;
+        int m = mat[0].length/2;
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<m; j++) {
+                if(mat[i][2*j+1]!=0) {
+                    sb.append(mat[i][2*j])
+                            .append(" ")
+                            .append(mat[i][2*j+1]);
+                    if(j<m-1)
+                        sb.append(" ");
+                }
+            }
+            sb.append("\n");
+        }
+        return sb.toString().trim();
     }
 }
