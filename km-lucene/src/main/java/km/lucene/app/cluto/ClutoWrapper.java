@@ -1,13 +1,11 @@
 package km.lucene.app.cluto;
 
 import io.deepreader.java.commons.util.CmdUtils;
-import io.deepreader.java.commons.util.DateUtils;
 import io.deepreader.java.commons.util.Displayer;
 import km.common.Settings;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,21 +23,19 @@ public class ClutoWrapper {
 
     public void run() throws IOException {
         File mat = new File(Settings.ClutoSettings.DOCS_MAT);
-        String cmd = buildCmd(getDefaultKwargs(), mat, 10);
+        String cmd = buildCmd(getDefaultKwargs(), mat, 226);
         System.out.println(cmd);
         CmdUtils.exec(cmd);
     }
 
     Map<String, String> getDefaultKwargs() {
         Map<String, String> kwargs = new HashMap<>();
-        String clustfile = Settings.ClutoSettings.ROOT_FOLDER+String.format("docs-output-%d.txt", DateUtils.getDayAsReadableInt(Calendar.getInstance()));
         // = in between
         kwargs.put("-clmethod", "rbr");
         kwargs.put("-sim", "cos");
         kwargs.put("-crfun", "h2");
         kwargs.put("-ntrials", "10");
-        kwargs.put("-clustfile", clustfile);
-        // kwargs.put("", "");
+        kwargs.put("-clustfile", Settings.ClutoSettings.OUTPUT);
         // kwargs.put("", "");
         // kwargs.put("-plotformat", "gif");
         return kwargs;

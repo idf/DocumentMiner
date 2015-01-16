@@ -53,6 +53,7 @@ public class Settings {
         public static final String ROOT_FOLDER = DATA_FOLDER+"cluto/";
         public static final String DOCS_MAT = ROOT_FOLDER+"docs.mat";
         public static final String VCLUSTER = "D:/Programming/java/kd/cluto/cluto-2.1.2/MSWIN-x86_64/vcluster.exe";
+        public static final String OUTPUT = ROOT_FOLDER+"docs-output.txt";
     }
 
 }
