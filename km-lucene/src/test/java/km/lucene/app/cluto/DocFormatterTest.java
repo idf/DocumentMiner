@@ -31,9 +31,6 @@ public class DocFormatterTest {
         TermsEnum te = terms.iterator(null);
         while(te.next()!=null)
             m ++;
-
-
-
         System.out.println(m);
     }
 

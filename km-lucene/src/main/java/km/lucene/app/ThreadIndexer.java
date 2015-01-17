@@ -83,7 +83,7 @@ public class ThreadIndexer {
 			fieldTypeDoc.setIndexed(true);
 			fieldTypeDoc.setStored(true);  //for Rake to re-analyze the content
 
-			doc.add(new Field(FieldName.CONTENT, post.getContent(), fieldTypeDoc));
+			doc.add(new Field(FieldName.CONTENT, post.getContent(), fieldTypeDoc));  // multiple contents under the same field
 			doc.add(new IntField(FieldName.STOREY, post.getStorey(), Field.Store.YES));
 
 			String poster = post.getPoster().isEmpty() ? "Anonymous" : post.getPoster();

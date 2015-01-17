@@ -12,6 +12,7 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.FSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.LuceneUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +27,9 @@ import java.util.stream.Stream;
  * User: Danyang
  * Date: 12/30/2014
  * Time: 20:34
+ *
+ * Notice:
+ * 1. Added delimiters between documents since not considering offset information.
  */
 public class RakeIndexingFacet {
     String postPath = Settings.SORTED_POSTS_PATH;
@@ -36,7 +40,7 @@ public class RakeIndexingFacet {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        new RakeIndexingFacet().threadedIndexing();
+        new RakeIndexingFacet().clusteredIndexing();
     }
 
 
@@ -95,15 +99,15 @@ public class RakeIndexingFacet {
         String rakeIndexPath = Settings.RakeSettings.CLUSTERED_INDEX_PATH;
         IndexReader reader =  DirectoryReader.open(FSDirectory.open(new File(indexPath)));
         for(Map.Entry<Integer, List<Integer>> e: cluster2docs.entrySet()) {
-            if(e.getKey()==-1) { // unclustered
+            if(e.getKey()==-1) {  // unclustered
                 for(Integer i: e.getValue()) {
-                    lst.add(reader.document(i).get(FieldName.CONTENT));  // TODO original document text, 924256<<41903447
+                    lst.add(LuceneUtils.getAllStringValues(reader.document(i), FieldName.CONTENT, "\n"));
                 }
             }
             else {
                 StringBuilder sb = new StringBuilder();
                 for(Integer i: e.getValue()) {
-                    sb.append(reader.document(i).get(FieldName.CONTENT)).append("\n");
+                    sb.append(lst.add(LuceneUtils.getAllStringValues(reader.document(i), FieldName.CONTENT, "\n")));
                 }
                 lst.add(sb.toString());
             }
