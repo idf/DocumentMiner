@@ -17,16 +17,23 @@ import java.io.IOException;
  *
  * Similar to Stack Overflow: Generate Term-Document matrix using Lucene 4.4
  */
-public class DocFormatter {
-    public static void main(String[] args) throws IOException {
+public class DocFormatter implements Runnable {
+    public static void main(String[] args) {
         DocFormatter docFormatter = new DocFormatter();
-        docFormatter.index2matrix();
+        docFormatter.run();
 
     }
-    public void index2matrix() throws IOException {
-        IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(Settings.THINDEX_PATH)));
-        String ret = getVectorSpaceMatrix(reader, FieldName.CONTENT);
-        IOHandler.write(Settings.ClutoSettings.DOCS_MAT, ret);
+
+    @Override
+    public void run() {
+        try {
+            IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(Settings.THINDEX_PATH)));
+            String ret = getVectorSpaceMatrix(reader, FieldName.CONTENT);
+            IOHandler.write(Settings.ClutoSettings.DOCS_MAT, ret);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

@@ -7,14 +7,11 @@ import km.common.Settings;
 import km.common.json.JsonReader;
 import km.lucene.constants.FieldName;
 import km.lucene.entities.Post;
-import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.store.FSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.LuceneUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,7 +28,7 @@ import java.util.stream.Stream;
  * Notice:
  * 1. Added delimiters between documents since not considering offset information.
  */
-public class RakeIndexingFacet {
+public class RakeIndexingFacet implements Runnable {
     String postPath = Settings.SORTED_POSTS_PATH;
     private Logger logger = LoggerFactory.getLogger(RakeIndexingFacet.class);
     /**
@@ -39,10 +36,19 @@ public class RakeIndexingFacet {
      * @param args
      * @throws IOException
      */
-    public static void main(String[] args) throws IOException {
-        new RakeIndexingFacet().clusteredIndexing();
+    public static void main(String[] args) {
+        new RakeIndexingFacet().run();
     }
 
+    @Override
+    public void run() {
+        try {
+            clusteredIndexing();
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private void basicIndexing() throws IOException {
         JsonReader<Post> jr = new JsonReader<Post>(postPath, Post.class);
@@ -97,7 +103,7 @@ public class RakeIndexingFacet {
         List<String> lst = new ArrayList<>();
         String indexPath = Settings.THINDEX_PATH;
         String rakeIndexPath = Settings.RakeSettings.CLUSTERED_INDEX_PATH;
-        IndexReader reader =  DirectoryReader.open(FSDirectory.open(new File(indexPath)));
+        IndexReader reader =  LuceneUtils.getReader(indexPath);
         for(Map.Entry<Integer, List<Integer>> e: cluster2docs.entrySet()) {
             if(e.getKey()==-1) {  // unclustered
                 for(Integer i: e.getValue()) {

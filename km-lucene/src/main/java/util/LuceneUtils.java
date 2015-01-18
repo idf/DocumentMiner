@@ -1,7 +1,13 @@
 package util;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.store.FSDirectory;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * User: Danyang
@@ -15,5 +21,9 @@ public class LuceneUtils {
             sb.append(field.stringValue()).append(delimiter);
         }
         return sb.toString();
+    }
+
+    public static IndexReader getReader(String path) throws IOException {
+        return DirectoryReader.open(FSDirectory.open(new File(path)));
     }
 }

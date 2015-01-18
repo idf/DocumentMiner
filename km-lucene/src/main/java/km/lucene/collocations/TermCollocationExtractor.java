@@ -14,13 +14,12 @@ import org.apache.lucene.index.collocations.TermFilter;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
-import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.LuceneUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -77,7 +76,7 @@ public class TermCollocationExtractor {
     }
 
     public TermCollocationExtractor(String indexPath, String thindexPath, String taxoPath, String rakeIndexPath) throws IOException, ClassNotFoundException, URISyntaxException {
-        this.reader = DirectoryReader.open(FSDirectory.open(new File(thindexPath)));
+        this.reader = LuceneUtils.getReader(thindexPath);
         this.searcher = new IndexSearcher(this.reader);
 
         Fields fields = MultiFields.getFields(this.reader);

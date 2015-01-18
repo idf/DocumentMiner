@@ -15,17 +15,21 @@ import java.util.Map;
  * Time: 20:29
  *
  */
-public class ClutoWrapper {
+public class ClutoWrapper implements Runnable {
     public static void main(String[] args) throws Exception {
         ClutoWrapper clutoWrapper = new ClutoWrapper();
         clutoWrapper.run();
     }
 
-    public void run() throws IOException {
+    @Override
+    public void run() {
         File mat = new File(Settings.ClutoSettings.DOCS_MAT);
         String cmd = buildCmd(getDefaultKwargs(), mat, 226);
-        System.out.println(cmd);
-        CmdUtils.exec(cmd);
+        try {
+            CmdUtils.exec(cmd);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     Map<String, String> getDefaultKwargs() {
