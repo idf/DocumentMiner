@@ -91,7 +91,7 @@ public class CollocationScorer {
     }
 
     /**
-     * Relative Entropy
+     * Relative Entropy: Kullback–Leibler divergence
      * score = P(x) ln(P(x)/P(y))
      * P(x) = coincidenceDocCount / df_x
      * P(y) = df_y / DF
