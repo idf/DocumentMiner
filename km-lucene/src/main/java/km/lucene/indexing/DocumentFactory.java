@@ -1,6 +1,6 @@
 package km.lucene.indexing;
 
-import km.common.util.DateUtil;
+import io.deepreader.java.commons.util.DateUtils;
 import km.lucene.constants.FieldName;
 import km.lucene.entities.DocWithTopic;
 import km.lucene.entities.Post;
@@ -28,13 +28,13 @@ public class DocumentFactory {
 		doc.add(new IntField(FieldName.ID, post.getId(), Field.Store.YES));
 
 		String postDateStr = post.getPostDate();
-		Date postDate = DateUtil.parse(postDateStr, "dd-MM-yyyy, hh:mm a");
+		Date postDate = DateUtils.parse(postDateStr, "dd-MM-yyyy, hh:mm a");
 		if (postDate == null) {
 			throw new IOException("Invalid date format of " + postDateStr);
 		}
 		long postDateLong = postDate.getTime();
 		doc.add(new LongField(FieldName.POST_DATE, postDateLong, Field.Store.YES));
-		postDateStr = DateUtil.format(postDate, "yyyy-MM");
+		postDateStr = DateUtils.format(postDate, "yyyy-MM");
 		String yearStr = postDateStr.substring(0, 4);
 		String monthStr = postDateStr.substring(5, 7);
 		doc.add(new FacetField(FieldName.POST_YEAR, yearStr));

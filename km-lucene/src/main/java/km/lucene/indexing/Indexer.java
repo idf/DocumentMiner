@@ -1,13 +1,12 @@
 package km.lucene.indexing;
 
+import io.deepreader.java.commons.util.Displayer;
 import km.common.Settings;
 import km.common.json.JsonReader;
-import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.entities.DocWithTopic;
 import km.lucene.entities.Post;
 import km.lucene.services.DocWithTopicParser;
 import km.lucene.services.ThreadService;
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
@@ -21,17 +20,15 @@ import org.apache.lucene.util.Version;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Map;
 
-public class Indexer {
-
+public class Indexer extends AbstractIndexer {
     private final static FacetsConfig config = new FacetsConfig();
+    private String postPath;
+    private String indexPath;
+    private String taxoPath;
 
-    public static void main(String[] args) throws IOException, ParseException {
-        ThreadService.init(Settings.THREADS_PATH);
-        Map<Integer, DocWithTopic> docTopics = DocWithTopicParser.parse(Settings.MalletSettings.TOPICS_PATH);
-
+    public static void main(String[] args) throws IOException {
         // test parameters
         args = new String[3];
         args[0] = Settings.POSTS_PATH;
@@ -43,31 +40,45 @@ public class Indexer {
             System.exit(1);
         }
 
-        String postPath = args[0];
-        String indexPath = args[1];
-        String taxoPath = args[2];
+        Indexer indexr = new Indexer(args[0], args[1], args[2]);
+        indexr.run();
+    }
 
-        System.out.println(String.format("Indexing to directory '%s'...", indexPath));
-        Directory dir = FSDirectory.open(new File(indexPath));
+    public Indexer(String postPath, String indexPath, String taxoPath) {
+        this.postPath = postPath;
+        this.indexPath = indexPath;
+        this.taxoPath = taxoPath;
+    }
 
-        Analyzer analyzer = new CustomAnalyzer(Version.LUCENE_48);
-        IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_48, analyzer);
-        iwc.setOpenMode(OpenMode.CREATE);
-        IndexWriter indexWriter = new IndexWriter(dir, iwc);
-        TaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(FSDirectory.open(new File(taxoPath)));
+    @Override
+    public void run() {
+        try {
+            ThreadService.init(Settings.THREADS_PATH);
+            Map<Integer, DocWithTopic> docTopics = DocWithTopicParser.parse(Settings.MalletSettings.TOPICS_PATH);
+            logger.info(String.format("Indexing to directory '%s'...", indexPath));
+            Directory dir = FSDirectory.open(new File(indexPath));
 
-        JsonReader<Post> jr = new JsonReader<Post>(postPath, Post.class);
-        Post post;
-        int i = 1;
-        while ((post = jr.next()) != null) {
-            Document doc = DocumentFactory.create(post, docTopics);
-            indexWriter.addDocument(config.build(taxoWriter, doc));
-            System.out.println(String.format("added post %d, %d", (i++), post.getId()));
+            IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_48, analyzer);
+            iwc.setOpenMode(OpenMode.CREATE);
+            IndexWriter indexWriter = new IndexWriter(dir, iwc);
+            TaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(FSDirectory.open(new File(taxoPath)));
+
+            JsonReader<Post> jr = new JsonReader<Post>(postPath, Post.class);
+            Post post;
+            int i = 1;
+            while ((post = jr.next()) != null) {
+                Document doc = DocumentFactory.create(post, docTopics);
+                indexWriter.addDocument(config.build(taxoWriter, doc));
+                logger.info(String.format("added post %d, %d", (i++), post.getId()));
+            }
+            jr.close();
+
+            logger.info(String.format("Number of files indexed: %d", indexWriter.numDocs()));
+            indexWriter.close();
+            taxoWriter.close();
         }
-        jr.close();
-
-        System.out.println(String.format("Number of files indexed: %d", indexWriter.numDocs()));
-        indexWriter.close();
-        taxoWriter.close();
+        catch (IOException e) {
+            logger.error(Displayer.display(e));
+        }
     }
 }

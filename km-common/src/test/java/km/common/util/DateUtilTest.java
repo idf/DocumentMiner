@@ -1,12 +1,10 @@
 package km.common.util;
 
+import io.deepreader.java.commons.util.DateUtils;
+import org.junit.*;
+
 import java.util.Calendar;
 import java.util.Date;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 public class DateUtilTest {
 
@@ -34,7 +32,7 @@ public class DateUtilTest {
         System.out.println("testParse");
         String dateStr = "Apr 2010";
         String format = "MMM yyyy";
-        Date date = DateUtil.parse(dateStr, format);
+        Date date = DateUtils.parse(dateStr, format);
         System.out.println(date);
     }
     
@@ -44,7 +42,7 @@ public class DateUtilTest {
         Calendar c = Calendar.getInstance();
         c.set(2014, 11, 1);
         Date date1 = c.getTime();
-        Date date2 = DateUtil.addMonth(date1, 1);
+        Date date2 = DateUtils.addMonth(date1, 1);
         System.out.println(date1 + " - " + date2);
     }
     
@@ -54,7 +52,7 @@ public class DateUtilTest {
         Calendar c = Calendar.getInstance();
         c.set(2014, 11, 31);
         Date date1 = c.getTime();
-        Date date2 = DateUtil.addDay(date1, 1);
+        Date date2 = DateUtils.addDay(date1, 1);
         System.out.println(date1 + " - " + date2);
     }
 }

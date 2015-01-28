@@ -33,6 +33,7 @@ public class Settings {
     public static final String INDEX_PATH = DATA_FOLDER+"index";
     public static final String TAXOINDEX_PATH = DATA_FOLDER+"taxoindex";
     public static final String THINDEX_PATH = DATA_FOLDER+"thindex";
+    public static final String POSTINDEX_PATH = DATA_FOLDER+"postindex";
 
     public class TopicSettings {
         public static final String ROOT_FOLDER = DATA_FOLDER+"topic/";

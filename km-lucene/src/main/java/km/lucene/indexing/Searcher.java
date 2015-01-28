@@ -1,7 +1,7 @@
 package km.lucene.indexing;
 
+import io.deepreader.java.commons.util.DateUtils;
 import km.common.Settings;
-import km.common.util.DateUtil;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
 import org.apache.lucene.analysis.Analyzer;
@@ -59,15 +59,15 @@ public class Searcher {
 		Query threadTitle = parserThreadTitle.parse("nus");
 
 		//post date
-		Date dateFrom = DateUtil.parse("2014-01-01", "yyyy-MM-dd");
-		Date dateTo = DateUtil.parse("2014-08-31", "yyyy-MM-dd");
+		Date dateFrom = DateUtils.parse("2014-01-01", "yyyy-MM-dd");
+		Date dateTo = DateUtils.parse("2014-08-31", "yyyy-MM-dd");
 		Long start = null;
 		Long end = null;
 		if (dateFrom != null) {
 			start = dateFrom.getTime();
 		}
 		if (dateTo != null) {
-			end = DateUtil.addDay(dateTo, 1).getTime() - 1;
+			end = DateUtils.addDay(dateTo, 1).getTime() - 1;
 		}
 		Query postDate = NumericRangeQuery.newLongRange(FieldName.POST_DATE, start, end, true, true);
 		

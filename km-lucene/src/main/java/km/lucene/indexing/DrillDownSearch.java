@@ -1,7 +1,7 @@
 package km.lucene.indexing;
 
+import io.deepreader.java.commons.util.DateUtils;
 import km.common.Settings;
-import km.common.util.DateUtil;
 import km.common.util.StringUtil;
 import km.lucene.analysis.CustomAnalyzer;
 import org.apache.lucene.analysis.Analyzer;
@@ -210,7 +210,7 @@ public class DrillDownSearch {
 			int id = Integer.parseInt(doc.get("id"));
 			long postDate = Long.parseLong(doc.get("postDate"));
 			Date date = new Date(postDate);
-			String dateStr = DateUtil.format(date, "yyyy-MM-dd HH:mm:ss");
+			String dateStr = DateUtils.format(date, "yyyy-MM-dd HH:mm:ss");
 			String content = doc.get("content");
 			content = StringUtil.toFixLengh(content, 50);
 			System.out.println(String.format("[%d] %d, %d, %s, %.2f, %s", (i + 1), forumId, id, dateStr, score, content));
