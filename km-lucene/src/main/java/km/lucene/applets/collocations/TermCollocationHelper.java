@@ -1,4 +1,4 @@
-package km.lucene.collocations;
+package km.lucene.applets.collocations;
 
 import io.deepreader.java.commons.util.Sorter;
 import org.apache.lucene.index.collocations.CollocationScorer;

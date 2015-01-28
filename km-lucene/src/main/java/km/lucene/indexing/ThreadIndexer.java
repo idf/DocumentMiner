@@ -1,4 +1,4 @@
-package km.lucene.app;
+package km.lucene.indexing;
 
 import km.common.Settings;
 import km.common.json.JsonReader;

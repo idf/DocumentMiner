@@ -1,11 +1,10 @@
-package km.lucene.app;
+package km.lucene.indexing;
 
 import km.common.Settings;
 import km.common.json.JsonReader;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.entities.DocWithTopic;
 import km.lucene.entities.Post;
-import km.lucene.index.DocumentFactory;
 import km.lucene.services.DocWithTopicParser;
 import km.lucene.services.ThreadService;
 import org.apache.lucene.analysis.Analyzer;

@@ -1,4 +1,4 @@
-package km.lucene.collocations;
+package km.lucene.applets.collocations;
 
 import io.deepreader.java.commons.util.Sorter;
 import io.deepreader.java.commons.util.Timestamper;

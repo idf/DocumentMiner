@@ -1,4 +1,4 @@
-package km.lucene.app.rake;
+package km.lucene.applets.rake;
 
 import io.deepreader.java.commons.util.Displayer;
 import io.deepreader.java.commons.util.IOHandler;

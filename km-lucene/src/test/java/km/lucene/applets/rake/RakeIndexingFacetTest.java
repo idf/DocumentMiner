@@ -1,4 +1,4 @@
-package km.lucene.app.rake;
+package km.lucene.applets.rake;
 
 import org.junit.After;
 import org.junit.Before;

@@ -1,4 +1,4 @@
-package km.lucene.collocations;
+package km.lucene.applets.collocations;
 
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.LowerCaseTokenizer;

@@ -1,4 +1,4 @@
-package km.lucene.app.cluto;
+package km.lucene.applets.cluto;
 
 import io.deepreader.java.commons.util.CmdUtils;
 import io.deepreader.java.commons.util.Displayer;

@@ -1,4 +1,4 @@
-package km.lucene.app.cluto;
+package km.lucene.applets.cluto;
 
 import km.common.Settings;
 import km.lucene.constants.FieldName;
@@ -36,6 +36,6 @@ public class DocFormatterTest {
 
     @Test
     public void testIndex2matrix() throws Exception {
-        new DocFormatter().index2matrix();
+
     }
 }

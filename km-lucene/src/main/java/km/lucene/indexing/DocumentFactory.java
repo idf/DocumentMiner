@@ -1,4 +1,4 @@
-package km.lucene.index;
+package km.lucene.indexing;
 
 import km.common.util.DateUtil;
 import km.lucene.constants.FieldName;
