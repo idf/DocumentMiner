@@ -50,8 +50,8 @@ public class RakeIndexingFacet implements Runnable {
         }
     }
 
-    private void basicIndexing() throws IOException {
-        JsonReader<Post> jr = new JsonReader<Post>(postPath, Post.class);
+    public void basicIndexing() throws IOException {
+        JsonReader<Post> jr = new JsonReader<>(postPath, Post.class);
         String indexPath = Settings.RakeSettings.BASIC_INDEX_PATH;
         Iterator<String> itr = jr.getList().parallelStream()
                 .map(e -> e.getContent())
@@ -61,8 +61,8 @@ public class RakeIndexingFacet implements Runnable {
         indexer.run();
     }
 
-    private void threadedIndexing() throws IOException {
-        JsonReader<Post> jr = new JsonReader<Post>(postPath, Post.class);
+    public void threadedIndexing() throws IOException {
+        JsonReader<Post> jr = new JsonReader<>(postPath, Post.class);
         String indexPath = Settings.RakeSettings.THREADED_INDEX_PATH;
 
         List<String> lst = new ArrayList<>();
@@ -87,22 +87,28 @@ public class RakeIndexingFacet implements Runnable {
         indexer.run();
     }
 
+
     /**
      * Notice the Cluto output file format as specified in Cluto manual
      * Cluster -1 means no group
-     * @throws IOException
+     * @throws java.io.IOException
      */
-    private void clusteredIndexing() throws IOException {
+    public void clusteredIndexing() throws IOException {
+        clusteredIndexing(Settings.ClutoSettings.OUTPUT,
+                Settings.THINDEX_PATH,
+                Settings.RakeSettings.CLUSTERED_INDEX_PATH
+        );
+    }
+
+    public void clusteredIndexing(String clusterPath, String indexPath, String rakeIndexPath) throws IOException {
         // Cluto interface
-        Stream<String> lines = IOHandler.getLines(Settings.ClutoSettings.OUTPUT);
+        Stream<String> lines = IOHandler.getLines(clusterPath);
         List<Integer> nums = lines.map(Integer::parseInt).collect(Collectors.toList());
         Map<Integer, List<Integer>> cluster2docs = Transformer.groupListToMap(nums);
         logger.trace(Displayer.display(cluster2docs));
 
         // indexing
         List<String> lst = new ArrayList<>();
-        String indexPath = Settings.THINDEX_PATH;
-        String rakeIndexPath = Settings.RakeSettings.CLUSTERED_INDEX_PATH;
         IndexReader reader =  LuceneUtils.getReader(indexPath);
         for(Map.Entry<Integer, List<Integer>> e: cluster2docs.entrySet()) {
             if(e.getKey()==-1) {  // unclustered
@@ -117,9 +123,7 @@ public class RakeIndexingFacet implements Runnable {
                 }
                 lst.add(sb.toString());
             }
-
         }
-
         logger.debug("Total document length: "+lst.parallelStream().map(String::length).reduce(0, Integer::sum).toString());
         RakeIndexer indexer = new RakeIndexer(rakeIndexPath, lst.iterator());
         indexer.run();

@@ -16,14 +16,21 @@ import java.util.Map;
  *
  */
 public class ClutoWrapper implements Runnable {
+    private String matPath;
+    private String cluserOutputPath;
+
     public static void main(String[] args) throws Exception {
-        ClutoWrapper clutoWrapper = new ClutoWrapper();
-        clutoWrapper.run();
+        new ClutoWrapper(Settings.ClutoSettings.DOCS_MAT, Settings.ClutoSettings.OUTPUT).run();
+    }
+
+    public ClutoWrapper(String matPath, String cluserOutputPath) {
+        this.matPath = matPath;
+        this.cluserOutputPath = cluserOutputPath;
     }
 
     @Override
     public void run() {
-        File mat = new File(Settings.ClutoSettings.DOCS_MAT);
+        File mat = new File(matPath);
         String cmd = buildCmd(getDefaultKwargs(), mat, 226);
         try {
             CmdUtils.exec(cmd);
@@ -39,7 +46,7 @@ public class ClutoWrapper implements Runnable {
         kwargs.put("-sim", "cos");
         kwargs.put("-crfun", "h2");
         kwargs.put("-ntrials", "10");
-        kwargs.put("-clustfile", Settings.ClutoSettings.OUTPUT);
+        kwargs.put("-clustfile", cluserOutputPath);
         // kwargs.put("", "");
         // kwargs.put("-plotformat", "gif");
         return kwargs;

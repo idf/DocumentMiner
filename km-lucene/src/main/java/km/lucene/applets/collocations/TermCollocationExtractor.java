@@ -50,7 +50,6 @@ public class TermCollocationExtractor {
     BitSet liveDocs = new BitSet();
     int k = 100;
 
-    // delegation
     TermCollocationHelper helper = new TermCollocationHelper();
 
     public static void main(String[] args) throws Exception {
