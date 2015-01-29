@@ -60,7 +60,7 @@ public class TermCollocationHelper {
         int i = 0;
         while(it.hasNext()) {
             Map.Entry<String, CollocationScorer> pair = (Map.Entry) it.next();
-            i ++;
+            i++;
             System.out.println("# "+i);
             System.out.println(pair.getKey()+" = "+pair.getValue().getScore());
             System.out.println(pair.getKey()+" = "+pair.getValue());  // details

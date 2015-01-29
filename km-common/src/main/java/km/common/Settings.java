@@ -57,4 +57,9 @@ public class Settings {
         public static final String OUTPUT = ROOT_FOLDER+"docs-output.txt";
     }
 
+    // Driver
+    public class DriverSettings {
+        public static final String ROOT_FOLDER = DATA_FOLDER+"expr/";
+    }
+
 }

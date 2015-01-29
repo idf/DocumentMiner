@@ -66,16 +66,18 @@ public class TermCollocationExtractor {
         }
         System.out.println("Started");
         String indexPath = args[0];
-        String thindexPath = args[1];
+        String mainIndexPath = args[1];
         String taxoPath = args[2];
         String rakeIndexPath = args[3];
 
-        TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, thindexPath, taxoPath, rakeIndexPath);
-        tce.search("ntu");
+        TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, mainIndexPath, taxoPath, rakeIndexPath);
+        TreeMap<String, CollocationScorer> sortedPhraseBScores = tce.search("ntu");
+        tce.helper.display(Sorter.topEntries(sortedPhraseBScores, 10,
+                (e1, e2) -> Float.compare(e1.getValue().getScore(), e2.getValue().getScore())));
     }
 
-    public TermCollocationExtractor(String indexPath, String thindexPath, String taxoPath, String rakeIndexPath) throws IOException, ClassNotFoundException, URISyntaxException {
-        this.reader = LuceneUtils.getReader(thindexPath);
+    public TermCollocationExtractor(String indexPath, String mainIndexPath, String taxoPath, String rakeIndexPath) throws IOException, ClassNotFoundException, URISyntaxException {
+        this.reader = LuceneUtils.getReader(mainIndexPath);
         this.searcher = new IndexSearcher(this.reader);
 
         Fields fields = MultiFields.getFields(this.reader);
@@ -90,7 +92,7 @@ public class TermCollocationExtractor {
     }
 
 
-    public void search(String queryString) throws ParseException, IOException, URISyntaxException {
+    public TreeMap<String, CollocationScorer> search(String queryString) throws ParseException, IOException, URISyntaxException {
         Timestamper timestamper = new Timestamper();
         timestamper.start();
         QueryParser queryParser = new QueryParser(Version.LUCENE_48, this.fieldName, new CustomAnalyzer(Version.LUCENE_48));
@@ -122,9 +124,8 @@ public class TermCollocationExtractor {
         phraseBScores = this.helper.filterDocFreq(phraseBScores, 5);
         // termBScores = this.helper.sortScores(termBScores);
         TreeMap<String, CollocationScorer> sortedPhraseBScores = this.helper.sortScores(phraseBScores);
-        this.helper.display(Sorter.topEntries(sortedPhraseBScores, 10,
-                (e1, e2) -> Float.compare(e1.getValue().getScore(), e2.getValue().getScore())));
         timestamper.end();
+        return sortedPhraseBScores;
     }
 
     private void rakePreprocess(TopDocs topDocs) throws IOException {

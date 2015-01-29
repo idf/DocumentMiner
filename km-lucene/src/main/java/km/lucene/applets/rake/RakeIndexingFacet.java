@@ -52,18 +52,18 @@ public class RakeIndexingFacet implements Runnable {
 
     public void basicIndexing() throws IOException {
         JsonReader<Post> jr = new JsonReader<>(postPath, Post.class);
-        String indexPath = Settings.RakeSettings.BASIC_INDEX_PATH;
+        final String INDEX_PATH = Settings.RakeSettings.BASIC_INDEX_PATH;
         Iterator<String> itr = jr.getList().parallelStream()
                 .map(e -> e.getContent())
                 .iterator();
         jr.close();
-        RakeIndexer indexer = new RakeIndexer(indexPath, itr);
+        RakeIndexer indexer = new RakeIndexer(INDEX_PATH, itr);
         indexer.run();
     }
 
     public void threadedIndexing() throws IOException {
         JsonReader<Post> jr = new JsonReader<>(postPath, Post.class);
-        String indexPath = Settings.RakeSettings.THREADED_INDEX_PATH;
+        final String INDEX_PATH = Settings.RakeSettings.THREADED_INDEX_PATH;
 
         List<String> lst = new ArrayList<>();
         int prevThreadId = 0;
@@ -83,7 +83,7 @@ public class RakeIndexingFacet implements Runnable {
         lst.add(sb.toString());
 
         logger.debug("Total document length: "+lst.parallelStream().map(String::length).reduce(0, Integer::sum).toString());
-        RakeIndexer indexer = new RakeIndexer(indexPath, lst.iterator());
+        RakeIndexer indexer = new RakeIndexer(INDEX_PATH, lst.iterator());
         indexer.run();
     }
 
@@ -100,7 +100,7 @@ public class RakeIndexingFacet implements Runnable {
         );
     }
 
-    public void clusteredIndexing(String clusterPath, String indexPath, String rakeIndexPath) throws IOException {
+    public void clusteredIndexing(final String clusterPath, final String indexPath, final String rakeIndexPath) throws IOException {
         // Cluto interface
         Stream<String> lines = IOHandler.getLines(clusterPath);
         List<Integer> nums = lines.map(Integer::parseInt).collect(Collectors.toList());
