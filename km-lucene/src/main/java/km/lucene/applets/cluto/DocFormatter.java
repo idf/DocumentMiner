@@ -6,6 +6,8 @@ import km.lucene.constants.FieldName;
 import org.apache.lucene.index.*;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +26,7 @@ public class DocFormatter implements Runnable {
     private String indexPath;
     private String matOutputPath;
 
+    protected Logger logger = LoggerFactory.getLogger(DocFormatter.class);
     public static void main(String[] args) {
         new DocFormatter(Settings.THINDEX_PATH, Settings.ClutoSettings.DOCS_MAT).run();
     }
@@ -38,7 +41,8 @@ public class DocFormatter implements Runnable {
         try {
             IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(indexPath)));
             String ret = getVectorSpaceMatrix(reader, FieldName.CONTENT);
-            IOHandler.write(matOutputPath,ret);
+            IOHandler.write(matOutputPath, ret);
+            logger.info("Matrix written to "+matOutputPath);
         }
         catch (IOException e) {
             throw new RuntimeException(e);
@@ -90,6 +94,7 @@ public class DocFormatter implements Runnable {
             }
             i++;
         }
+        logger.info("Converted Lucene Index to Sprase Matrix");
         return String.format("%d %d %d\n", n, m, cntNonZero)+display(docs);
     }
 

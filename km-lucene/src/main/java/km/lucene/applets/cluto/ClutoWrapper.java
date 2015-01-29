@@ -3,6 +3,8 @@ package km.lucene.applets.cluto;
 import io.deepreader.java.commons.util.CmdUtils;
 import io.deepreader.java.commons.util.Displayer;
 import km.common.Settings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +22,8 @@ public class ClutoWrapper implements Runnable {
     private String cluserOutputPath;
     private int k;
 
+    protected Logger logger = LoggerFactory.getLogger(ClutoWrapper.class);
+
     public static void main(String[] args) throws Exception {
         new ClutoWrapper(Settings.ClutoSettings.DOCS_MAT, Settings.ClutoSettings.OUTPUT, 226).run();
     }
@@ -36,6 +40,7 @@ public class ClutoWrapper implements Runnable {
         String cmd = buildCmd(getDefaultKwargs(), mat, k);
         try {
             CmdUtils.exec(cmd);
+            logger.info("Cluto executed");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

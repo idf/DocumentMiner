@@ -30,7 +30,7 @@ import java.util.stream.Stream;
  */
 public class RakeIndexingFacet implements Runnable {
     String postPath = Settings.SORTED_POSTS_PATH;
-    private Logger logger = LoggerFactory.getLogger(RakeIndexingFacet.class);
+    protected Logger logger = LoggerFactory.getLogger(RakeIndexingFacet.class);
     /**
      * Does not need the position of the phrase, just need to store the scores of the words.
      * @param args
@@ -50,7 +50,7 @@ public class RakeIndexingFacet implements Runnable {
         }
     }
 
-    public void basicIndexing() throws IOException {
+    public String basicIndexing() throws IOException {
         JsonReader<Post> jr = new JsonReader<>(postPath, Post.class);
         final String INDEX_PATH = Settings.RakeSettings.BASIC_INDEX_PATH;
         Iterator<String> itr = jr.getList().parallelStream()
@@ -59,9 +59,11 @@ public class RakeIndexingFacet implements Runnable {
         jr.close();
         RakeIndexer indexer = new RakeIndexer(INDEX_PATH, itr);
         indexer.run();
+        logger.info("Basic indexing completed");
+        return INDEX_PATH;
     }
 
-    public void threadedIndexing() throws IOException {
+    public String threadedIndexing() throws IOException {
         JsonReader<Post> jr = new JsonReader<>(postPath, Post.class);
         final String INDEX_PATH = Settings.RakeSettings.THREADED_INDEX_PATH;
 
@@ -82,25 +84,36 @@ public class RakeIndexingFacet implements Runnable {
         jr.close();
         lst.add(sb.toString());
 
-        logger.debug("Total document length: "+lst.parallelStream().map(String::length).reduce(0, Integer::sum).toString());
+        logger.trace("Total document length: " + lst.parallelStream().map(String::length).reduce(0, Integer::sum).toString());
         RakeIndexer indexer = new RakeIndexer(INDEX_PATH, lst.iterator());
         indexer.run();
+        logger.info("Thread-based indexing completed");
+        return INDEX_PATH;
     }
 
 
     /**
      * Notice the Cluto output file format as specified in Cluto manual
      * Cluster -1 means no group
-     * @throws java.io.IOException
+     * @return rake index path
+     * @throws IOException
      */
-    public void clusteredIndexing() throws IOException {
-        clusteredIndexing(Settings.ClutoSettings.OUTPUT,
+    public String clusteredIndexing() throws IOException {
+        return clusteredIndexing(Settings.ClutoSettings.OUTPUT,
                 Settings.THINDEX_PATH,
                 Settings.RakeSettings.CLUSTERED_INDEX_PATH
         );
     }
 
-    public void clusteredIndexing(final String clusterPath, final String indexPath, final String rakeIndexPath) throws IOException {
+    /**
+     *
+     * @param clusterPath
+     * @param luceneIndexPath
+     * @param rakeIndexPath
+     * @return rake index path
+     * @throws IOException
+     */
+    public String clusteredIndexing(final String clusterPath, final String luceneIndexPath, final String rakeIndexPath) throws IOException {
         // Cluto interface
         Stream<String> lines = IOHandler.getLines(clusterPath);
         List<Integer> nums = lines.map(Integer::parseInt).collect(Collectors.toList());
@@ -109,7 +122,7 @@ public class RakeIndexingFacet implements Runnable {
 
         // indexing
         List<String> lst = new ArrayList<>();
-        IndexReader reader =  LuceneUtils.getReader(indexPath);
+        IndexReader reader =  LuceneUtils.getReader(luceneIndexPath);
         for(Map.Entry<Integer, List<Integer>> e: cluster2docs.entrySet()) {
             if(e.getKey()==-1) {  // unclustered
                 for(Integer i: e.getValue()) {
@@ -124,8 +137,10 @@ public class RakeIndexingFacet implements Runnable {
                 lst.add(sb.toString());
             }
         }
-        logger.debug("Total document length: "+lst.parallelStream().map(String::length).reduce(0, Integer::sum).toString());
+        logger.trace("Total document length: " + lst.parallelStream().map(String::length).reduce(0, Integer::sum).toString());
         RakeIndexer indexer = new RakeIndexer(rakeIndexPath, lst.iterator());
         indexer.run();
+        logger.info("Cluster-based Indexing completed");
+        return rakeIndexPath;
     }
 }

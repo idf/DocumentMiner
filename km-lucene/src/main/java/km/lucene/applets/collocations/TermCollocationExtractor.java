@@ -125,6 +125,7 @@ public class TermCollocationExtractor {
         // termBScores = this.helper.sortScores(termBScores);
         TreeMap<String, CollocationScorer> sortedPhraseBScores = this.helper.sortScores(phraseBScores);
         timestamper.end();
+        logger.info("Search "+queryString+" completed");
         return sortedPhraseBScores;
     }
 

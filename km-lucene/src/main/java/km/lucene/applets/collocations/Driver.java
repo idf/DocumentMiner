@@ -7,9 +7,14 @@ import km.lucene.applets.cluto.ClutoWrapper;
 import km.lucene.applets.cluto.DocFormatter;
 import km.lucene.applets.rake.RakeIndexingFacet;
 import org.apache.lucene.index.collocations.CollocationScorer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.IntStream;
 
 /**
@@ -24,21 +29,26 @@ public class Driver {
     final int[] LST_K = IntStream.range(0, 1)
             .map(e -> (int) Math.pow(2, e)* BASE)
             .toArray();
+    final boolean RE_RUN_CLUSTER = false;
 
     final String [] TERMS = {"ntu", "sce", "nbs", "nus", "soc", "smu"};
+    final int TOP = 10;
+    protected Logger logger = LoggerFactory.getLogger(Driver.class);
 
     public static void main(String[] args) throws Exception {
-        new Driver().postClusteredCollocation();
+        Driver driver = new Driver();
+        driver.postClusteredCollocation();
     }
 
     String cluster(String indexPath, int k, String suffix) throws IOException {
         String matPath = Settings.DriverSettings.ROOT_FOLDER+String.format("docs-%s.mat", suffix);
         String clusterPath = Settings.DriverSettings.ROOT_FOLDER+String.format("cluster-%s.txt", suffix);
         String rakeIndexPath = Settings.DriverSettings.ROOT_FOLDER+String.format("rakeIndex-%s.ser", suffix);
-
-        new DocFormatter(indexPath, matPath).run();
-        new ClutoWrapper(matPath, clusterPath, k).run();
-        new RakeIndexingFacet().clusteredIndexing(clusterPath, indexPath, rakeIndexPath);
+        if(RE_RUN_CLUSTER) {
+            new DocFormatter(indexPath, matPath).run();
+            new ClutoWrapper(matPath, clusterPath, k).run();
+            new RakeIndexingFacet().clusteredIndexing(clusterPath, indexPath, rakeIndexPath);
+        }
         return rakeIndexPath;
     }
 
@@ -46,7 +56,8 @@ public class Driver {
     TreeMap<String, CollocationScorer> collocate(String indexPath, String rakeIndexPath, String term) throws Exception {
         TermCollocationExtractor tce = new TermCollocationExtractor("", indexPath, "", rakeIndexPath);
         TreeMap<String, CollocationScorer> sortedPhraseBScores = tce.search(term);
-        return Sorter.topEntries(sortedPhraseBScores, 10,
+        logger.info("Collocation scoring completed");
+        return Sorter.topEntries(sortedPhraseBScores, TOP,
                 (e1, e2) -> Float.compare(e1.getValue().getScore(), e2.getValue().getScore()));
 
     }
@@ -58,7 +69,9 @@ public class Driver {
         for(TreeMap<String, CollocationScorer> map: lst) {
             int i = 0;
             for(Map.Entry<String, CollocationScorer> pair: map.entrySet()) {
-                sb.append("# "+(++i)+"\n");
+                if(i==0)
+                    sb.append("# "+pair.getValue().getTerm()+"\n");
+                sb.append("## "+(++i)+"\n");
                 sb.append(pair.getKey() + " = " + pair.getValue().getScore() + "\n");
                 sb.append(pair.getKey() + " = " + pair.getValue() + "\n");  // details
             }
@@ -82,10 +95,10 @@ public class Driver {
     public void threadCollocation() throws Exception {
         final String INDEX_PATH = Settings.THINDEX_PATH;
         final String SUFFIX = String.format("%s", "thread");
-        new RakeIndexingFacet().threadedIndexing();  // TODO Settings parameter
+        String rakeIndexPath = new RakeIndexingFacet().threadedIndexing();
         List<TreeMap<String, CollocationScorer>> lst = new ArrayList<>();
         for(String term: TERMS) {
-            lst.add(collocate(INDEX_PATH, "", term));  // TODO
+            lst.add(collocate(INDEX_PATH, rakeIndexPath, term));
         }
         writeToFile(lst, SUFFIX);
     }
@@ -93,10 +106,10 @@ public class Driver {
     public void postCollection() throws Exception {
         final String INDEX_PATH = Settings.POSTINDEX_PATH;
         final String SUFFIX = String.format("%s", "post");
-        new RakeIndexingFacet().basicIndexing();  // TODO Settings parameter
+        String rakeIndexPath = new RakeIndexingFacet().basicIndexing();
         List<TreeMap<String, CollocationScorer>> lst = new ArrayList<>();
         for(String term: TERMS) {
-            lst.add(collocate(INDEX_PATH, "", term));  // TODO
+            lst.add(collocate(INDEX_PATH, rakeIndexPath, term));
         }
         writeToFile(lst, SUFFIX);
     }

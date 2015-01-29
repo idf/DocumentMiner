@@ -51,7 +51,7 @@ public class RakeIndexer implements Runnable {
             String content = itr.next();
             Document doc = new Document(content);
             iw.addDocument(doc);
-            logger.info(String.format("added document count %d", (i++)));
+            logger.trace(String.format("added document count %d", (i++)));
         }
 
         try {
@@ -62,7 +62,8 @@ public class RakeIndexer implements Runnable {
             logger.error(Displayer.display(e));
         }
 
-        logger.info(index.toString());
+        logger.trace(index.toString());
+        logger.info("Rake Indexing Completed");
         timestamper.end();
     }
 }
