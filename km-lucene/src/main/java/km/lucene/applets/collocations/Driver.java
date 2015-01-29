@@ -37,7 +37,7 @@ public class Driver {
         String rakeIndexPath = Settings.DriverSettings.ROOT_FOLDER+String.format("rakeIndex-%s.ser", suffix);
 
         new DocFormatter(indexPath, matPath).run();
-        new ClutoWrapper(matPath, clusterPath).run();
+        new ClutoWrapper(matPath, clusterPath, k).run();
         new RakeIndexingFacet().clusteredIndexing(clusterPath, indexPath, rakeIndexPath);
         return rakeIndexPath;
     }

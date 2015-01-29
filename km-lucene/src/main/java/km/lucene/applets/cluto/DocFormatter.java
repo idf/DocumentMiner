@@ -9,6 +9,9 @@ import org.apache.lucene.util.BytesRef;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * User: Danyang
@@ -22,7 +25,7 @@ public class DocFormatter implements Runnable {
     private String matOutputPath;
 
     public static void main(String[] args) {
-        new DocFormatter(Settings.ClutoSettings.DOCS_MAT, Settings.THINDEX_PATH).run();
+        new DocFormatter(Settings.THINDEX_PATH, Settings.ClutoSettings.DOCS_MAT).run();
     }
 
     public DocFormatter(String indexPath, String matOutputPath) {
@@ -50,6 +53,8 @@ public class DocFormatter implements Runnable {
      * The non-zero entries of each row are specified as a space-separated list of pairs. Each pair contains the column
      * number followed by the value for that particular column (i.e., feature)
      *
+     * memory problem when n is set to the number of posts rather than thread.
+     * use linked list as sparse matrix rather than int[n][2*m]
      * @param reader
      * @param fieldName
      * @return
@@ -63,34 +68,29 @@ public class DocFormatter implements Runnable {
         while(te.next()!=null)
             m++;
         assert m>0;
-        int max_col = Integer.MAX_VALUE;  // for debug
-        m = Math.min(m, max_col);
         int n = reader.numDocs();
-        int[][] mat = new int[n][2*m];  // n*m
+        List<List<Integer>> docs = new ArrayList<>(n);
         for(int i=0; i<n; i++) {
-            for(int j=0; j<m; j++) {
-                mat[i][2*j] = j+1;
-                mat[i][2*j+1] = 0; // must be non-zero entries.
-            }
+            docs.add(new ArrayList<>());
         }
 
         int i=0;
         int cntNonZero = 0;
         te = terms.iterator(te);
         BytesRef t;
-        while((t=te.next())!=null && i<max_col) {
+        while((t=te.next())!=null) {
             DocsEnum de = te.docs(null, null, DocsEnum.FLAG_FREQS);
             while(de.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
                 int docId = de.docID();
                 int tf = de.freq();
-                mat[docId][2*i] = i+1;
-                mat[docId][2*i+1] = tf;
+                docs.get(docId).add(i + 1);
+                docs.get(docId).add(tf);
                 if(tf!=0)
                     cntNonZero++;
             }
             i++;
         }
-        return String.format("%d %d %d\n", n, m, cntNonZero)+display(mat);
+        return String.format("%d %d %d\n", n, m, cntNonZero)+display(docs);
     }
 
     /**
@@ -118,5 +118,16 @@ public class DocFormatter implements Runnable {
             sb.append("\n");
         }
         return sb.toString().trim();
+    }
+
+    /**
+     *
+     * @param docs
+     * @return string as the sparse matrix
+     */
+    String display(List<List<Integer>> docs) {
+        return docs.parallelStream()
+                .map(e -> e.stream().map(Object::toString).collect(Collectors.joining(" ")))
+                .collect(Collectors.joining("\n"));
     }
 }

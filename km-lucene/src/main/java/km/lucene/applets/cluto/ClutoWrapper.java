@@ -18,20 +18,22 @@ import java.util.Map;
 public class ClutoWrapper implements Runnable {
     private String matPath;
     private String cluserOutputPath;
+    private int k;
 
     public static void main(String[] args) throws Exception {
-        new ClutoWrapper(Settings.ClutoSettings.DOCS_MAT, Settings.ClutoSettings.OUTPUT).run();
+        new ClutoWrapper(Settings.ClutoSettings.DOCS_MAT, Settings.ClutoSettings.OUTPUT, 226).run();
     }
 
-    public ClutoWrapper(String matPath, String cluserOutputPath) {
+    public ClutoWrapper(String matPath, String cluserOutputPath, int k) {
         this.matPath = matPath;
         this.cluserOutputPath = cluserOutputPath;
+        this.k = k;
     }
 
     @Override
     public void run() {
         File mat = new File(matPath);
-        String cmd = buildCmd(getDefaultKwargs(), mat, 226);
+        String cmd = buildCmd(getDefaultKwargs(), mat, k);
         try {
             CmdUtils.exec(cmd);
         } catch (IOException e) {
