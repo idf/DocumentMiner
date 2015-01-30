@@ -26,12 +26,12 @@ public class Driver {
     final int DOC_NUM = 327454;
     final int BASE = (int) Math.sqrt(DOC_NUM);
     final int UPPER = (int) (Math.log(BASE)/Math.log(2));
-    final int[] LST_K = IntStream.range(0, 1)
+    final int[] LST_K = IntStream.range(0, UPPER)
             .map(e -> (int) Math.pow(2, e)* BASE)
             .toArray();
-    final boolean RE_RUN_CLUSTER = false;
+    final boolean RE_RUN_CLUSTER = true;
 
-    final String [] TERMS = {"ntu", "sce", "nbs", "nus", "soc", "smu"};
+    final String [] TERMS = {"ntu", "sce", "nbs", "nus", "soc", "smu", "computer", "hardware", "software", "degree", "school", "food"};
     final int TOP = 10;
     protected Logger logger = LoggerFactory.getLogger(Driver.class);
 
@@ -113,5 +113,4 @@ public class Driver {
         }
         writeToFile(lst, SUFFIX);
     }
-
 }
