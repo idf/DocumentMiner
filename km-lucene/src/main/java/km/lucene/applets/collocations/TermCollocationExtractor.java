@@ -121,9 +121,8 @@ public class TermCollocationExtractor {
             this.processDocForTerm(t, dpe, termBScores, phraseBScores, true);
         }
         termBScores = this.helper.filterByCollocationCount(termBScores, 5);
-        // phraseBScores = this.helper.filterByDocFreq(phraseBScores, 2);
         phraseBScores = this.helper.filterByTermFreq(phraseBScores, 5);
-        // termBScores = this.helper.sortScores(termBScores);
+        TreeMap<String, CollocationScorer> sortedTermBScores = this.helper.sortScores(termBScores);
         TreeMap<String, CollocationScorer> sortedPhraseBScores = this.helper.sortScores(phraseBScores);
         timestamper.end();
         logger.info("Search "+queryString+" completed");

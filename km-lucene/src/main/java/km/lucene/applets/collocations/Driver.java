@@ -55,9 +55,18 @@ public class Driver {
         return rakeIndexPath;
     }
 
+    /**
+     * Deserialize rake index is expensive
+     * @param indexPath
+     * @param rakeIndexPath
+     * @return
+     * @throws Exception
+     */
+    TermCollocationExtractor getTCE(String indexPath, String rakeIndexPath) throws Exception{
+        return new TermCollocationExtractor("", indexPath, "", rakeIndexPath);
+    }
 
-    TreeMap<String, CollocationScorer> collocate(String indexPath, String rakeIndexPath, String term) throws Exception {
-        TermCollocationExtractor tce = new TermCollocationExtractor("", indexPath, "", rakeIndexPath);
+    TreeMap<String, CollocationScorer> collocate(TermCollocationExtractor tce, String term) throws Exception {
         TreeMap<String, CollocationScorer> sortedPhraseBScores = tce.search(term);
         logger.info("Collocation scoring completed");
         return Sorter.topEntries(sortedPhraseBScores, TOP,
@@ -76,7 +85,7 @@ public class Driver {
                     sb.append("# "+pair.getValue().getTerm()+"\n");
                 sb.append("## "+(++i)+"\n");
                 sb.append(pair.getKey() + " = " + pair.getValue().getScore() + "\n");
-                // sb.append(pair.getKey() + " = " + pair.getValue() + "\n");  // details
+                sb.append(pair.getKey() + " = " + pair.getValue() + "\n");  // details
             }
         }
         IOHandler.write(resultPath, sb.toString());
@@ -85,11 +94,12 @@ public class Driver {
     public void postClusteredCollocation() throws Exception {
         final String INDEX_PATH = Settings.POSTINDEX_PATH;
         for(int k: LST_K) {
-            final String SUFFIX = String.format("%s-%d-%.2f", "post-clustered", k, Settings.RakeSettings.TOP_PERCENT);
+            final String SUFFIX = String.format("%s-%d", "post-clustered", k);
             String rakeIndexPath = cluster(INDEX_PATH, k, SUFFIX);
             List<TreeMap<String, CollocationScorer>> lst = new ArrayList<>();
+            TermCollocationExtractor tce = getTCE(INDEX_PATH, rakeIndexPath);
             for(String term: TERMS) {
-                lst.add(collocate(INDEX_PATH, rakeIndexPath, term));
+                lst.add(collocate(tce, term));
             }
             writeToFile(lst, SUFFIX);
         }
@@ -100,8 +110,9 @@ public class Driver {
         final String SUFFIX = String.format("%s", "thread");
         String rakeIndexPath = new RakeIndexingFacet().threadedIndexing();
         List<TreeMap<String, CollocationScorer>> lst = new ArrayList<>();
+        TermCollocationExtractor tce = getTCE(INDEX_PATH, rakeIndexPath);
         for(String term: TERMS) {
-            lst.add(collocate(INDEX_PATH, rakeIndexPath, term));
+            lst.add(collocate(tce, term));
         }
         writeToFile(lst, SUFFIX);
     }
@@ -111,8 +122,9 @@ public class Driver {
         final String SUFFIX = String.format("%s", "post");
         String rakeIndexPath = new RakeIndexingFacet().basicIndexing();
         List<TreeMap<String, CollocationScorer>> lst = new ArrayList<>();
+        TermCollocationExtractor tce = getTCE(INDEX_PATH, rakeIndexPath);
         for(String term: TERMS) {
-            lst.add(collocate(INDEX_PATH, rakeIndexPath, term));
+            lst.add(collocate(tce, term));
         }
         writeToFile(lst, SUFFIX);
     }

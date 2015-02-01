@@ -42,7 +42,7 @@ public class Settings {
 
     // RAKE
     public class RakeSettings {
-        public static final float TOP_PERCENT = 0.3333f;  // one-third the number of words in the graph. (Rose et al.)
+        public static final float TOP_PERCENT = 0.75f; // 0.3333f;  // one-third the number of words in the graph. (Rose et al.)
         public static final String ROOT_FOLDER = DATA_FOLDER+"rake/";
         public static final String BASIC_INDEX_PATH = ROOT_FOLDER+"basic_index.ser";
         public static final String THREADED_INDEX_PATH = ROOT_FOLDER+"threaded_index.ser";
