@@ -85,7 +85,7 @@ public class Driver {
     public void postClusteredCollocation() throws Exception {
         final String INDEX_PATH = Settings.POSTINDEX_PATH;
         for(int k: LST_K) {
-            final String SUFFIX = String.format("%s-%d", "post-clustered", k);
+            final String SUFFIX = String.format("%s-%d-%.2f", "post-clustered", k, Settings.RakeSettings.TOP_PERCENT);
             String rakeIndexPath = cluster(INDEX_PATH, k, SUFFIX);
             List<TreeMap<String, CollocationScorer>> lst = new ArrayList<>();
             for(String term: TERMS) {

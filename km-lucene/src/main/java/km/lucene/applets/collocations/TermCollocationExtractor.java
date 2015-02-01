@@ -120,8 +120,9 @@ public class TermCollocationExtractor {
             dpe.advance(docID);
             this.processDocForTerm(t, dpe, termBScores, phraseBScores, true);
         }
-        termBScores = this.helper.filterCollocationCount(termBScores, 5);
-        phraseBScores = this.helper.filterDocFreq(phraseBScores, 5);
+        termBScores = this.helper.filterByCollocationCount(termBScores, 5);
+        // phraseBScores = this.helper.filterByDocFreq(phraseBScores, 2);
+        phraseBScores = this.helper.filterByTermFreq(phraseBScores, 5);
         // termBScores = this.helper.sortScores(termBScores);
         TreeMap<String, CollocationScorer> sortedPhraseBScores = this.helper.sortScores(phraseBScores);
         timestamper.end();
@@ -151,7 +152,7 @@ public class TermCollocationExtractor {
         Timestamper timestamper = new Timestamper();
         timestamper.start();
         Map<String, CollocationScorer> termBScores = processTerm(t);
-        termBScores = this.helper.filterCollocationCount(termBScores, 5);
+        termBScores = this.helper.filterByCollocationCount(termBScores, 5);
         this.helper.sortScores(termBScores);
         timestamper.end();
     }
@@ -269,10 +270,10 @@ public class TermCollocationExtractor {
                     if(this.liveDocs.get(dpeB.docID()))
                         dfB ++;
                 }
-                pt = new CollocationScorer(term.text(), termB.text(), this.k,  this.reader.docFreq(termB), this.reader.numDocs());
+                pt = new CollocationScorer(term.text(), termB.text(), this.k,  this.reader.docFreq(termB), this.reader.totalTermFreq(termB), this.reader.numDocs());
             }
             else {
-                pt = new CollocationScorer(term.text(), termB.text(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.numDocs());
+                pt = new CollocationScorer(term.text(), termB.text(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.totalTermFreq(termB), this.reader.numDocs());
             }
             scores.put(pt.getCoincidentalTerm(), pt);
         }
@@ -298,10 +299,10 @@ public class TermCollocationExtractor {
 
         if (pt==null) {  // if not exist
             if(top) {
-                pt = new CollocationScorer(term.text(), phraseB, this.k, this.rakeMgr.index.docFreq(phraseB), this.reader.numDocs());
+                pt = new CollocationScorer(term.text(), phraseB, this.k, this.rakeMgr.index.docFreq(phraseB), this.rakeMgr.index.totalTermFreq(phraseB), this.reader.numDocs());
             }
             else {
-                pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeMgr.index.docFreq(phraseB), this.reader.numDocs());
+                pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeMgr.index.docFreq(phraseB), this.rakeMgr.index.totalTermFreq(phraseB), this.reader.numDocs());
             }
             scores.put(pt.getCoincidentalTerm(), pt);
         }

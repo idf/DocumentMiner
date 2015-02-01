@@ -21,17 +21,24 @@ public class TermCollocationHelper {
     static float DEFAULT_MAX_TERM_POPULARITY = 1f;
     float maxTermPopularity = DEFAULT_MAX_TERM_POPULARITY;
 
-    public Map<String, CollocationScorer> filterCollocationCount(Map<String, CollocationScorer> map, int count) {
+    public Map<String, CollocationScorer> filterByCollocationCount(Map<String, CollocationScorer> map, int count) {
         return map.entrySet()
                 .parallelStream()
                 .filter(e -> e.getValue().getCoIncidenceDocCount()>=count)
                 .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public Map<String, CollocationScorer> filterDocFreq(Map<String, CollocationScorer> map, int count) {
+    public Map<String, CollocationScorer> filterByDocFreq(Map<String, CollocationScorer> map, int count) {
         return map.entrySet()
                 .parallelStream()
                 .filter(e -> e.getValue().getTermBDocFreq()>=count)
+                .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public Map<String, CollocationScorer> filterByTermFreq(Map<String, CollocationScorer> map, int count) {
+        return map.entrySet()
+                .parallelStream()
+                .filter(e -> e.getValue().getTermBTermFreq()>=count)
                 .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

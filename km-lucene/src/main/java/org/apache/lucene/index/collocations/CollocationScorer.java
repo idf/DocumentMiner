@@ -37,6 +37,8 @@ public class CollocationScorer {
     private int termBDocFreq;
     private long totalDocFreq;
 
+    private long termBTermFreq;  // information for filter
+
     /**
      * @param coincidentalTerm
      *            the coincidental term eg "fast" (found next to
@@ -46,16 +48,17 @@ public class CollocationScorer {
      * @param termBDocFreq
      *            the document frequency of the other term eg "food"
      */
-    public CollocationScorer(String term,String coincidentalTerm, int termADocFreq, int termBDocFreq) {
+    public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq, long termBTermFreq) {
         this.term = term;
         this.coincidentalTerm = coincidentalTerm;
         this.termADocFreq = termADocFreq;
         this.termBDocFreq = termBDocFreq;
+        this.termBTermFreq = termBTermFreq;
         this.totalDocFreq = 0;
     }
 
-    public CollocationScorer(String term,String coincidentalTerm, int termADocFreq, int termBDocFreq, long totalDocFreq) {
-        this(term, coincidentalTerm, termADocFreq, termBDocFreq);
+    public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq, long termBTermFreq, long totalDocFreq) {
+        this(term, coincidentalTerm, termADocFreq, termBDocFreq, termBTermFreq);
         this.totalDocFreq = totalDocFreq;
     }
 
@@ -127,5 +130,13 @@ public class CollocationScorer {
     @Override
     public String toString() {
         return Displayer.toString(this);
+    }
+
+    public long getTermBTermFreq() {
+        return termBTermFreq;
+    }
+
+    public void setTermBTermFreq(long termBTermFreq) {
+        this.termBTermFreq = termBTermFreq;
     }
 }
