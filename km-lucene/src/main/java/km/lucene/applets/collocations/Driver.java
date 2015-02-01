@@ -24,12 +24,12 @@ import java.util.stream.IntStream;
  */
 public class Driver {
     final int DOC_NUM = 327454;
-    final int BASE = (int) Math.sqrt(DOC_NUM);
-    final int UPPER = (int) (Math.log(BASE)/Math.log(2));
+    final int BASE = (int) Math.sqrt(DOC_NUM);  // 572
+    final int UPPER = 4;  // 5th, 9152 would be 7 hours  // (int) (Math.log(BASE)/Math.log(2))
     final int[] LST_K = IntStream.range(0, UPPER)
             .map(e -> (int) Math.pow(2, e)* BASE)
             .toArray();
-    final boolean RE_RUN_CLUSTER = true;
+    final boolean RE_RUN_CLUSTER = false;
 
     final String [] TERMS = {"ntu", "sce", "nbs", "nus", "soc", "smu", "computer", "hardware", "software", "degree", "school", "food"};
     final int TOP = 10;
