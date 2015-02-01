@@ -117,7 +117,7 @@ public class RakeIndexingFacet implements Runnable {
         // Cluto interface
         Stream<String> lines = IOHandler.getLines(clusterPath);
         List<Integer> nums = lines.map(Integer::parseInt).collect(Collectors.toList());
-        Map<Integer, List<Integer>> cluster2docs = Transformer.groupListToMap(nums);
+        Map<Integer, List<Integer>> cluster2docs = Transformer.groupListIndexByValue(nums);
         logger.trace(Displayer.display(cluster2docs));
 
         // indexing
@@ -132,7 +132,7 @@ public class RakeIndexingFacet implements Runnable {
             else {
                 StringBuilder sb = new StringBuilder();
                 for(Integer i: e.getValue()) {
-                    sb.append(lst.add(LuceneUtils.getAllStringValues(reader.document(i), FieldName.CONTENT, "\n")));
+                    sb.append(LuceneUtils.getAllStringValues(reader.document(i), FieldName.CONTENT, "\n"));
                 }
                 lst.add(sb.toString());
             }

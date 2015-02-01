@@ -25,11 +25,12 @@ import java.util.stream.IntStream;
 public class Driver {
     final int DOC_NUM = 327454;
     final int BASE = (int) Math.sqrt(DOC_NUM);  // 572
-    final int UPPER = 4;  // 5th, 9152 would be 7 hours  // (int) (Math.log(BASE)/Math.log(2))
+    final int UPPER = 5;  // 5th, 9152 would be 7 hours  // (int) (Math.log(BASE)/Math.log(2))
     final int[] LST_K = IntStream.range(0, UPPER)
             .map(e -> (int) Math.pow(2, e)* BASE)
             .toArray();
     final boolean RE_RUN_CLUSTER = false;
+    final boolean RE_RUN_RAKE_INDEX = true;
 
     final String [] TERMS = {"ntu", "sce", "nbs", "nus", "soc", "smu", "computer", "hardware", "software", "degree", "school", "food"};
     final int TOP = 10;
@@ -47,6 +48,8 @@ public class Driver {
         if(RE_RUN_CLUSTER) {
             new DocFormatter(indexPath, matPath).run();
             new ClutoWrapper(matPath, clusterPath, k).run();
+        }
+        if(RE_RUN_RAKE_INDEX) {
             new RakeIndexingFacet().clusteredIndexing(clusterPath, indexPath, rakeIndexPath);
         }
         return rakeIndexPath;
@@ -63,7 +66,7 @@ public class Driver {
     }
 
     void writeToFile(List<TreeMap<String, CollocationScorer>> lst, String suffix) {
-        String resultPath = Settings.DriverSettings.ROOT_FOLDER+String.format("result-%s.txt", suffix);
+        String resultPath = Settings.DriverSettings.ROOT_FOLDER+String.format("result-%s.md", suffix);
 
         StringBuilder sb = new StringBuilder();
         for(TreeMap<String, CollocationScorer> map: lst) {
@@ -73,7 +76,7 @@ public class Driver {
                     sb.append("# "+pair.getValue().getTerm()+"\n");
                 sb.append("## "+(++i)+"\n");
                 sb.append(pair.getKey() + " = " + pair.getValue().getScore() + "\n");
-                sb.append(pair.getKey() + " = " + pair.getValue() + "\n");  // details
+                // sb.append(pair.getKey() + " = " + pair.getValue() + "\n");  // details
             }
         }
         IOHandler.write(resultPath, sb.toString());
