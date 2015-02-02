@@ -1,10 +1,13 @@
 $(document).ready(function() {
+    "use strict";
     var titles = {postMonth: "Any month", postYear: "Any year", topicId: "Any topic", forumId: "Any forum", threadId: "Any thread", poster: "Any poster"};
     var selecteds = {postMonth: "", postYear: "", topicId: "", forumId: "", threadId: "", poster: ""};
     var cols = {postMonth: 3, postYear: 3, topicId: 1, forumId: 1, threadId: 1, poster: 1};
     var menu = new Menu("#topMenu");
     for (var key in titles) {
-        menu.addItem(new MenuItem(key, titles[key], getFacetByDim));
+        if(titles.hasOwnProperty(key)) {
+            menu.addItem(new MenuItem(key, titles[key], getFacetByDim));
+        }
     }
     menu.render();
     var dd = new Dropdown("#topMenuDropdown", filter, getFacetMoreItems);
@@ -25,7 +28,7 @@ $(document).ready(function() {
 
     $("#txtQuery").focus();
     $("#txtQuery").keypress(function() {
-        if (event.which == 13) {   //enter pressed
+        if (event.which === 13) {   //enter pressed
             search();
         }
     });
@@ -103,14 +106,18 @@ $(document).ready(function() {
     function searchFacet() {
         var filters = [];
         for (var key in selecteds) {
-            filters.push(key + ":" + selecteds[key]);
+            if(selecteds.hasOwnProperty(key)) {
+                filters.push(key + ":" + selecteds[key]);
+            }
         }
         var data = [];
         data.push("query=" + queryStr);
         data.push("filter=" + filters.join(","));
         $.get("/s/v2/facets", data.join("&"), function(facets) {
             for (var dim in facets) {
-                charts[dim].render(facets[dim]);
+                if(facets.hasOwnProperty(dim)) {
+                    charts[dim].render(facets[dim]);
+                }
             }
             $.notify("Facets refreshed.", "success");
         });
@@ -119,7 +126,9 @@ $(document).ready(function() {
     function getFacetMoreItems(dim) {
         var filters = [];
         for (var key in selecteds) {
-            filters.push(key + ":" + selecteds[key]);
+            if(selecteds.hasOwnProperty(key)) {
+                filters.push(key + ":" + selecteds[key]);
+            }
         }
         var data = [];
         data.push("query=" + queryStr);

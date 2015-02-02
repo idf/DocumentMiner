@@ -1,4 +1,5 @@
 var Menu = Menu || function(container) {
+    "use strict";
     var $menu = $(container);
     var items = {};
 
@@ -17,8 +18,10 @@ var Menu = Menu || function(container) {
     this.render = function() {
         var html = [];
         for (var key in items) {
-            var menuItem = items[key];
-            html.push(menuItem.html());
+            if(items.hasOwnProperty(key)) {
+                var menuItem = items[key];
+                html.push(menuItem.html());
+            }
         }
         $menu.html(html.join(""));
     };
@@ -26,7 +29,7 @@ var Menu = Menu || function(container) {
     this.highlight = function(dim, selected) {
         var $e = $menu.find("div.menu_item_panel#" + dim + ">div.menu_item_text");
         var item = items[dim];
-        if (selected.length == 0) {
+        if (selected.length === 0) {
             $e.text(item.title);
             $e.css("font-weight", "normal");
         } else {
@@ -37,6 +40,7 @@ var Menu = Menu || function(container) {
 };
 
 var MenuItem = MenuItem || function(dim, title, callback) {
+    "use strict";
     this.dim = dim;
     this.title = title;
     this.callback = callback;

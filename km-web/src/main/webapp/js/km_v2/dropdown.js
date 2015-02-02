@@ -1,13 +1,13 @@
 var Dropdown = Dropdown || function(container, update, more) {
-        "use strict";
+    "use strict";
     var instance = this;
     var $dropdown = $(container);
     var currentDim = "";
 
     // hide dropdown if click on document
     $(document).click(function() {
-        if ($(event.target).hasClass("menu_panel") == false 
-                && $(event.target).parents("div.menu_panel").length == 0) {
+        if ($(event.target).hasClass("menu_panel") === false
+                && $(event.target).parents("div.menu_panel").length === 0) {
             instance.hide();
         }
     });
@@ -102,7 +102,7 @@ var Dropdown = Dropdown || function(container, update, more) {
             var width = item.count / max * 100;
             html.push("<div class='dd_item_bar' style='width:{0}%'></div>".format([width]));
             html.push("</div>");
-            if ((i + 1) % cols == 0) {
+            if ((i + 1) % cols === 0) {
                 html.push("<br/>");
             }
         }

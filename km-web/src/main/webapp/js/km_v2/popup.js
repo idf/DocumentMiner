@@ -1,12 +1,13 @@
 var Popup = Popup || function(container, update) {
+    "use strict";
     var instance = this;
     var $pp = $(container);
     var currentDim = "";
 
     // hide popup if click on document
     $(document).click(function() {
-        if ($(event.target).hasClass("pp_panel") == false
-                && $(event.target).parents("div.pp_panel").length == 0) {
+        if ($(event.target).hasClass("pp_panel")===false
+                && $(event.target).parents("div.pp_panel").length===0) {
             $pp.hide();
         }
     });

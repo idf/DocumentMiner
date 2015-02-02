@@ -1,4 +1,5 @@
 var Pagination = Pagination || function(container, goto) {
+    "use strict";
     var $pg = $(container);
     var span = 5;
     
@@ -19,7 +20,7 @@ var Pagination = Pagination || function(container, goto) {
         var start = page - span < 1 ? 1 : page - span;
         var end = page + span > pageCount ? pageCount : page + span;
         for (var i = start; i <= end; i++) {
-            if (i == page) {
+            if (i === page) {
                 html.push("<b>{0}</b>".build(i));
             } else {
                 html.push("<a href='#' id='{0}'>{1}</a>".build(i, i));

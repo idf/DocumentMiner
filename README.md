@@ -1,4 +1,4 @@
-TopicModeling
+Knowledge Miner 
 =============
 
 Final Year Project

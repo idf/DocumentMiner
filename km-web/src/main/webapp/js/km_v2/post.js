@@ -1,5 +1,5 @@
 var Post = Post || function(container) {
-        "use strict";
+    "use strict";
     var $post = $(container);
 
     $post.on("click", "#more", function() {
@@ -97,8 +97,8 @@ var Post = Post || function(container) {
         var prevThreadId = 0;
         for (var i = 0; i < posts.length; i++) {
             var post = posts[i];
-            if (post.threadId != prevThreadId) {
-                if (prevThreadId != 0) {
+            if (post.threadId !== prevThreadId) {
+                if (prevThreadId !== 0) {
                     html.push("</div>");  // end of previous thread
                 }
                 html.push("<div class='thread_panel' id='{0}'>".build(post.threadId));
@@ -136,7 +136,7 @@ var Post = Post || function(container) {
             }
         }
         html.push("<div class='content'>{0}".build(post.content));
-        if (post.full == false) {
+        if (post.full === false) {
             html.push(" <small id='more'><span class='glyphicon glyphicon-forward'></span></small>");
         }
         html.push("</div>");
@@ -152,7 +152,7 @@ var Post = Post || function(container) {
         var html = [];
         html.push("<div class='quote_panel' id='{0}'>".build(quote.id));
         html.push("<div class='quote'>{0}".build(quote.content));
-        if (quote.full == false) {
+        if (quote.full === false) {
             html.push(" <small id='more_quote'><span class='glyphicon glyphicon-forward'></span></small>");
         }
         html.push("</div>");
