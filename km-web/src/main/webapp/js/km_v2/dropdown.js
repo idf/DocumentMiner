@@ -1,4 +1,5 @@
 var Dropdown = Dropdown || function(container, update, more) {
+        "use strict";
     var instance = this;
     var $dropdown = $(container);
     var currentDim = "";

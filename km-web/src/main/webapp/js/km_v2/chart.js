@@ -1,4 +1,5 @@
 var Chart = Chart || function(container, title) {
+        "use strict";
     var chart = null;
     var type = "line";
 

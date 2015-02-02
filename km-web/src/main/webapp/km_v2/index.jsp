@@ -57,14 +57,15 @@
         <script type="text/javascript" src="../lib/notify.js"></script>
         <script type="text/javascript" src="../lib/canvasjs-1.5.0-beta/source/canvasjs.js"></script>
         <script type="text/javascript" src="../js/jquery-ext.js"></script>
-        <script type="text/javascript" src="../js/number.js"></script>
-        <script type="text/javascript" src="../js/string.js"></script>
-        <script type="text/javascript" src="js/main.js"></script>
-        <script type="text/javascript" src="js/menu.js"></script>
-        <script type="text/javascript" src="js/dropdown.js"></script>
-        <script type="text/javascript" src="js/popup.js"></script>
-        <script type="text/javascript" src="js/post.js"></script>
-        <script type="text/javascript" src="js/pagination.js"></script>
-        <script type="text/javascript" src="js/chart.js"></script>
+        <script type="text/javascript" src="../commons-util-js/Number.js"></script>
+        <script type="text/javascript" src="../commons-util-js/String.js"></script>
+        <script type="text/javascript" src="../commons-util-js/DomUtils.js"></script>
+        <script type="text/javascript" src="../js/km_v2/main.js"></script>
+        <script type="text/javascript" src="../js/km_v2/menu.js"></script>
+        <script type="text/javascript" src="../js/km_v2/dropdown.js"></script>
+        <script type="text/javascript" src="../js/km_v2/popup.js"></script>
+        <script type="text/javascript" src="../js/km_v2/post.js"></script>
+        <script type="text/javascript" src="../js/km_v2/pagination.js"></script>
+        <script type="text/javascript" src="../js/km_v2/chart.js"></script>
     </body>
 </html>

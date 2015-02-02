@@ -1,4 +1,5 @@
 var Post = Post || function(container) {
+        "use strict";
     var $post = $(container);
 
     $post.on("click", "#more", function() {
