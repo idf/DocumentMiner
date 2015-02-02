@@ -4,6 +4,6 @@
 [submodule "commons-util"]
 	path = commons-util
 	url = git@github.com:zhangdanyangg/commons-util.git
-[submodule "km-web/src/main/webapp/commons-util-js"]
+[submodule "km-web/src/main/webapp/js/commons-util-js"]
 	path = km-web/src/main/webapp/js/commons-util-js/
 	url = git@github.com:zhangdanyangg/commons-util-js.git
