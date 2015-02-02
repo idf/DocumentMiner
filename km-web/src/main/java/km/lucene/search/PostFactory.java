@@ -1,6 +1,6 @@
 package km.lucene.search;
 
-import km.common.util.DateUtil;
+import io.deepreader.java.commons.util.DateUtils;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
 import km.lucene.entities.Post;
@@ -40,7 +40,7 @@ public class PostFactory {
         int id = Integer.parseInt(doc.get(FieldName.ID));
         Long postDateLong = Long.parseLong(doc.get(FieldName.POST_DATE));
         Date postDate = new Date(postDateLong);
-        String postDateStr = DateUtil.format(postDate, "yyyy-MM-dd hh:mm");
+        String postDateStr = DateUtils.format(postDate, "yyyy-MM-dd hh:mm");
 
         String content = doc.get(FieldName.CONTENT);
         String fragment = getFragment(query, FieldName.CONTENT, analyzer, content);

@@ -4,7 +4,7 @@
 <table width="100%" class="bottom_container">
     <tr>
         <td align="right">
-            Developed by <a href="mailto:jun.li.sg@gmail.com">Li Jun</a> @ 2014
+            Developed by <a href="mailto:jun.li.sg@gmail.com">Li Jun</a> <a href="https://github.com/zhangdanyangg">ZHANG Danyang</a> @ 2014
         </td>
     </tr>
 </table>

@@ -1,7 +1,6 @@
 package km.lucene.search;
 
-import java.util.Date;
-import km.common.util.DateUtil;
+import io.deepreader.java.commons.util.DateUtils;
 import km.lucene.constants.FieldName;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BooleanClause.Occur;
@@ -9,6 +8,8 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
+
+import java.util.Date;
 
 public class QueryBuilder {
 
@@ -40,15 +41,15 @@ public class QueryBuilder {
             }
         }
 
-        Date dateFrom = DateUtil.parse(dateFromStr, "yyyy-MM-dd");
-        Date dateTo = DateUtil.parse(dateToStr, "yyyy-MM-dd");
+        Date dateFrom = DateUtils.parse(dateFromStr, "yyyy-MM-dd");
+        Date dateTo = DateUtils.parse(dateToStr, "yyyy-MM-dd");
         Long start = null;
         Long end = null;
         if (dateFrom != null) {
             start = dateFrom.getTime();
         }
         if (dateTo != null) {
-            end = DateUtil.addDay(dateTo, 1).getTime() - 1;
+            end = DateUtils.addDay(dateTo, 1).getTime() - 1;
         }
         query.add(NumericRangeQuery.newLongRange(FieldName.POST_DATE, start, end, true, true), Occur.MUST);
     }

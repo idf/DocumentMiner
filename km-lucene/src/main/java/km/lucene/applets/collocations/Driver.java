@@ -30,7 +30,7 @@ public class Driver {
             .map(e -> (int) Math.pow(2, e)* BASE)
             .toArray();
     final boolean RE_RUN_CLUSTER = false;
-    final boolean RE_RUN_RAKE_INDEX = true;
+    final boolean RE_RUN_RAKE_INDEX = false;
 
     final String [] TERMS = {"ntu", "sce", "nbs", "nus", "soc", "smu", "computer", "hardware", "software", "degree", "school", "food"};
     final int TOP = 10;
@@ -85,7 +85,7 @@ public class Driver {
                     sb.append("# "+pair.getValue().getTerm()+"\n");
                 sb.append("## "+(++i)+"\n");
                 sb.append(pair.getKey() + " = " + pair.getValue().getScore() + "\n");
-                sb.append(pair.getKey() + " = " + pair.getValue() + "\n");  // details
+                // sb.append(pair.getKey() + " = " + pair.getValue() + "\n");  // details
             }
         }
         IOHandler.write(resultPath, sb.toString());
