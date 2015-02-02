@@ -23,7 +23,7 @@ var _root = "<%=root%>";
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Knowledge Miner</title>
         <link href="<%=root%>/css/main.css" rel="stylesheet" />
-        <link href="<%=root%>/lib/jquery-ui-1.11.0/jquery-ui.css" rel="stylesheet">
+        <link href="<%=root%>/js/lib/jquery-ui-1.11.0/jquery-ui.css" rel="stylesheet">
     </head>
     <body>
 

@@ -52,14 +52,14 @@
         <div class="hr"></div>
         <div class="footer">&nbsp;</div>
 
-        <script type="text/javascript" src="../lib/jquery-2.1.0.js"></script>
-        <script type="text/javascript" src="../lib/moment.js"></script>
-        <script type="text/javascript" src="../lib/notify.js"></script>
-        <script type="text/javascript" src="../lib/canvasjs-1.5.0-beta/source/canvasjs.js"></script>
+        <script type="text/javascript" src="../js/lib/jquery-2.1.0.js"></script>
+        <script type="text/javascript" src="../js/lib/moment.js"></script>
+        <script type="text/javascript" src="../js/lib/notify.js"></script>
+        <script type="text/javascript" src="../js/lib/canvasjs-1.5.0-beta/source/canvasjs.js"></script>
         <script type="text/javascript" src="../js/jquery-ext.js"></script>
-        <script type="text/javascript" src="../commons-util-js/Number.js"></script>
-        <script type="text/javascript" src="../commons-util-js/String.js"></script>
-        <script type="text/javascript" src="../commons-util-js/DomUtils.js"></script>
+        <script type="text/javascript" src="../js/commons-util-js/Number.js"></script>
+        <script type="text/javascript" src="../js/commons-util-js/String.js"></script>
+        <script type="text/javascript" src="../js/commons-util-js/DomUtils.js"></script>
         <script type="text/javascript" src="../js/km_v2/main.js"></script>
         <script type="text/javascript" src="../js/km_v2/menu.js"></script>
         <script type="text/javascript" src="../js/km_v2/dropdown.js"></script>
