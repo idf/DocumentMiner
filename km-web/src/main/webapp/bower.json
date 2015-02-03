@@ -1,6 +1,6 @@
 {
   "name": "km",
-  "version": "0.0.3",
+  "version": "3.0.0",
   "homepage": "https://github.com/zhangdanyangg/KnowledgeMiner",
   "authors": [
     "Daniel D. ZHANG <zhangdanyangg@gmail.com>"
@@ -24,6 +24,7 @@
     "angularjs": "~1.3.11",
     "bootstrap-material-design": "~0.2.2",
     "jquery": "~2.1.3",
-    "jquery-ui": "~1.11.2"
+    "jquery-ui": "~1.11.2",
+    "chartjs": "~1.0.1"
   }
 }

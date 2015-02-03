@@ -1,16 +1,50 @@
 <!DOCTYPE html>
-<html ng-app="gemStore">
-    <head>
-        <link rel="stylesheet" type="text/css" href="../bower_components/bootstrap-material-design/dist/css/material.min.css" />
-        <script type="text/javascript" src="../bower_components/angularjs/angular.min.js"></script>
-        <script type="text/javascript" src="../js/app.js"></script>
-    </head>
-    <body ng-controller="StoreController as store">
-    <div class="product row">
-        <h3>
-            {{store.product.name}}
-            <em class="pull-right">{{store.product.price}}</em>
-        </h3>
+<html ng-app="km_v3">
+<head>
+    <link rel="stylesheet" type="text/css" href="/bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/custom.css" />
+    <script type="text/javascript" src="/bower_components/angularjs/angular.min.js"></script>
+    <script type="text/javascript" src="js/search.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+</head>
+
+<body ng-controller="StoreController as store">
+    <header>
+        <div class="navbar navbar-inverse">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">HardwareZone Uncovered</a>
+            </div>
+            <div class="navbar-collapse collapse navbar-inverse-collapse">
+                <form class="navbar-form navbar-left" style="width: 50%">
+                    <div  class="input-group">
+                        <input type="text" autofocus="autofocus" autocomplete="off" placeholder="Search Here" name="search" style="" class="form-control">
+                        <span style="width: 1%;" class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
+                    </div>
+                </form>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#">version 3.0.0</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+    <!--  Products Container  -->
+    <div class="list-group">
+        <!--  Product Container  -->
+        <div class="list-group-item" ng-repeat="product in store.products">
+            <h3>{{product.name}} <em class="pull-right">{{product.price | currency}}</em></h3>
+
+            <!-- Image Gallery  -->
+            <product-gallery></product-gallery>
+
+            <!-- Product Tabs  -->
+            <product-tabs></product-tabs>
+        </div>
+
     </div>
-    </body>
+</body>
 </html>
