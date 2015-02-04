@@ -1,0 +1,13 @@
+<h3>Search Results</h3>
+<div>
+    <h4>Query: {{searchCtrl.query.str }}</h4>
+    <p>Elapsed: {{searchCtrl.results.posts.elapsed }}ms</p>
+    <div ng-repeat="entry in searchCtrl.results.posts.posts">
+        <div class="panel panel-default">
+            <div class="panel-heading" ng-bind-html="entry.threadTitle | sanitize"></div>
+            <div class="panel-body">
+                <div ng-bind-html="entry.content | sanitize"></div>
+            </div>
+        </div>
+    </div>
+</div>

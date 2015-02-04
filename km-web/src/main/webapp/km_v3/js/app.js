@@ -5,6 +5,7 @@
     'use strict';
     var app = angular.module('km_v3', [
         'controllers',
-        'directives'
+        'directives',
+        'filters'
     ]);
 })();

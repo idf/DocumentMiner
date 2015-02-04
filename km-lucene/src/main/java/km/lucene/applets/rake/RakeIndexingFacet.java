@@ -43,7 +43,7 @@ public class RakeIndexingFacet implements Runnable {
     @Override
     public void run() {
         try {
-            clusteredIndexing();
+            basicIndexing();
         }
         catch (IOException e) {
             throw new RuntimeException(e);

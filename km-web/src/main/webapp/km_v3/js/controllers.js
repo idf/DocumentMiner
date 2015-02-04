@@ -5,16 +5,38 @@
     'use strict';
     var app = angular.module('controllers', []);
 
-    app.controller('SearchController', ["$http", function($http) {
+    app.controller('SearchController', ['$http', function($http) {
         var ctrl = this;
-        var debug = false;
-        ctrl.results = [];
-        ctrl.results.push({"snippet": "no results yet"});
-        ctrl.queryTerm = {};
+        var debug = true;
+        ctrl.results = {};
+        ctrl.query = {};
+
+        ctrl.pagination = function(pageInfo) {
+            var pageCount = pageInfo.pageCount;
+            var page = pageInfo.page;
+            // TODO: page
+        };
+
+        ctrl.filtering = function() {
+
+        };
 
         ctrl.searchQuery = function() {
-            console.log("query searched");
-            ctrl.results.push({"snippet": "this is the test results: "+ctrl.queryTerm.content }); // something with ctrl.queryTerm
+            var param = [];
+            param.push('query='+ctrl.query.str);
+            param.push('filter='+'postMonth:,postYear:,topicId:,forumId:,threadId:,poster:');
+            param.push('page='+1);
+            param.push('sort='+2);
+            $http.get('/s/v2/posts?'+param.join('&')).success(function(data) {
+                console.log(data);
+                ctrl.results.posts = data;
+                ctrl.pagination(data.pageInfo);
+            });
+
+            $http.get('/s/v2/collocations?query='+ctrl.query.str).success(function(data) {
+                console.log(data);
+                ctrl.results.collocations = data;
+            });
         };
     }]);
 })();

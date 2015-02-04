@@ -94,7 +94,7 @@ public class TermCollocationExtractor {
 
     public TreeMap<String, CollocationScorer> search(String queryString) throws ParseException, IOException, URISyntaxException {
         Timestamper timestamper = new Timestamper();
-        timestamper.start();
+        timestamper.loudStart();
         QueryParser queryParser = new QueryParser(Version.LUCENE_48, this.fieldName, new CustomAnalyzer(Version.LUCENE_48));
         Query query = queryParser.parse(queryString);
         TopScoreDocCollector collector = TopScoreDocCollector.create(this.k, true);
@@ -124,7 +124,7 @@ public class TermCollocationExtractor {
         phraseBScores = this.helper.filterByTermFreq(phraseBScores, 5);
         TreeMap<String, CollocationScorer> sortedTermBScores = this.helper.sortScores(termBScores);
         TreeMap<String, CollocationScorer> sortedPhraseBScores = this.helper.sortScores(phraseBScores);
-        timestamper.end();
+        timestamper.loudEnd();
         logger.info("Search "+queryString+" completed");
         return sortedPhraseBScores;
     }
@@ -149,11 +149,11 @@ public class TermCollocationExtractor {
      */
     private void extract(Term t) throws IOException, ParseException {
         Timestamper timestamper = new Timestamper();
-        timestamper.start();
+        timestamper.loudStart();
         Map<String, CollocationScorer> termBScores = processTerm(t);
         termBScores = this.helper.filterByCollocationCount(termBScores, 5);
         this.helper.sortScores(termBScores);
-        timestamper.end();
+        timestamper.loudEnd();
     }
 
 

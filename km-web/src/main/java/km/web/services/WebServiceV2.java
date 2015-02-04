@@ -1,11 +1,15 @@
 package km.web.services;
 
+import io.deepreader.java.commons.util.Sorter;
+import io.deepreader.java.commons.util.Timestamper;
 import km.common.Settings;
+import km.lucene.applets.collocations.TermCollocationExtractor;
 import km.lucene.constants.FieldName;
 import km.lucene.entities.Facet;
 import km.lucene.entities.FacetWithKeyword;
 import km.lucene.search.FacetService;
 import km.lucene.search.PostService;
+import org.apache.lucene.index.collocations.CollocationScorer;
 import org.apache.lucene.queryparser.classic.ParseException;
 
 import javax.ws.rs.GET;
@@ -14,12 +18,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Path("/v2")
 public class WebServiceV2 {
+    TermCollocationExtractor tce;
+    public WebServiceV2() throws Exception {
+        this.tce = new TermCollocationExtractor("", Settings.POSTINDEX_PATH, "", Settings.DriverSettings.ROOT_FOLDER+"rakeIndex-post-clustered-9152.ser");
+    }
 
     @GET
     @Path("/posts")
@@ -35,6 +42,24 @@ public class WebServiceV2 {
         PostService ps = new PostService(indexPath, taxoPath);
         Map<String, Object> ret = ps.getPosts(queryStr, filterStr, page, sortType);
         ret.put("elapsed", new Date().getTime() - start);
+        return ret;
+    }
+
+    @GET
+    @Path("/collocations")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Map<String, Object> getCollocations(
+            @QueryParam("query") String queryStr
+    ) throws Exception {
+        Timestamper timer = new Timestamper();
+        timer.start();
+        Map<String, Object> ret = new HashMap<>();
+        TreeMap<String, CollocationScorer> sortedPhraseBScores = this.tce.search(queryStr);
+        sortedPhraseBScores = Sorter.topEntries(sortedPhraseBScores, 10,
+                (e1, e2) -> Float.compare(e1.getValue().getScore(), e2.getValue().getScore()));
+        List<CollocationScorer> rankedLst = sortedPhraseBScores.entrySet().stream().map(Map.Entry<String, CollocationScorer>::getValue).collect(Collectors.toList());
+        ret.put("results", rankedLst);
+        ret.put("elapsed", timer.end());
         return ret;
     }
     

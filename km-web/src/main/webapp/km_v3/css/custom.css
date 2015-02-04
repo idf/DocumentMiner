@@ -1,0 +1,39 @@
+/**************** Flush Footer ****************/
+html, body {
+    height: 100%;
+}
+
+#wrap {
+    min-height: 90%;
+    overflow: visible; /* otherwise got scroll bar */ /* scroll bar problem cannot be solved */
+    /* padding-bottom:150px; */ /* this needs to be bigger than footer height*/
+}
+
+.footer {
+    position: relative;
+    margin-top: -150px; /* negative value of footer height */
+    height: 150px;
+    clear:both;
+    padding-top:20px;
+}
+/**************** HTML5 Semantics ****************/
+section,
+article,
+footer{
+    text-align: justify;
+}
+footer{
+    background-color: #222222;
+    color: #b5b5b6;
+}
+#footer_end{
+    margin-bottom: 30px;
+}
+
+a.jump-link{
+
+}
+
+img.full{
+    width: 1100px; !important /* limit the width when the image is displayed as full */
+}

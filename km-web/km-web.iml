@@ -36,12 +36,15 @@
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-facet:4.8.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-queryparser:4.8.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-sandbox:4.8.1" level="project" />
-    <orderEntry type="module" module-name="commons-util" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-highlighter:4.8.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-queries:4.8.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-memory:4.8.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.3.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax:javaee-web-api:7.0" level="project" />
+    <orderEntry type="module" module-name="commons-util" />
+    <orderEntry type="module" module-name="rake4j" />
+    <orderEntry type="library" name="Maven: com.google.guava:guava:15.0" level="project" />
+    <orderEntry type="library" name="Maven: commons-io:commons-io:2.4" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.9" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-log4j12:1.7.9" level="project" />
     <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />

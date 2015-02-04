@@ -35,7 +35,7 @@ public class RakeIndexer implements Runnable {
         Index index = new Index();
         Logger logger = LoggerFactory.getLogger(RakeIndexer.class);
 
-        timestamper.start();
+        timestamper.loudStart();
         RakeAnalyzer rake = null;
         try {
             rake = new RakeAnalyzer();
@@ -64,6 +64,6 @@ public class RakeIndexer implements Runnable {
 
         logger.trace(index.toString());
         logger.info("Rake Indexing Completed");
-        timestamper.end();
+        timestamper.loudEnd();
     }
 }
