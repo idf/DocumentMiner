@@ -67,9 +67,9 @@ public class Driver {
     }
 
     TreeMap<String, CollocationScorer> collocate(TermCollocationExtractor tce, String term) throws Exception {
-        TreeMap<String, CollocationScorer> sortedPhraseBScores = tce.search(term);
+        Map<String , TreeMap<String, CollocationScorer>> sorts = tce.search(term);
         logger.info("Collocation scoring completed");
-        return Sorter.topEntries(sortedPhraseBScores, TOP,
+        return Sorter.topEntries(sorts.get("phrases"), TOP,
                 (e1, e2) -> Float.compare(e1.getValue().getScore(), e2.getValue().getScore()));
 
     }

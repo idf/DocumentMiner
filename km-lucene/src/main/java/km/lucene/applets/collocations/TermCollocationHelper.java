@@ -3,6 +3,7 @@ package km.lucene.applets.collocations;
 import io.deepreader.java.commons.util.Sorter;
 import org.apache.lucene.index.collocations.CollocationScorer;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -74,6 +75,9 @@ public class TermCollocationHelper {
         }
     }
 
+    public Comparator<Map.Entry<String, CollocationScorer>> getComparator() {
+        return (e1, e2) -> Float.compare(e1.getValue().getScore(), e2.getValue().getScore());
+    }
 
     public boolean isTooPopularOrNotPopularEnough(float percent) {
         // check term is not too rare or frequent

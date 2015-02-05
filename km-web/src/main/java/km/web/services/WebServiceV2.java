@@ -4,6 +4,7 @@ import io.deepreader.java.commons.util.Sorter;
 import io.deepreader.java.commons.util.Timestamper;
 import km.common.Settings;
 import km.lucene.applets.collocations.TermCollocationExtractor;
+import km.lucene.applets.collocations.TermCollocationHelper;
 import km.lucene.constants.FieldName;
 import km.lucene.entities.Facet;
 import km.lucene.entities.FacetWithKeyword;
@@ -53,12 +54,19 @@ public class WebServiceV2 {
     ) throws Exception {
         Timestamper timer = new Timestamper();
         timer.start();
+        TermCollocationHelper helper = new TermCollocationHelper();
         Map<String, Object> ret = new HashMap<>();
-        TreeMap<String, CollocationScorer> sortedPhraseBScores = this.tce.search(queryStr);
-        sortedPhraseBScores = Sorter.topEntries(sortedPhraseBScores, 10,
-                (e1, e2) -> Float.compare(e1.getValue().getScore(), e2.getValue().getScore()));
-        List<CollocationScorer> rankedLst = sortedPhraseBScores.entrySet().stream().map(Map.Entry<String, CollocationScorer>::getValue).collect(Collectors.toList());
-        ret.put("results", rankedLst);
+        Map<String, TreeMap<String, CollocationScorer>> sorts = this.tce.search(queryStr);  // terms, phrases
+        Map<String, List<CollocationScorer>> results = sorts.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                            e-> Sorter.topEntries(e.getValue(), 10, helper.getComparator())
+                                    .entrySet().stream()
+                                    .map(Map.Entry::getValue)
+                                    .collect(Collectors.toList())
+                        )
+                );
+
+        ret.put("results", results);
         ret.put("elapsed", timer.end());
         return ret;
     }

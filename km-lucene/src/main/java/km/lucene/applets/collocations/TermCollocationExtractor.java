@@ -48,7 +48,7 @@ public class TermCollocationExtractor {
 
     // top k
     BitSet liveDocs = new BitSet();
-    int k = 100;
+    int k = 500;
 
     TermCollocationHelper helper = new TermCollocationHelper();
 
@@ -56,7 +56,8 @@ public class TermCollocationExtractor {
         // test parameters
         args = new String[4];
         args[0] = Settings.INDEX_PATH;
-        args[1] = Settings.THINDEX_PATH;
+        // args[1] = Settings.THINDEX_PATH;
+        args[1] = Settings.POSTINDEX_PATH;
         args[2] = Settings.TAXOINDEX_PATH;
         args[3] = Settings.RakeSettings.BASIC_INDEX_PATH;
 
@@ -71,9 +72,8 @@ public class TermCollocationExtractor {
         String rakeIndexPath = args[3];
 
         TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, mainIndexPath, taxoPath, rakeIndexPath);
-        TreeMap<String, CollocationScorer> sortedPhraseBScores = tce.search("ntu");
-        tce.helper.display(Sorter.topEntries(sortedPhraseBScores, 10,
-                (e1, e2) -> Float.compare(e1.getValue().getScore(), e2.getValue().getScore())));
+        Map<String, TreeMap<String, CollocationScorer>> sorts = tce.search("ntu");
+        sorts.entrySet().forEach(e -> tce.helper.display(Sorter.topEntries(e.getValue(), 10, tce.helper.getComparator())));
     }
 
     public TermCollocationExtractor(String indexPath, String mainIndexPath, String taxoPath, String rakeIndexPath) throws IOException, ClassNotFoundException, URISyntaxException {
@@ -92,7 +92,7 @@ public class TermCollocationExtractor {
     }
 
 
-    public TreeMap<String, CollocationScorer> search(String queryString) throws ParseException, IOException, URISyntaxException {
+    public Map<String, TreeMap<String, CollocationScorer>> search(String queryString) throws ParseException, IOException, URISyntaxException {
         Timestamper timestamper = new Timestamper();
         timestamper.loudStart();
         QueryParser queryParser = new QueryParser(Version.LUCENE_48, this.fieldName, new CustomAnalyzer(Version.LUCENE_48));
@@ -120,13 +120,16 @@ public class TermCollocationExtractor {
             dpe.advance(docID);
             this.processDocForTerm(t, dpe, termBScores, phraseBScores, true);
         }
-        termBScores = this.helper.filterByCollocationCount(termBScores, 5);
+        termBScores = this.helper.filterByTermFreq(termBScores, 5);
         phraseBScores = this.helper.filterByTermFreq(phraseBScores, 5);
         TreeMap<String, CollocationScorer> sortedTermBScores = this.helper.sortScores(termBScores);
         TreeMap<String, CollocationScorer> sortedPhraseBScores = this.helper.sortScores(phraseBScores);
         timestamper.loudEnd();
         logger.info("Search "+queryString+" completed");
-        return sortedPhraseBScores;
+        Map<String, TreeMap<String, CollocationScorer>> ret = new HashMap<>();
+        ret.put("terms", sortedTermBScores);
+        ret.put("phrases", sortedPhraseBScores);
+        return ret;
     }
 
     private void rakePreprocess(TopDocs topDocs) throws IOException {
