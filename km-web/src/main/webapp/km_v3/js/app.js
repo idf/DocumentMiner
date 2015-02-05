@@ -3,9 +3,13 @@
  */
 (function(){
     'use strict';
-    var app = angular.module('km_v3', [
-        'controllers',
-        'directives',
-        'filters'
+
+    angular.module('km_v3', [
+        /* Shared Modules */
+        'filters',
+
+        /* Feature ares */
+        'km_v3.controllers',
+        'km_v3.directives'
     ]);
 })();

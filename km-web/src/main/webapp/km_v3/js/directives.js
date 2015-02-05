@@ -1,6 +1,6 @@
 (function(){
     'use strict';
-    var app = angular.module('directives', []);
+    var app = angular.module('km_v3.directives', []);
 
     app.directive("postHits", function() {
        return {
