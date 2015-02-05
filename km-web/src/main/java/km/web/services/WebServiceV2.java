@@ -56,7 +56,7 @@ public class WebServiceV2 {
         timer.start();
         TermCollocationHelper helper = new TermCollocationHelper();
         Map<String, Object> ret = new HashMap<>();
-        Map<String, TreeMap<String, CollocationScorer>> sorts = this.tce.search(queryStr);  // terms, phrases
+        Map<String, TreeMap<String, CollocationScorer>> sorts = this.tce.search(queryStr);  // terms, phrases, phrases_excluded
         Map<String, List<CollocationScorer>> results = sorts.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey,
                             e-> Sorter.topEntries(e.getValue(), 10, helper.getComparator())

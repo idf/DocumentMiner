@@ -2,6 +2,7 @@ package km.lucene.applets.collocations;
 
 import io.deepreader.java.commons.util.Sorter;
 import io.deepreader.java.commons.util.Timestamper;
+import io.deepreader.java.commons.util.Transformer;
 import km.common.Settings;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
@@ -124,11 +125,15 @@ public class TermCollocationExtractor {
         phraseBScores = this.helper.filterByTermFreq(phraseBScores, 5);
         TreeMap<String, CollocationScorer> sortedTermBScores = this.helper.sortScores(termBScores);
         TreeMap<String, CollocationScorer> sortedPhraseBScores = this.helper.sortScores(phraseBScores);
+        TreeMap<String, CollocationScorer> sortedPhraseExcludedScores = new TreeMap<>(sortedPhraseBScores);
+        Transformer.removeByKey(sortedPhraseExcludedScores, e-> e.contains(queryString));
+
         timestamper.loudEnd();
         logger.info("Search "+queryString+" completed");
         Map<String, TreeMap<String, CollocationScorer>> ret = new HashMap<>();
         ret.put("terms", sortedTermBScores);
         ret.put("phrases", sortedPhraseBScores);
+        ret.put("phrases_excluded", sortedPhraseExcludedScores);
         return ret;
     }
 
