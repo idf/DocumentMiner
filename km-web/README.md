@@ -6,6 +6,7 @@
 
 
 #CSS/JS Dependencies
+Do not commit 3rd party/ventor CSS/JS. Use bower.json to update dependencies instead
 ```bash
 bower update
 ```

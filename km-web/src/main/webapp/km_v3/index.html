@@ -2,12 +2,14 @@
 <html ng-app="km_v3">
 <head>
     <link rel="stylesheet" type="text/css" href="/bower_components/bootstrap/dist/css/bootstrap-yeti.css" />
-    <link rel="stylesheet" type="text/css" href="css/custom.css" />
     <link rel="stylesheet" type="text/css" href="/bower_components/angular-chart.js/dist/angular-chart.css" />
+    <link rel="stylesheet" type="text/css" href="css/custom.css" />
 
     <script type="text/javascript" src="/bower_components/angularjs/angular.min.js"></script>
-    <script type="text/javascript" src="/bower_components/chart.js/chart.js"></script>
+    <script type="text/javascript" src="/bower_components/Chart.js/Chart.min.js"></script>
     <script type="text/javascript" src="/bower_components/angular-chart.js/dist/angular-chart.js"></script>
+    <script type="text/javascript" src="/js/commons-util-js/PrimitiveExtensions.js"></script>
+
     <script type="text/javascript" src="/js/commons-util-js/angularjs/filters.js"></script>
     <script type="text/javascript" src="js/controllers.js"></script>
     <script type="text/javascript" src="js/directives.js"></script>
@@ -52,7 +54,10 @@
                     <div>
                         <h3 ng-show="searchCtrl.debug">Query: {{searchCtrl.query.str }}</h3>
                         <div ng-repeat="entry in searchCtrl.results.posts">
-                            <canvas ng-controller="RadarCtrl" id="radar" class="chart chart-radar" data="data" labels="labels"></canvas>
+                            TODO
+                        </div>
+                        <div ng-controller="BarController as barCtrl">
+                            <canvas class="chart chart-bar" data="barCtrl.data" labels="barCtrl.labels" options="barCtrl.options"></canvas>
                         </div>
                     </div>
                 </div>

@@ -44,12 +44,22 @@
         }
     }]);
 
-    app.controller('RadarCtrl', function($scope) {
-        $scope.labels =["Eating", "Drinking", "Sleeping", "Designing", "Coding", "Cycling", "Running"];
+    app.controller('BarController', function() {
+        var vm = this;
+        vm.labels =["nice place", "felicia chin", "bear bear", "pika kor kor", "pulau ubin", "happy valentine", "merry christmas", "nus forum", "haut ahh", "world class university"];
 
-        $scope.data = [
-            [65, 59, 90, 81, 56, 55, 40],
-            [28, 48, 40, 19, 96, 27, 100]
+        vm.series = ["Phrases"];
+
+        vm.data = [
+            [65, 59, 90, 81, 56, 55, 40, 56, 55, 40]
         ];
+
+        var steps = 10;
+        vm.options = {
+            scaleOverride: true,
+            scaleSteps: steps,
+            scaleStepWidth: Math.ceil(vm.data[0].max()/steps),
+            scaleStartValue: 0
+        };
     });
 })();
