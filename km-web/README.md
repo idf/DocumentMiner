@@ -5,3 +5,7 @@
 * Web Container: Glassfish 4.0.0
 
 
+#CSS/JS Dependencies
+```bash
+bower update
+```

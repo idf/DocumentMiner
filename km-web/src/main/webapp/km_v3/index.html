@@ -3,7 +3,11 @@
 <head>
     <link rel="stylesheet" type="text/css" href="/bower_components/bootstrap/dist/css/bootstrap-yeti.css" />
     <link rel="stylesheet" type="text/css" href="css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="/bower_components/angular-chart.js/dist/angular-chart.css" />
+
     <script type="text/javascript" src="/bower_components/angularjs/angular.min.js"></script>
+    <script type="text/javascript" src="/bower_components/chart.js/chart.js"></script>
+    <script type="text/javascript" src="/bower_components/angular-chart.js/dist/angular-chart.js"></script>
     <script type="text/javascript" src="/js/commons-util-js/angularjs/filters.js"></script>
     <script type="text/javascript" src="js/controllers.js"></script>
     <script type="text/javascript" src="js/directives.js"></script>
@@ -48,60 +52,12 @@
                     <div>
                         <h3 ng-show="searchCtrl.debug">Query: {{searchCtrl.query.str }}</h3>
                         <div ng-repeat="entry in searchCtrl.results.posts">
-                            TODO
+                            <canvas ng-controller="RadarCtrl" id="radar" class="chart chart-radar" data="data" labels="labels"></canvas>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <h3>Co-occurrence Results</h3>
-                    <div>
-                        <h4>Query: {{searchCtrl.query.str }}</h4>
-                        <p>Elapsed: {{searchCtrl.results.collocations.elapsed }}ms</p>
-                        <table class="table table-striped table-hover ">
-                            <thead>
-                            <tr>
-                                <th class="col-md-2">#</th>
-                                <th class="col-md-10">Terms</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr ng-repeat="entry in searchCtrl.results.collocations.results.terms ">
-                                <td>{{$index + 1}}</td>
-                                <td>{{ entry.coincidentalTerm }}</td>
-                            </tr>
-                            </tbody>
-                        </table>
-
-                        <table class="table table-striped table-hover ">
-                            <thead>
-                            <tr>
-                                <th class="col-md-2">#</th>
-                                <th class="col-md-10">Phrases</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr ng-repeat="entry in searchCtrl.results.collocations.results.phrases ">
-                                <td>{{$index + 1}}</td>
-                                <td>{{ entry.coincidentalTerm }}</td>
-                            </tr>
-                            </tbody>
-                        </table>
-
-                        <table class="table table-striped table-hover ">
-                            <thead>
-                            <tr>
-                                <th class="col-md-2">#</th>
-                                <th class="col-md-10">Phrases (query exclusive)</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr ng-repeat="entry in searchCtrl.results.collocations.results.phrases_excluded ">
-                                <td>{{$index + 1}}</td>
-                                <td>{{ entry.coincidentalTerm }}</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <co-occurrence-table></co-occurrence-table>
                 </div>
             </div>
             <hr>
