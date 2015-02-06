@@ -5,7 +5,7 @@
     'use strict';
     var app = angular.module('km_v3.controllers', ['chart.js']);
 
-    app.controller('SearchController', ['$http', 'collocationService', function($http, sharedService) {
+    app.controller('SearchController', ['$http', '$scope', 'collocationDataService', function($http, $scope, sharedService) {
         var vm = this;  // view model
         var debug = true;
         vm.results = {};
@@ -43,19 +43,19 @@
             //});
 
             sharedService.prepForBroadcast(vm.query.str);
-            vm.$on('handleBroadcast', function() {
+            $scope.$on('collocationDataReady', function() {
                vm.results.collocations = sharedService.msg;
             });
         }
     }]);
 
-    app.factory('collocationService', ["$http", "$rootScope", function($http, $rootScope) {
+    app.factory('collocationDataService', ["$http", "$rootScope", function($http, $rootScope) {
         var sharedService = {};
         sharedService.prepForBroadcast = prepForBroadcast;
         sharedService.broadcastItem = broadcastItem;
 
         function broadcastItem() {
-            $rootScope.$broadcast('handleBroadcast');
+            $rootScope.$broadcast('collocationDataReady');
         }
 
         function prepForBroadcast(str) {
@@ -69,20 +69,23 @@
         return sharedService;
     }]);
 
-    // TODO data service
-    app.controller('BarController', function() {
+    // TODO service for phrases and phrases excluded
+    app.controller('BarController', ['$scope', 'collocationDataService', function($scope, sharedService) {
         var vm = this;
         vm.labels =[];
         vm.series = [""];
         vm.data = []; // push
         var steps = 10;
         vm.options = {};
-
         vm.setUp = setUp;
+
         function setUp(rankedList) {
+            vm.data = [];
+            vm.labels =[];
+
             var scores = [];
             for(var i=0; i<rankedList.length; i++) {
-                scores.push(rankedList[i].score);
+                scores.push(rankedList[i].score*1000);
                 vm.labels.push(rankedList[i].coincidentalTerm);
             }
             vm.data.push(scores);
@@ -94,5 +97,9 @@
                 scaleStartValue: 0
             };
         }
-    });
+
+        $scope.$on('collocationDataReady', function() {
+            vm.setUp(sharedService.msg.results.terms);
+        });
+    }]);
 })();
