@@ -6,6 +6,7 @@ import io.deepreader.java.commons.util.Transformer;
 import km.common.Settings;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
+import km.lucene.entities.ScoreMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.lucene.document.Document;
@@ -73,7 +74,7 @@ public class TermCollocationExtractor {
         String rakeIndexPath = args[3];
 
         TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, mainIndexPath, taxoPath, rakeIndexPath);
-        Map<String, TreeMap<String, CollocationScorer>> sorts = tce.search("ntu sce");
+        Map<String, ScoreMap> sorts = tce.search("ntu sce");
         sorts.entrySet().forEach(e -> tce.helper.display(Sorter.topEntries(e.getValue(), 10, tce.helper.getComparator())));
     }
 
@@ -93,7 +94,7 @@ public class TermCollocationExtractor {
     }
 
 
-    public Map<String, TreeMap<String, CollocationScorer>> search(String queryString) throws ParseException, IOException, URISyntaxException {
+    public Map<String, ScoreMap> search(String queryString) throws ParseException, IOException, URISyntaxException {
         Timestamper timestamper = new Timestamper();
         timestamper.loudStart();
         QueryParser queryParser = new QueryParser(Version.LUCENE_48, this.fieldName, new CustomAnalyzer(Version.LUCENE_48));
@@ -108,18 +109,18 @@ public class TermCollocationExtractor {
             this.liveDocs.set(topDocs.scoreDocs[j].doc);
         }
 
-        List<Map<String, TreeMap<String, CollocationScorer>>> rets = new ArrayList<>();
+        List<Map<String, ScoreMap>> rets = new ArrayList<>();
         for(Term t : terms) {
             // rakePreprocess(topDocs);
-            Map<String, TreeMap<String, CollocationScorer>> ret = collocateIndividualTerm(t, topDocs);
+            Map<String, ScoreMap> ret = collocateIndividualTerm(t, topDocs);
             rets.add(ret);
         }
-        Map<String, TreeMap<String, CollocationScorer>> ret = mergeSearch(rets);
+        Map<String, ScoreMap> ret = mergeSearch(rets);
         timestamper.loudEnd();
         return ret;
     }
 
-    private Map<String, TreeMap<String, CollocationScorer>> collocateIndividualTerm(Term t, TopDocs topDocs) throws IOException {
+    private Map<String, ScoreMap> collocateIndividualTerm(Term t, TopDocs topDocs) throws IOException {
         Map<String, CollocationScorer> termBScores = new HashMap<>();
         Map<String, CollocationScorer> phraseBScores = new HashMap<>();
         for (int j = 0; j < Math.min(this.k, topDocs.totalHits); j++) {
@@ -130,10 +131,10 @@ public class TermCollocationExtractor {
         }
         termBScores = this.helper.filterByTermFreq(termBScores, 5);
         phraseBScores = this.helper.filterByTermFreq(phraseBScores, 5);
-        TreeMap<String, CollocationScorer> sortedTermBScores = this.helper.sortScores(termBScores);
-        TreeMap<String, CollocationScorer> sortedPhraseBScores = this.helper.sortScores(phraseBScores);
+        ScoreMap sortedTermBScores = this.helper.sortScores(termBScores);
+        ScoreMap sortedPhraseBScores = this.helper.sortScores(phraseBScores);
 
-        Map<String, TreeMap<String, CollocationScorer>> ret = new HashMap<>();
+        Map<String, ScoreMap> ret = new HashMap<>();
         ret.put("terms", sortedTermBScores);
         ret.put("phrases", sortedPhraseBScores);
         logger.info("Search "+t.text()+" completed");
@@ -148,8 +149,8 @@ public class TermCollocationExtractor {
      * @param sortedPhraseBScores
      * @return
      */
-    private TreeMap<String, CollocationScorer> getPhrasesExcluded(Term t, TreeMap<String, CollocationScorer> sortedPhraseBScores) {
-        TreeMap<String, CollocationScorer> sortedPhraseExcludedScores = new TreeMap<>(sortedPhraseBScores);
+    private ScoreMap getPhrasesExcluded(Term t, ScoreMap sortedPhraseBScores) {
+        ScoreMap sortedPhraseExcludedScores = new ScoreMap(sortedPhraseBScores);
         Transformer.removeByKey(sortedPhraseExcludedScores, e -> e.contains(t.text()));
         return sortedPhraseExcludedScores;
     }
@@ -159,11 +160,11 @@ public class TermCollocationExtractor {
      * @param rets
      * @return
      */
-    private Map<String, TreeMap<String, CollocationScorer>> mergeSearch(List<Map<String, TreeMap<String, CollocationScorer>>> rets) {
-        Map<String, TreeMap<String, CollocationScorer>> ret = new HashMap<>();
-        List<TreeMap<String, CollocationScorer>> terms = new ArrayList<>();
-        List<TreeMap<String, CollocationScorer>> phrases = new ArrayList<>();
-        for(Map<String, TreeMap<String, CollocationScorer>> r: rets) {
+    private Map<String, ScoreMap> mergeSearch(List<Map<String, ScoreMap>> rets) {
+        Map<String, ScoreMap> ret = new HashMap<>();
+        List<ScoreMap> terms = new ArrayList<>();
+        List<ScoreMap> phrases = new ArrayList<>();
+        for(Map<String, ScoreMap> r: rets) {
             terms.add(r.get("terms"));
             phrases.add(r.get("phrases"));
         }
@@ -175,14 +176,13 @@ public class TermCollocationExtractor {
     /**
      * Merge either phrases map or terms map
      * TODO: exclude "term1 term2" from search query "term1 term2"
-     * TODO: internal data structure of TreeMap<String, CollocationScorer>
-     * TODO: bugs in terms merge 
+     * TODO: bugs in terms merge
      * @param lst
      * @return
      */
-    private TreeMap<String, CollocationScorer> mergeMaps(List<TreeMap<String, CollocationScorer>> lst) {
-        TreeMap<String, CollocationScorer> ret = lst.get(0);  // base
-        for(TreeMap<String, CollocationScorer> map: lst.subList(1, lst.size())) {
+    private ScoreMap mergeMaps(List<ScoreMap> lst) {
+        ScoreMap ret = lst.get(0);  // base
+        for(ScoreMap map: lst.subList(1, lst.size())) {
             for(Map.Entry<String, CollocationScorer> e: map.entrySet()) {
                 if(ret.containsKey(e.getKey())) {
                     ret.put(e.getKey(), ret.get(e.getKey()).merge(e.getValue()));

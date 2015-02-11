@@ -1,6 +1,7 @@
 package km.lucene.applets.collocations;
 
 import io.deepreader.java.commons.util.Sorter;
+import km.lucene.entities.ScoreMap;
 import org.apache.lucene.index.collocations.CollocationScorer;
 
 import java.util.Comparator;
@@ -43,8 +44,8 @@ public class TermCollocationHelper {
                 .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public TreeMap<String, CollocationScorer> sortScores(Map<String, CollocationScorer> phraseTerms) {
-        TreeMap<String, CollocationScorer> sortedMap = Sorter.sortByValues(phraseTerms, new Sorter.ValueComparator<String, CollocationScorer>(phraseTerms) {
+    public ScoreMap sortScores(Map<String, CollocationScorer> phraseTerms) {
+        TreeMap sortedMap = Sorter.sortByValues(phraseTerms, new Sorter.ValueComparator<String, CollocationScorer>(phraseTerms) {
             @Override
             public int compare(String a, String b) {
                 try {
@@ -60,10 +61,10 @@ public class TermCollocationHelper {
                 }
             }
         });
-        return sortedMap;
+        return new ScoreMap(sortedMap);
     }
 
-    public void display(TreeMap<String, CollocationScorer> sortedMap) {
+    public void display(ScoreMap sortedMap) {
         Iterator it = sortedMap.entrySet().iterator();
         int i = 0;
         while(it.hasNext()) {

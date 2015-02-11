@@ -6,6 +6,7 @@ import km.common.Settings;
 import km.lucene.applets.cluto.ClutoWrapper;
 import km.lucene.applets.cluto.DocFormatter;
 import km.lucene.applets.rake.RakeIndexingFacet;
+import km.lucene.entities.ScoreMap;
 import org.apache.lucene.index.collocations.CollocationScorer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.IntStream;
 
 /**
@@ -66,19 +66,19 @@ public class Driver {
         return new TermCollocationExtractor("", indexPath, "", rakeIndexPath);
     }
 
-    TreeMap<String, CollocationScorer> collocate(TermCollocationExtractor tce, String term) throws Exception {
-        Map<String , TreeMap<String, CollocationScorer>> sorts = tce.search(term);
+    ScoreMap collocate(TermCollocationExtractor tce, String term) throws Exception {
+        Map<String , ScoreMap> sorts = tce.search(term);
         logger.info("Collocation scoring completed");
         return Sorter.topEntries(sorts.get("phrases"), TOP,
                 (e1, e2) -> Float.compare(e1.getValue().getScore(), e2.getValue().getScore()));
 
     }
 
-    void writeToFile(List<TreeMap<String, CollocationScorer>> lst, String suffix) {
+    void writeToFile(List<ScoreMap> lst, String suffix) {
         String resultPath = Settings.DriverSettings.ROOT_FOLDER+String.format("result-%s.md", suffix);
 
         StringBuilder sb = new StringBuilder();
-        for(TreeMap<String, CollocationScorer> map: lst) {
+        for(ScoreMap map: lst) {
             int i = 0;
             for(Map.Entry<String, CollocationScorer> pair: map.entrySet()) {
                 if(i==0)
@@ -96,7 +96,7 @@ public class Driver {
         for(int k: LST_K) {
             final String SUFFIX = String.format("%s-%d", "post-clustered", k);
             String rakeIndexPath = cluster(INDEX_PATH, k, SUFFIX);
-            List<TreeMap<String, CollocationScorer>> lst = new ArrayList<>();
+            List<ScoreMap> lst = new ArrayList<>();
             TermCollocationExtractor tce = getTCE(INDEX_PATH, rakeIndexPath);
             for(String term: TERMS) {
                 lst.add(collocate(tce, term));
@@ -109,7 +109,7 @@ public class Driver {
         final String INDEX_PATH = Settings.THINDEX_PATH;
         final String SUFFIX = String.format("%s", "thread");
         String rakeIndexPath = new RakeIndexingFacet().threadedIndexing();
-        List<TreeMap<String, CollocationScorer>> lst = new ArrayList<>();
+        List<ScoreMap> lst = new ArrayList<>();
         TermCollocationExtractor tce = getTCE(INDEX_PATH, rakeIndexPath);
         for(String term: TERMS) {
             lst.add(collocate(tce, term));
@@ -121,7 +121,7 @@ public class Driver {
         final String INDEX_PATH = Settings.POSTINDEX_PATH;
         final String SUFFIX = String.format("%s", "post");
         String rakeIndexPath = new RakeIndexingFacet().basicIndexing();
-        List<TreeMap<String, CollocationScorer>> lst = new ArrayList<>();
+        List<ScoreMap> lst = new ArrayList<>();
         TermCollocationExtractor tce = getTCE(INDEX_PATH, rakeIndexPath);
         for(String term: TERMS) {
             lst.add(collocate(tce, term));
