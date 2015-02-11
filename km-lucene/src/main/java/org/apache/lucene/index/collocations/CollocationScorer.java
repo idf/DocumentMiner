@@ -110,6 +110,14 @@ public class CollocationScorer {
 
     }
 
+    public CollocationScorer merge(CollocationScorer other) {
+        if(this.coincidentalTerm.equals(other.coincidentalTerm))
+            this.coIncidenceDocCount += other.coIncidenceDocCount;
+        if(!this.term.equals(other.term))
+            this.term = this.term+" "+other.term;  // better algorithm
+        return this;
+    }
+
     public String getCoincidentalTerm() {
         return coincidentalTerm;
     }
