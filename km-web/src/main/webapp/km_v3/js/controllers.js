@@ -7,7 +7,9 @@
 
     app.controller('SearchController', ['$http', '$scope', 'collocationDataService', function($http, $scope, sharedService) {
         var vm = this;  // view model
-        var debug = true;
+        vm.debug = true;
+        vm.show = false;
+        vm.searching = false;
         vm.results = {};
         vm.query = {};
 
@@ -44,49 +46,49 @@
 
             sharedService.prepForBroadcast(vm.query.str);
             $scope.$on('collocationDataReady', function() {
-               vm.results.collocations = sharedService.msg;
+                vm.results.collocations = sharedService.msg;
+                vm.searching = false;
+                vm.show = true;
             });
+            $scope.$on('prepForBroadcast', function() {
+                vm.searching = true;
+                vm.show = false;
+            });
+
         }
     }]);
 
     app.factory('collocationDataService', ["$http", "$rootScope", function($http, $rootScope) {
         var sharedService = {};
         sharedService.prepForBroadcast = prepForBroadcast;
-        sharedService.broadcastItem = broadcastItem;
-
-        function broadcastItem() {
-            $rootScope.$broadcast('collocationDataReady');
-        }
 
         function prepForBroadcast(str) {
+            $rootScope.$broadcast('prepForBroadcast');
             $http.get('/s/v2/collocations?query='+str).success(function(data) {
                 console.log(data);
                 sharedService.msg = data;
-                sharedService.broadcastItem();
+                $rootScope.$broadcast('collocationDataReady');
             });
         }
 
         return sharedService;
     }]);
 
-    // TODO service for phrases and phrases excluded, need constructor
     app.controller('BarController', ['$scope', 'collocationDataService', function($scope, sharedService) {
         var vm = this;
         vm.labels =[];
-        vm.series = [""];
         vm.data = []; // push
-        var steps = 10;
         vm.options = {};
         vm.setUp = setUp;
+        vm.cleanup = cleanup;
 
+        var steps = 10;
         vm.init = function (target) {
           vm.target = target;
         };
 
         function setUp(rankedList) {
-            vm.data = [];
-            vm.labels =[];
-
+            vm.cleanup();
             var scores = [];
             for(var i=0; i<rankedList.length; i++) {
                 scores.push(rankedList[i].score*1000);
@@ -102,13 +104,27 @@
             };
         }
 
+        function cleanup() {
+            vm.data.length = 0;
+            vm.labels.length = 0;
+            vm.options = {};
+        }
+
         $scope.$on('collocationDataReady', function() {
             if(vm.target==="terms") {
                 vm.setUp(sharedService.msg.results.terms);
             }
-            else if(vm.target=="phrases") {
+            else if(vm.target==="phrases") {
                 vm.setUp(sharedService.msg.results.phrases);
             }
+            else if(vm.target==="phrases_excluded") {
+                vm.setUp(sharedService.msg.results.phrases_excluded);
+            }
+        });
+
+        $scope.$on('prepForBroadcast', function () {
+            console.log("cleaning up ");
+            vm.cleanup();
         });
     }]);
 })();

@@ -20,14 +20,18 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Path("/v2")
 public class WebServiceV2 {
     TermCollocationExtractor tce;
+    PostService ps;
     public WebServiceV2() throws Exception {
         this.tce = new TermCollocationExtractor("", Settings.POSTINDEX_PATH, "", Settings.DriverSettings.ROOT_FOLDER+"rakeIndex-post-clustered-9152.ser");
+        this.ps = new PostService(Settings.INDEX_PATH, Settings.TAXOINDEX_PATH);
     }
 
     @GET
@@ -38,12 +42,10 @@ public class WebServiceV2 {
             @QueryParam("filter") String filterStr,
             @QueryParam("page") int page,
             @QueryParam("sort") int sortType) throws IOException, ParseException {
-        long start = new Date().getTime();
-        String indexPath = Settings.INDEX_PATH; // "E:/project/kd/data/index";
-        String taxoPath = Settings.TAXOINDEX_PATH; // "E:/project/kd/data/taxoindex";
-        PostService ps = new PostService(indexPath, taxoPath);
-        Map<String, Object> ret = ps.getPosts(queryStr, filterStr, page, sortType);
-        ret.put("elapsed", new Date().getTime() - start);
+        Timestamper timer = new Timestamper();
+        timer.start();
+        Map<String, Object> ret = this.ps.getPosts(queryStr, filterStr, page, sortType);
+        ret.put("elapsed", timer.end());
         return ret;
     }
 

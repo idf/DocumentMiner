@@ -16,4 +16,10 @@
        };
     });
 
+    app.directive('charts', function() {
+        return {
+            restrict: 'E',
+            templateUrl: 'charts.html'
+        };
+    });
 })();
