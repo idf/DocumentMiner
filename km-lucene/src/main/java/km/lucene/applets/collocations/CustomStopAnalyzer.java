@@ -36,6 +36,7 @@ public class CustomStopAnalyzer extends StopwordAnalyzerBase {
                 "haha",
                 "ha",
                 "lol",
+                "lar",
 
                 "a",
                 "a's",

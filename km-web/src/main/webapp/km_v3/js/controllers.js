@@ -49,6 +49,7 @@
                 vm.results.collocations = sharedService.msg;
                 vm.searching = false;
                 vm.show = true;
+                $scope.$broadcast('shown');
             });
             $scope.$on('prepForBroadcast', function() {
                 vm.searching = true;
@@ -96,6 +97,14 @@
                 scores.push(rankedList[i].score*1000);
                 vm.labels.push(rankedList[i].coincidentalTerm);
             }
+
+            var l = scores.length;
+            while(l<10) {
+                scores.push(0);
+                vm.labels.push('');
+                l++;
+            }
+
             vm.data.push(scores);
 
             vm.options =  {
@@ -120,13 +129,18 @@
             }
         });
 
+        $scope.$on('shown', function () {
+            console.log('event: shown');
+            $scope.$apply();  // TODO: fix $digest already in progress
+        });
+
         $scope.$on('prepForBroadcast', function () {
             vm.cleanup();
         });
 
         $scope.$on('create', function (chart) {
             // TODO fix chart reference
-            console.log(chart);
+            // console.log(chart);
             vm.chart = chart;
         });
     }]);
