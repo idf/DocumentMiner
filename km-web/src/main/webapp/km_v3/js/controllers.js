@@ -81,6 +81,8 @@
         vm.options = {};
         vm.setUp = setUp;
         vm.cleanup = cleanup;
+        vm.chart = null;
+        vm.show = false;
 
         var steps = 10;
         vm.init = function (target) {
@@ -102,29 +104,30 @@
                 scaleStepWidth: Math.ceil(vm.data[0].max()/steps),
                 scaleStartValue: 0
             };
+            vm.show = true;
         }
 
         function cleanup() {
             vm.data.length = 0;
             vm.labels.length = 0;
             vm.options = {};
+            vm.show = false;
         }
 
         $scope.$on('collocationDataReady', function() {
-            if(vm.target==="terms") {
-                vm.setUp(sharedService.msg.results.terms);
-            }
-            else if(vm.target==="phrases") {
-                vm.setUp(sharedService.msg.results.phrases);
-            }
-            else if(vm.target==="phrases_excluded") {
-                vm.setUp(sharedService.msg.results.phrases_excluded);
+            if(sharedService.msg.results.hasOwnProperty(vm.target)) {
+                vm.setUp(sharedService.msg.results[vm.target]);
             }
         });
 
         $scope.$on('prepForBroadcast', function () {
-            console.log("cleaning up ");
             vm.cleanup();
+        });
+
+        $scope.$on('create', function (chart) {
+            // TODO fix chart reference
+            console.log(chart);
+            vm.chart = chart;
         });
     }]);
 })();
