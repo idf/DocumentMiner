@@ -2,7 +2,6 @@ package km.lucene.applets.collocations;
 
 import io.deepreader.java.commons.util.Sorter;
 import io.deepreader.java.commons.util.Timestamper;
-import io.deepreader.java.commons.util.Transformer;
 import km.common.Settings;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
@@ -25,6 +24,7 @@ import util.LuceneUtils;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * User: Danyang
@@ -74,7 +74,7 @@ public class TermCollocationExtractor {
         String rakeIndexPath = args[3];
 
         TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, mainIndexPath, taxoPath, rakeIndexPath);
-        Map<String, ScoreMap> sorts = tce.search("ntu sce");
+        Map<String, ScoreMap> sorts = tce.search("sce ntu");
         sorts.entrySet().forEach(e -> tce.helper.display(Sorter.topEntries(e.getValue(), 10, tce.helper.getComparator())));
     }
 
@@ -116,6 +116,11 @@ public class TermCollocationExtractor {
             rets.add(ret);
         }
         Map<String, ScoreMap> ret = mergeSearch(rets);
+
+        List<String> termStrs = terms.stream().map(Term::text).collect(Collectors.toList());
+        for(Map.Entry<String, ScoreMap> e: ret.entrySet()) {
+            e.getValue().exclude(termStrs);
+        }
         timestamper.loudEnd();
         return ret;
     }
@@ -141,20 +146,6 @@ public class TermCollocationExtractor {
         return ret;
     }
 
-
-    /**
-     * Usage:
-     * ret.put("phrases_excluded", getPhrasesExcluded(t, ret.get("phrases")));
-     * @param t
-     * @param sortedPhraseBScores
-     * @return
-     */
-    private ScoreMap getPhrasesExcluded(Term t, ScoreMap sortedPhraseBScores) {
-        ScoreMap sortedPhraseExcludedScores = new ScoreMap(sortedPhraseBScores);
-        Transformer.removeByKey(sortedPhraseExcludedScores, e -> e.contains(t.text()));
-        return sortedPhraseExcludedScores;
-    }
-
     /**
      * Merge the search results of phrase query
      * @param rets
@@ -175,7 +166,7 @@ public class TermCollocationExtractor {
 
     /**
      * Merge either phrases map or terms map
-     * TODO: exclude "term1 term2" from search query "term1 term2"
+     * TODO: pre-dominated by a time
      * TODO: bugs in terms merge
      * @param lst
      * @return
