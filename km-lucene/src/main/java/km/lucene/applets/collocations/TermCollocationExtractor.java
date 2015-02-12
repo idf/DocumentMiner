@@ -74,7 +74,7 @@ public class TermCollocationExtractor {
         String rakeIndexPath = args[3];
 
         TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, mainIndexPath, taxoPath, rakeIndexPath);
-        Map<String, ScoreMap> sorts = tce.search("sce ntu");
+        Map<String, ScoreMap> sorts = tce.search("ntu sce");
         sorts.entrySet().forEach(e -> tce.helper.display(Sorter.topEntries(e.getValue(), 10, tce.helper.getComparator())));
     }
 
@@ -125,6 +125,13 @@ public class TermCollocationExtractor {
         return ret;
     }
 
+    /**
+     * Merge either phrases map or terms map
+     * @param t
+     * @param topDocs
+     * @return
+     * @throws IOException
+     */
     private Map<String, ScoreMap> collocateIndividualTerm(Term t, TopDocs topDocs) throws IOException {
         Map<String, CollocationScorer> termBScores = new HashMap<>();
         Map<String, CollocationScorer> phraseBScores = new HashMap<>();
@@ -136,13 +143,13 @@ public class TermCollocationExtractor {
         }
         termBScores = this.helper.filterByTermFreq(termBScores, 5);
         phraseBScores = this.helper.filterByTermFreq(phraseBScores, 5);
-        ScoreMap sortedTermBScores = this.helper.sortScores(termBScores);
-        ScoreMap sortedPhraseBScores = this.helper.sortScores(phraseBScores);
+        ScoreMap sortedTermBScores = ScoreMap.sortScores(termBScores);
+        ScoreMap sortedPhraseBScores = ScoreMap.sortScores(phraseBScores);
 
         Map<String, ScoreMap> ret = new HashMap<>();
         ret.put("terms", sortedTermBScores);
         ret.put("phrases", sortedPhraseBScores);
-        logger.info("Search "+t.text()+" completed");
+        logger.info("Search " + t.text() + " completed");
         return ret;
     }
 
@@ -159,30 +166,8 @@ public class TermCollocationExtractor {
             terms.add(r.get("terms"));
             phrases.add(r.get("phrases"));
         }
-        ret.put("terms", mergeMaps(terms));
-        ret.put("phrases", mergeMaps(phrases));
-        return ret;
-    }
-
-    /**
-     * Merge either phrases map or terms map
-     * TODO: pre-dominated by a time
-     * TODO: bugs in terms merge
-     * @param lst
-     * @return
-     */
-    private ScoreMap mergeMaps(List<ScoreMap> lst) {
-        ScoreMap ret = lst.get(0);  // base
-        for(ScoreMap map: lst.subList(1, lst.size())) {
-            for(Map.Entry<String, CollocationScorer> e: map.entrySet()) {
-                if(ret.containsKey(e.getKey())) {
-                    ret.put(e.getKey(), ret.get(e.getKey()).merge(e.getValue()));
-                }
-                else {
-                    ret.put(e.getKey(), e.getValue());
-                }
-            }
-        }
+        ret.put("terms", ScoreMap.mergeMaps(terms));
+        ret.put("phrases", ScoreMap.mergeMaps(phrases));
         return ret;
     }
 
@@ -215,7 +200,7 @@ public class TermCollocationExtractor {
         timestamper.loudStart();
         Map<String, CollocationScorer> termBScores = processTerm(t);
         termBScores = this.helper.filterByCollocationCount(termBScores, 5);
-        this.helper.sortScores(termBScores);
+        ScoreMap.sortScores(termBScores);
         timestamper.loudEnd();
     }
 

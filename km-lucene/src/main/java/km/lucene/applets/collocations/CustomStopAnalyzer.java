@@ -32,6 +32,10 @@ public class CustomStopAnalyzer extends StopwordAnalyzerBase {
                 "btw",
                 "dun",
                 "dunno",
+                "quot",
+                "haha",
+                "ha",
+                "lol",
 
                 "a",
                 "a's",

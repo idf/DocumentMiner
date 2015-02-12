@@ -1,13 +1,11 @@
 package km.lucene.applets.collocations;
 
-import io.deepreader.java.commons.util.Sorter;
 import km.lucene.entities.ScoreMap;
 import org.apache.lucene.index.collocations.CollocationScorer;
 
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
@@ -42,26 +40,6 @@ public class TermCollocationHelper {
                 .parallelStream()
                 .filter(e -> e.getValue().getTermBTermFreq()>=count)
                 .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    public ScoreMap sortScores(Map<String, CollocationScorer> phraseTerms) {
-        TreeMap sortedMap = Sorter.sortByValues(phraseTerms, new Sorter.ValueComparator<String, CollocationScorer>(phraseTerms) {
-            @Override
-            public int compare(String a, String b) {
-                try {
-                    if (base.get(a).getScore()<base.get(b).getScore())
-                        return 1;
-                    else if(a.equals(b))
-                        return 0;
-                    else
-                        return -1;
-                }
-                catch (NullPointerException e) {
-                    return -1;
-                }
-            }
-        });
-        return new ScoreMap(sortedMap);
     }
 
     public void display(ScoreMap sortedMap) {
