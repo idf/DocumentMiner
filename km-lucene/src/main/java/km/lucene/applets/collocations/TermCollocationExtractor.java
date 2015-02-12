@@ -118,9 +118,8 @@ public class TermCollocationExtractor {
         Map<String, ScoreMap> ret = mergeSearch(rets);
 
         List<String> termStrs = terms.stream().map(Term::text).collect(Collectors.toList());
-        for(Map.Entry<String, ScoreMap> e: ret.entrySet()) {
-            e.getValue().exclude(termStrs);
-        }
+        ret.get("terms").excludeMathAny(termStrs);
+        ret.get("phrases").excludeMathAll(termStrs);
         timestamper.loudEnd();
         return ret;
     }

@@ -4,10 +4,7 @@ import io.deepreader.java.commons.util.Sorter;
 import io.deepreader.java.commons.util.Transformer;
 import org.apache.lucene.index.collocations.CollocationScorer;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * User: Danyang
@@ -28,17 +25,20 @@ public class ScoreMap extends TreeMap<String, CollocationScorer> {
         Transformer.removeByKey(this, e -> e.contains(t));
     }
 
-    public void exclude(List<String> t) {
+    public void excludeMathAll(List<String> t) {
         Transformer.removeByKey(this, e -> t.stream().allMatch(e::contains));
     }
 
+    public void excludeMathAny(List<String> t) {
+        Transformer.removeByKey(this, e -> t.stream().anyMatch(e::contains));
+    }
+
     public static ScoreMap mergeMaps(List<ScoreMap> lst) {
-        ScoreMap ret = lst.get(0);  // base
-        return ret.merge(lst.subList(1, lst.size()));
+        return  lst.get(0).merge(lst.subList(1, lst.size()));
     }
 
     public ScoreMap merge(List<ScoreMap> lst) {
-        ScoreMap ret = new ScoreMap(this);
+        Map<String, CollocationScorer> ret = new HashMap<>(this);  // Cannot use TreeMap for ret, issue with put key
         for(ScoreMap map: lst) {
             for(Map.Entry<String, CollocationScorer> e: map.entrySet()) {
                 if(ret.containsKey(e.getKey())) {
@@ -52,6 +52,12 @@ public class ScoreMap extends TreeMap<String, CollocationScorer> {
         return ScoreMap.sortScores(ret);
     }
 
+    /**
+     * Sort by key
+     * need to call it to update base
+     * @param phraseTerms
+     * @return
+     */
     public static ScoreMap sortScores(Map<String, CollocationScorer> phraseTerms) {
         TreeMap sortedMap = Sorter.sortByValues(phraseTerms, new Sorter.ValueComparator<String, CollocationScorer>(phraseTerms) {
             @Override
@@ -65,7 +71,8 @@ public class ScoreMap extends TreeMap<String, CollocationScorer> {
                 }
             }
         });
-        return new ScoreMap(sortedMap);
+        ScoreMap ret = new ScoreMap(sortedMap);
+        return ret ;
     }
 
 
