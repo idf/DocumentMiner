@@ -50,9 +50,14 @@ public class TermCollocationExtractor {
 
     // top k
     BitSet liveDocs = new BitSet();
-    int k = 100;
+    int k = 500;
 
     TermCollocationHelper helper = new TermCollocationHelper();
+
+    // JSON entries
+    static final String PHRASES_STR = "phrases";
+    static final String TERMS_STR= "terms";
+    static final String PHRASES_EXCLUDED_STR = "phrases_excluded";
 
     public static void main(String[] args) throws Exception {
         // test parameters
@@ -118,8 +123,13 @@ public class TermCollocationExtractor {
         Map<String, ScoreMap> ret = mergeSearch(rets);
 
         List<String> termStrs = terms.stream().map(Term::text).collect(Collectors.toList());
-        ret.get("terms").excludeMathAny(termStrs);
-        ret.get("phrases").excludeMathAll(termStrs);
+        ret.get(TERMS_STR).excludeMathAny(termStrs);
+        ret.get(PHRASES_STR).excludeMathAll(termStrs);
+        if(termStrs.size()==1) {
+            ScoreMap temp = new ScoreMap(ret.get(PHRASES_STR));
+            temp.excludeMathAny(termStrs);
+            ret.put(PHRASES_EXCLUDED_STR, temp);
+        }
         timestamper.loudEnd();
         return ret;
     }
@@ -146,8 +156,8 @@ public class TermCollocationExtractor {
         ScoreMap sortedPhraseBScores = ScoreMap.sortScores(phraseBScores);
 
         Map<String, ScoreMap> ret = new HashMap<>();
-        ret.put("terms", sortedTermBScores);
-        ret.put("phrases", sortedPhraseBScores);
+        ret.put(TERMS_STR, sortedTermBScores);
+        ret.put(PHRASES_STR, sortedPhraseBScores);
         logger.info("Search " + t.text() + " completed");
         return ret;
     }
@@ -165,8 +175,8 @@ public class TermCollocationExtractor {
             terms.add(r.get("terms"));
             phrases.add(r.get("phrases"));
         }
-        ret.put("terms", ScoreMap.mergeMaps(terms));
-        ret.put("phrases", ScoreMap.mergeMaps(phrases));
+        ret.put(TERMS_STR, ScoreMap.mergeMaps(terms));
+        ret.put(PHRASES_STR, ScoreMap.mergeMaps(phrases));
         return ret;
     }
 
