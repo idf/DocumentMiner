@@ -8,6 +8,7 @@ import km.lucene.applets.collocations.TermCollocationHelper;
 import km.lucene.constants.FieldName;
 import km.lucene.entities.Facet;
 import km.lucene.entities.FacetWithKeyword;
+import km.lucene.entities.ScoreMap;
 import km.lucene.search.FacetService;
 import km.lucene.search.PostService;
 import org.apache.lucene.index.collocations.CollocationScorer;
@@ -56,7 +57,7 @@ public class WebServiceV2 {
         timer.start();
         TermCollocationHelper helper = new TermCollocationHelper();
         Map<String, Object> ret = new HashMap<>();
-        Map<String, TreeMap<String, CollocationScorer>> sorts = this.tce.search(queryStr);  // terms, phrases, phrases_excluded
+        Map<String, ScoreMap> sorts = this.tce.search(queryStr);  // terms, phrases, phrases_excluded
         Map<String, List<CollocationScorer>> results = sorts.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey,
                             e-> Sorter.topEntries(e.getValue(), 10, helper.getComparator())

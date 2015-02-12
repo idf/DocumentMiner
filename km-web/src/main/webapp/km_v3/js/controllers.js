@@ -69,7 +69,7 @@
         return sharedService;
     }]);
 
-    // TODO service for phrases and phrases excluded
+    // TODO service for phrases and phrases excluded, need constructor
     app.controller('BarController', ['$scope', 'collocationDataService', function($scope, sharedService) {
         var vm = this;
         vm.labels =[];
@@ -78,6 +78,10 @@
         var steps = 10;
         vm.options = {};
         vm.setUp = setUp;
+
+        vm.init = function (target) {
+          vm.target = target;
+        };
 
         function setUp(rankedList) {
             vm.data = [];
@@ -99,7 +103,12 @@
         }
 
         $scope.$on('collocationDataReady', function() {
-            vm.setUp(sharedService.msg.results.terms);
+            if(vm.target==="terms") {
+                vm.setUp(sharedService.msg.results.terms);
+            }
+            else if(vm.target=="phrases") {
+                vm.setUp(sharedService.msg.results.phrases);
+            }
         });
     }]);
 })();

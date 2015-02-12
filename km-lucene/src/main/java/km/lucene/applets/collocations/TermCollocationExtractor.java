@@ -50,7 +50,7 @@ public class TermCollocationExtractor {
 
     // top k
     BitSet liveDocs = new BitSet();
-    int k = 500;
+    int k = 100;
 
     TermCollocationHelper helper = new TermCollocationHelper();
 
