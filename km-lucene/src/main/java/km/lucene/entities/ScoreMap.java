@@ -59,7 +59,7 @@ public class ScoreMap extends TreeMap<String, CollocationScorer> {
      * @return
      */
     public static ScoreMap sortScores(Map<String, CollocationScorer> phraseTerms) {
-        TreeMap sortedMap = Sorter.sortByValues(phraseTerms, new Sorter.ValueComparator<String, CollocationScorer>(phraseTerms) {
+        TreeMap sortedMap = Sorter.sortByValue(phraseTerms, new Sorter.ValueComparator<String, CollocationScorer>(phraseTerms) {
             @Override
             public int compare(String a, String b) {
                 try {

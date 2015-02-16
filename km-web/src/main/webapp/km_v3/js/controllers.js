@@ -34,7 +34,7 @@
             param.push('page='+1);
             param.push('sort='+2);
             $http.get('/s/v2/posts?'+param.join('&')).success(function(data) {
-                console.log(data);
+                // console.log(data);
                 vm.results.posts = data;
                 vm.pagination(data.pageInfo);
             });

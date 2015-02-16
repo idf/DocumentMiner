@@ -27,12 +27,8 @@ import java.util.stream.Collectors;
 
 @Path("/v2")
 public class WebServiceV2 {
-    TermCollocationExtractor tce;
-    PostService ps;
-    public WebServiceV2() throws Exception {
-        this.tce = new TermCollocationExtractor("", Settings.POSTINDEX_PATH, "", Settings.DriverSettings.ROOT_FOLDER+"rakeIndex-post-clustered-9152.ser");
-        this.ps = new PostService(Settings.INDEX_PATH, Settings.TAXOINDEX_PATH);
-    }
+    static PostService ps  = new PostService(Settings.INDEX_PATH, Settings.TAXOINDEX_PATH);
+    static TermCollocationExtractor tce = new TermCollocationExtractor("", Settings.POSTINDEX_PATH, "", Settings.DriverSettings.ROOT_FOLDER+"rakeIndex-post-clustered-9152.ser");
 
     @GET
     @Path("/posts")
@@ -44,7 +40,7 @@ public class WebServiceV2 {
             @QueryParam("sort") int sortType) throws IOException, ParseException {
         Timestamper timer = new Timestamper();
         timer.start();
-        Map<String, Object> ret = this.ps.getPosts(queryStr, filterStr, page, sortType);
+        Map<String, Object> ret = ps.getPosts(queryStr, filterStr, page, sortType);
         ret.put("elapsed", timer.end());
         return ret;
     }
@@ -59,7 +55,7 @@ public class WebServiceV2 {
         timer.start();
         TermCollocationHelper helper = new TermCollocationHelper();
         Map<String, Object> ret = new HashMap<>();
-        Map<String, ScoreMap> sorts = this.tce.search(queryStr);  // terms, phrases, phrases_excluded
+        Map<String, ScoreMap> sorts = tce.search(queryStr);  // terms, phrases, phrases_excluded
         Map<String, List<CollocationScorer>> results = sorts.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey,
                             e-> Sorter.topEntries(e.getValue(), 10, helper.getComparator())

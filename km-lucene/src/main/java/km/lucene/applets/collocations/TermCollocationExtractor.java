@@ -1,5 +1,6 @@
 package km.lucene.applets.collocations;
 
+import io.deepreader.java.commons.util.Displayer;
 import io.deepreader.java.commons.util.Sorter;
 import io.deepreader.java.commons.util.Timestamper;
 import km.common.Settings;
@@ -50,7 +51,7 @@ public class TermCollocationExtractor {
 
     // top k
     BitSet liveDocs = new BitSet();
-    int k = 100;
+    int k = 500;
 
     TermCollocationHelper helper = new TermCollocationHelper();
 
@@ -83,20 +84,27 @@ public class TermCollocationExtractor {
         sorts.entrySet().forEach(e -> tce.helper.display(Sorter.topEntries(e.getValue(), 10, tce.helper.getComparator())));
     }
 
-    public TermCollocationExtractor(String indexPath, String mainIndexPath, String taxoPath, String rakeIndexPath) throws IOException, ClassNotFoundException, URISyntaxException {
-        this.reader = LuceneUtils.getReader(mainIndexPath);
-        this.searcher = new IndexSearcher(this.reader);
+    public TermCollocationExtractor(String indexPath, String mainIndexPath, String taxoPath, String rakeIndexPath) {
+        try {
+            this.reader = LuceneUtils.getReader(mainIndexPath);
+            this.searcher = new IndexSearcher(this.reader);
 
-        Fields fields = MultiFields.getFields(this.reader);
-        Terms terms = fields.terms(this.fieldName);
-        TermsEnum iterator = terms.iterator(null);
-        BytesRef byteRef = null;
-        while((byteRef = iterator.next()) != null) {
-            this.totalVocabulary++;
+            Fields fields = MultiFields.getFields(this.reader);
+            Terms terms = fields.terms(this.fieldName);
+            TermsEnum iterator = terms.iterator(null);
+            BytesRef byteRef = null;
+            while((byteRef = iterator.next()) != null) {
+                this.totalVocabulary++;
+            }
+            this.liveDocs = new BitSet(this.reader.numDocs());
+            this.rakeMgr = new RakeCollocationMgr(rakeIndexPath);
         }
-        this.liveDocs = new BitSet(this.reader.numDocs());
-        this.rakeMgr = new RakeCollocationMgr(rakeIndexPath);
+        catch (Exception e) {
+            logger.error(Displayer.display(e));
+            System.exit(1);
+        }
     }
+
 
 
     public Map<String, ScoreMap> search(String queryString) throws ParseException, IOException, URISyntaxException {
