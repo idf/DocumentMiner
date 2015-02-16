@@ -3,7 +3,7 @@ package km.mallet.topic;
 import cc.mallet.topics.TopicalNGrams;
 import cc.mallet.types.InstanceList;
 import cc.mallet.util.Randoms;
-import km.common.Settings;
+import km.common.Config;
 
 import java.io.*;
 
@@ -11,10 +11,10 @@ public class TrainTopicBigram {
 
 	public static void main(String[] args) throws IOException {
 		// String path = "E:/project/kd/data/mallet/";
-		String inputFile = Settings.MalletSettings.ROOT_FOLDER + "posts_bigram.mallet";
-		int numTopics = Settings.MalletSettings.TOPIC_CNT;	// 50
-		String topicKeysFile = Settings.MalletSettings.ROOT_FOLDER + "phrase_" + numTopics + "_keys.txt";
-		String docTopicsFile = Settings.MalletSettings.ROOT_FOLDER + "phrase_" + numTopics + "_topics.txt";
+		String inputFile = Config.settings.getMalletSettings().getRootFolder() + "posts_bigram.mallet";
+		int numTopics = Config.settings.getMalletSettings().getTopicCnt();	// 50
+		String topicKeysFile = Config.settings.getMalletSettings().getRootFolder() + "phrase_" + numTopics + "_keys.txt";
+		String docTopicsFile = Config.settings.getMalletSettings().getRootFolder() + "phrase_" + numTopics + "_topics.txt";
 		
 		int showTopicsInterval = 100;
 		int topWords = 10;

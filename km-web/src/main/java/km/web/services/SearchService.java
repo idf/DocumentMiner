@@ -1,6 +1,6 @@
 package km.web.services;
 
-import km.common.Settings;
+import km.common.Config;
 import km.lucene.constants.FieldName;
 import km.lucene.entities.Facet;
 import km.lucene.entities.Post;
@@ -43,7 +43,7 @@ public class SearchService {
 
         long start = new Date().getTime();
 
-        String indexPath = Settings.INDEX_PATH; // "E:/project/kd/data/index";
+        String indexPath = Config.settings.getIndexPath(); // "E:/project/kd/data/index";
         PostService ps = new PostService(indexPath);
         QueryBuilder builder = new QueryBuilder();
         builder.addBasicFields(queryType, keyword, dateFrom, dateTo);
@@ -75,8 +75,8 @@ public class SearchService {
 
         long start = new Date().getTime();
 
-        String indexPath = Settings.INDEX_PATH; // "E:/project/kd/data/index";
-        String taxoPath = Settings.TAXOINDEX_PATH; // "E:/project/kd/data/taxoindex";
+        String indexPath = Config.settings.getIndexPath(); // "E:/project/kd/data/index";
+        String taxoPath = Config.settings.getTaxoindexPath(); // "E:/project/kd/data/taxoindex";
         PostService ps = new PostService(indexPath, taxoPath);
         QueryBuilder builder = new QueryBuilder();
         builder.addBasicFields(queryType, keyword, dateFrom, dateTo);
@@ -94,7 +94,7 @@ public class SearchService {
     public Map<String, String> content(
             @QueryParam("postId") int postId) throws IOException {
 
-        String indexPath = Settings.INDEX_PATH; // "E:/project/kd/data/index";
+        String indexPath = Config.settings.getIndexPath(); // "E:/project/kd/data/index";
         PostService ps = new PostService(indexPath);
         String content = ps.getContent(postId);
         Map<String, String> ret = new HashMap<>();
@@ -109,7 +109,7 @@ public class SearchService {
             @QueryParam("postId") int postId,
             @QueryParam("quoteId") int quoteId) throws IOException {
 
-        String indexPath = Settings.INDEX_PATH; // "E:/project/kd/data/index";
+        String indexPath = Config.settings.getIndexPath(); // "E:/project/kd/data/index";
         PostService ps = new PostService(indexPath);
         String quoteContent = ps.getQuoteContent(postId, quoteId);
         Map<String, String> ret = new HashMap<>();
@@ -124,7 +124,7 @@ public class SearchService {
             @QueryParam("threadId") int threadId,
             @QueryParam("storey") int storey) throws IOException {
 
-        String indexPath = Settings.INDEX_PATH; // "E:/project/kd/data/index";
+        String indexPath = Config.settings.getIndexPath(); // "E:/project/kd/data/index";
         PostService ps = new PostService(indexPath);
         List<Post> posts = ps.getPostsInFrontOfStorey(threadId, storey, 3);
         return posts;
@@ -137,7 +137,7 @@ public class SearchService {
             @QueryParam("threadId") int threadId,
             @QueryParam("storey") int storey) throws IOException {
         
-        String indexPath = Settings.INDEX_PATH; // "E:/project/kd/data/index";
+        String indexPath = Config.settings.getIndexPath(); // "E:/project/kd/data/index";
         PostService ps = new PostService(indexPath);
         List<Post> posts = ps.getPostsBackOfStorey(threadId, storey, 3);
         return posts;
@@ -158,8 +158,8 @@ public class SearchService {
             @QueryParam("poster") String posterStr,
             @QueryParam("topicId") String topicIdStr) throws IOException, ParseException {
 
-        String indexPath = Settings.INDEX_PATH; // "E:/project/kd/data/index";
-        String taxoPath = Settings.TAXOINDEX_PATH; // "E:/project/kd/data/taxoindex";
+        String indexPath = Config.settings.getIndexPath(); // "E:/project/kd/data/index";
+        String taxoPath = Config.settings.getTaxoindexPath(); // "E:/project/kd/data/taxoindex";
         FacetService fs = new FacetService(indexPath, taxoPath);
         QueryBuilder builder = new QueryBuilder();
         builder.addBasicFields(queryType, keyword, dateFrom, dateTo);
@@ -184,8 +184,8 @@ public class SearchService {
             @QueryParam("topicId") String topicIdStr,
             @QueryParam("dim") String dim) throws IOException, ParseException {
 
-        String indexPath = Settings.INDEX_PATH; // "E:/project/kd/data/index";
-        String taxoPath = Settings.TAXOINDEX_PATH; // "E:/project/kd/data/taxoindex";
+        String indexPath = Config.settings.getIndexPath(); // "E:/project/kd/data/index";
+        String taxoPath = Config.settings.getTaxoindexPath(); // "E:/project/kd/data/taxoindex";
         FacetService fs = new FacetService(indexPath, taxoPath);
         QueryBuilder builder = new QueryBuilder();
         builder.addBasicFields(queryType, keyword, dateFrom, dateTo);

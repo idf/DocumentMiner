@@ -2,7 +2,7 @@ package km.web.services;
 
 import io.deepreader.java.commons.util.Sorter;
 import io.deepreader.java.commons.util.Timestamper;
-import km.common.Settings;
+import km.common.Config;
 import km.lucene.applets.collocations.TermCollocationExtractor;
 import km.lucene.applets.collocations.TermCollocationHelper;
 import km.lucene.constants.FieldName;
@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 
 @Path("/v2")
 public class WebServiceV2 {
-    static PostService ps  = new PostService(Settings.INDEX_PATH, Settings.TAXOINDEX_PATH);
-    static TermCollocationExtractor tce = new TermCollocationExtractor("", Settings.POSTINDEX_PATH, "", Settings.DriverSettings.ROOT_FOLDER+"rakeIndex-post-clustered-9152.ser");
+    static PostService ps  = new PostService(Config.settings.getIndexPath(), Config.settings.getTaxoindexPath());
+    static TermCollocationExtractor tce = new TermCollocationExtractor("", Config.settings.getPostindexPath(), "", Config.settings.getDriverSettings().getRootFolder()+"rakeIndex-post-clustered-9152.ser");
 
     @GET
     @Path("/posts")
@@ -77,8 +77,8 @@ public class WebServiceV2 {
             @QueryParam("query") String queryStr,
             @QueryParam("filter") String filterStr,
             @QueryParam("dim") String dim) throws IOException, ParseException {
-        String indexPath = Settings.INDEX_PATH; // "E:/project/kd/data/index";
-        String taxoPath = Settings.TAXOINDEX_PATH; // "E:/project/kd/data/taxoindex";
+        String indexPath = Config.settings.getIndexPath(); // "E:/project/kd/data/index";
+        String taxoPath = Config.settings.getTaxoindexPath(); // "E:/project/kd/data/taxoindex";
         FacetService fs = new FacetService(indexPath, taxoPath);
         int maxItems = 50;
         Facet facet = fs.getByDim(queryStr, filterStr, dim, maxItems);
@@ -92,8 +92,8 @@ public class WebServiceV2 {
             @QueryParam("query") String queryStr,
             @QueryParam("filter") String filterStr,
             @QueryParam("dim") String dim) throws IOException, ParseException {
-        String indexPath = Settings.INDEX_PATH; // "E:/project/kd/data/index";
-        String taxoPath = Settings.TAXOINDEX_PATH; // "E:/project/kd/data/taxoindex";
+        String indexPath = Config.settings.getIndexPath(); // "E:/project/kd/data/index";
+        String taxoPath = Config.settings.getTaxoindexPath(); // "E:/project/kd/data/taxoindex";
         FacetService fs = new FacetService(indexPath, taxoPath);
         int maxItems = 5;
         if (dim.equals(FieldName.POST_MONTH) || dim.equals(FieldName.POST_YEAR)) {
@@ -109,8 +109,8 @@ public class WebServiceV2 {
     public Map<String, List<FacetWithKeyword>> getFacets(
             @QueryParam("query") String queryStr,
             @QueryParam("filter") String filterStr) throws IOException, ParseException {
-        String indexPath = Settings.INDEX_PATH; // "E:/project/kd/data/index";
-        String taxoPath = Settings.TAXOINDEX_PATH; // "E:/project/kd/data/taxoindex";
+        String indexPath = Config.settings.getIndexPath(); // "E:/project/kd/data/index";
+        String taxoPath = Config.settings.getTaxoindexPath(); // "E:/project/kd/data/taxoindex";
         FacetService fs = new FacetService(indexPath, taxoPath);
         Map<String, List<FacetWithKeyword>> facets = fs.getAll(queryStr, filterStr);
         return facets;

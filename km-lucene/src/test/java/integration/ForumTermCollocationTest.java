@@ -21,7 +21,7 @@ package integration;
  * @author iprovalov
  */
 
-import km.common.Settings;
+import km.common.Config;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.DirectoryReader;
@@ -44,8 +44,8 @@ import static org.junit.Assert.assertEquals;
 
 
 public class ForumTermCollocationTest {
-	private String indexDir = Settings.THINDEX_PATH;
-	private String collocsDir = Settings.DATA_FOLDER+"collocations/";
+	private String indexDir = Config.settings.getThindexPath();
+	private String collocsDir = Config.settings.getDataFolder()+"collocations/";
 
 	@Before
 	public void setup() throws Exception {

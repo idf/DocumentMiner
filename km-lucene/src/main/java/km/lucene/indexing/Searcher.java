@@ -1,7 +1,7 @@
 package km.lucene.indexing;
 
 import io.deepreader.java.commons.util.DateUtils;
-import km.common.Settings;
+import km.common.Config;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
 import org.apache.lucene.analysis.Analyzer;
@@ -29,9 +29,9 @@ public class Searcher {
 	public static void main(String[] args) throws IOException, ParseException {
 		// test parameters
 		args = new String[3];
-		args[0] = Settings.INDEX_PATH;
-		args[1] = Settings.THINDEX_PATH;
-		args[2] = Settings.TAXOINDEX_PATH;
+		args[0] = Config.settings.getIndexPath();
+		args[1] = Config.settings.getThindexPath();
+		args[2] = Config.settings.getTaxoindexPath();
 
 		if (args.length < 3) {
 			System.out.println("Please specify data file, index folder, taxonomy index folder in sequence.");

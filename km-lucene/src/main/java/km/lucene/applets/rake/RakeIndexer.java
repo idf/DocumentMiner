@@ -3,7 +3,7 @@ package km.lucene.applets.rake;
 import io.deepreader.java.commons.util.Displayer;
 import io.deepreader.java.commons.util.IOHandler;
 import io.deepreader.java.commons.util.Timestamper;
-import km.common.Settings;
+import km.common.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rake4j.core.IndexWriter;
@@ -43,7 +43,7 @@ public class RakeIndexer implements Runnable {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        IndexWriter iw = new IndexWriter(index, rake , Settings.RakeSettings.TOP_PERCENT);
+        IndexWriter iw = new IndexWriter(index, rake , Config.settings.getRakeSettings().getTopPercent());
 
         int i = 1;
         int maxDocs = 1<<31-1; //1<<31-1;

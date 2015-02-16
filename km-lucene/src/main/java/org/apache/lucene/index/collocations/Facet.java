@@ -1,6 +1,6 @@
 package org.apache.lucene.index.collocations;
 
-import km.common.Settings;
+import km.common.Config;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.DirectoryReader;
@@ -20,8 +20,8 @@ import java.io.IOException;
  * Time: 12:28 AM
  */
 public class Facet {
-    private String indexDir = Settings.THINDEX_PATH;
-    private String collocsDir = Settings.DATA_FOLDER+"collocations/";
+    private String indexDir = Config.settings.getThindexPath();
+    private String collocsDir = Config.settings.getDataFolder()+"collocations/";
 
     public static void main(String[] args) throws IOException {
         Facet facet = new Facet();

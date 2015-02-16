@@ -2,7 +2,7 @@ package km.lucene.applets.cluto;
 
 import io.deepreader.java.commons.util.CmdUtils;
 import io.deepreader.java.commons.util.Displayer;
-import km.common.Settings;
+import km.common.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,7 @@ public class ClutoWrapper implements Runnable {
     protected Logger logger = LoggerFactory.getLogger(ClutoWrapper.class);
 
     public static void main(String[] args) throws Exception {
-        new ClutoWrapper(Settings.ClutoSettings.DOCS_MAT, Settings.ClutoSettings.OUTPUT, 226).run();
+        new ClutoWrapper(Config.settings.getClutoSettings().getDocsMat(), Config.settings.getClutoSettings().getOUTPUT(), 226).run();
     }
 
     public ClutoWrapper(String matPath, String cluserOutputPath, int k) {
@@ -62,7 +62,7 @@ public class ClutoWrapper implements Runnable {
     String buildCmd(Map<String, String> kwargs, File matrixFile, int numClusters) {
         // vcluster [optional parameters] MatrixFile NClusters
         StringBuffer cmd = new StringBuffer();
-        cmd.append(Settings.ClutoSettings.VCLUSTER).append(" ")
+        cmd.append(Config.settings.getClutoSettings().getVCLUSTER()).append(" ")
                 .append(Displayer.display(kwargs, "=", " ")).append(" ")
                 .append(matrixFile.toString().replace("\\", "/")).append(" ")
                 .append(numClusters);

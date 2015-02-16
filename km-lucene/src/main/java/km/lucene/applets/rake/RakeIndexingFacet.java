@@ -3,7 +3,7 @@ package km.lucene.applets.rake;
 import io.deepreader.java.commons.util.Displayer;
 import io.deepreader.java.commons.util.IOHandler;
 import io.deepreader.java.commons.util.Transformer;
-import km.common.Settings;
+import km.common.Config;
 import km.common.json.JsonReader;
 import km.lucene.constants.FieldName;
 import km.lucene.entities.Post;
@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  * 1. Added delimiters between documents since not considering offset information.
  */
 public class RakeIndexingFacet implements Runnable {
-    String postPath = Settings.SORTED_POSTS_PATH;
+    String postPath = Config.settings.getSortedPostsPath();
     protected Logger logger = LoggerFactory.getLogger(RakeIndexingFacet.class);
     /**
      * Does not need the position of the phrase, just need to store the scores of the words.
@@ -52,7 +52,7 @@ public class RakeIndexingFacet implements Runnable {
 
     public String basicIndexing() throws IOException {
         JsonReader<Post> jr = new JsonReader<>(postPath, Post.class);
-        final String INDEX_PATH = Settings.RakeSettings.BASIC_INDEX_PATH;
+        final String INDEX_PATH = Config.settings.getRakeSettings().getBasicIndexPath();
         Iterator<String> itr = jr.getList().parallelStream()
                 .map(e -> e.getContent())
                 .iterator();
@@ -65,7 +65,7 @@ public class RakeIndexingFacet implements Runnable {
 
     public String threadedIndexing() throws IOException {
         JsonReader<Post> jr = new JsonReader<>(postPath, Post.class);
-        final String INDEX_PATH = Settings.RakeSettings.THREADED_INDEX_PATH;
+        final String INDEX_PATH = Config.settings.getRakeSettings().getThreadedIndexPath();
 
         List<String> lst = new ArrayList<>();
         int prevThreadId = 0;
@@ -99,9 +99,9 @@ public class RakeIndexingFacet implements Runnable {
      * @throws IOException
      */
     public String clusteredIndexing() throws IOException {
-        return clusteredIndexing(Settings.ClutoSettings.OUTPUT,
-                Settings.THINDEX_PATH,
-                Settings.RakeSettings.CLUSTERED_INDEX_PATH
+        return clusteredIndexing(Config.settings.getClutoSettings().getOUTPUT(),
+                Config.settings.getThindexPath(),
+                Config.settings.getRakeSettings().getClusteredIndexPath()
         );
     }
 

@@ -1,7 +1,7 @@
 package km.lucene.indexing;
 
 import io.deepreader.java.commons.util.DateUtils;
-import km.common.Settings;
+import km.common.Config;
 import km.common.util.StringUtil;
 import km.lucene.analysis.CustomAnalyzer;
 import org.apache.lucene.analysis.Analyzer;
@@ -34,8 +34,8 @@ public class DrillDownSearch {
 	public static void main(String[] args) throws IOException, ParseException {
 		// test parameters
 		args = new String[2];
-        args[0] = Settings.INDEX_PATH;
-        args[1] = Settings.TAXOINDEX_PATH;
+        args[0] = Config.settings.getIndexPath();
+        args[1] = Config.settings.getTaxoindexPath();
 
 		if (args.length < 2) {
 			System.out.println("Please specify the index folder, taxonomy index folder in sequence.");

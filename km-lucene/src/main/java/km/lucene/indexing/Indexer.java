@@ -1,7 +1,7 @@
 package km.lucene.indexing;
 
 import io.deepreader.java.commons.util.Displayer;
-import km.common.Settings;
+import km.common.Config;
 import km.common.json.JsonReader;
 import km.lucene.entities.DocWithTopic;
 import km.lucene.entities.Post;
@@ -31,9 +31,9 @@ public class Indexer extends AbstractIndexer {
     public static void main(String[] args) throws IOException {
         // test parameters
         args = new String[3];
-        args[0] = Settings.POSTS_PATH;
-        args[1] = Settings.INDEX_PATH;
-        args[2] = Settings.TAXOINDEX_PATH;
+        args[0] = Config.settings.getPostsPath();
+        args[1] = Config.settings.getIndexPath();
+        args[2] = Config.settings.getTaxoindexPath();
 
         if (args.length < 3) {
             System.out.println("Please specify data file, index folder, taxonomy index folder in sequence.");
@@ -53,8 +53,8 @@ public class Indexer extends AbstractIndexer {
     @Override
     public void run() {
         try {
-            ThreadService.init(Settings.THREADS_PATH);
-            Map<Integer, DocWithTopic> docTopics = DocWithTopicParser.parse(Settings.MalletSettings.TOPICS_PATH);
+            ThreadService.init(Config.settings.getThreadsPath());
+            Map<Integer, DocWithTopic> docTopics = DocWithTopicParser.parse(Config.settings.getMalletSettings().getTopicsPath());
             logger.info(String.format("Indexing to directory '%s'...", indexPath));
             Directory dir = FSDirectory.open(new File(indexPath));
 

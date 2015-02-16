@@ -1,6 +1,6 @@
 package km.lucene.applets.cluto;
 
-import km.common.Settings;
+import km.common.Config;
 import km.lucene.constants.FieldName;
 import org.apache.lucene.index.*;
 import org.apache.lucene.store.FSDirectory;
@@ -24,7 +24,7 @@ public class DocFormatterTest {
 
     @Test
     public void info() throws Exception {
-        IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(Settings.THINDEX_PATH)));
+        IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(Config.settings.getDataFolder())));
         Fields fields = MultiFields.getFields(reader);
         Terms terms = fields.terms(FieldName.CONTENT);
         long m = terms.size();  // -1

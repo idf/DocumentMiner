@@ -1,6 +1,6 @@
 package km.crawler.unithread;
 
-import km.common.Settings;
+import km.common.Config;
 import km.common.json.JsonWriter;
 import km.common.util.HttpUtil;
 import km.crawler.entities.Forum;
@@ -27,8 +27,8 @@ public class Crawler {
 
 		// testing parameters
 		args = new String[2];
-		args[0] = Settings.DATA_FOLDER;
-		args[1] = Settings.RAW_HTML_FOLDER;
+		args[0] = Config.settings.getDataFolder();
+		args[1] = Config.settings.getRawHtmlFolder();
 
 		if (args.length < 2) {
 			System.out.println("Please specify data path to store the output files, and html path to store html pages.");

@@ -7,13 +7,16 @@
 
 package cc.mallet.topics.tui;
 
+import cc.mallet.pipe.iterator.DBInstanceIterator;
+import cc.mallet.topics.PAM4L;
+import cc.mallet.topics.ParallelTopicModel;
+import cc.mallet.topics.PolylingualTopicModel;
+import cc.mallet.topics.TopicalNGrams;
+import cc.mallet.types.FeatureSequence;
+import cc.mallet.types.InstanceList;
 import cc.mallet.util.CommandOption;
 import cc.mallet.util.Randoms;
-import cc.mallet.types.InstanceList;
-import cc.mallet.types.FeatureSequence;
-import cc.mallet.topics.*;
-import cc.mallet.pipe.iterator.DBInstanceIterator;
-import km.common.Settings;
+import km.common.Config;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -105,19 +108,19 @@ public class Vectors2Topics {
 		// test parameters
 		List<String> param = new ArrayList<>();
 		param.add("--input");
-		param.add(Settings.MalletSettings.OAC_69_FOLDER+"posts.mallet");
+		param.add(Config.settings.getMalletSettings().getOac69Folder()+"posts.mallet");
 		param.add("--num-topics");
 		param.add("10");
 		param.add("--num-iterations");
 		param.add("10");
 		param.add("--output-topic-keys");
-		param.add(Settings.MalletSettings.OAC_69_FOLDER+"10_keys.txt");
+		param.add(Config.settings.getMalletSettings().getOac69Folder()+"10_keys.txt");
 		param.add("--output-doc-topics");
-		param.add(Settings.MalletSettings.OAC_69_FOLDER+"10_topics.txt");
+		param.add(Config.settings.getMalletSettings().getOac69Folder()+"10_topics.txt");
 		param.add("--topic-word-weights-file");
-		param.add(Settings.MalletSettings.OAC_69_FOLDER+"10_weights.txt");
+		param.add(Config.settings.getMalletSettings().getOac69Folder()+"10_weights.txt");
 		param.add("--word-topic-counts-file");
-		param.add(Settings.MalletSettings.OAC_69_FOLDER+"10_counts.txt");
+		param.add(Config.settings.getMalletSettings().getOac69Folder()+"10_counts.txt");
 		param.add("--optimize-interval");
 		param.add("10");
 		param.add("--random-seed");

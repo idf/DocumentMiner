@@ -2,7 +2,7 @@ package km.lucene.applets.collocations;
 
 import io.deepreader.java.commons.util.IOHandler;
 import io.deepreader.java.commons.util.Sorter;
-import km.common.Settings;
+import km.common.Config;
 import km.lucene.applets.cluto.ClutoWrapper;
 import km.lucene.applets.cluto.DocFormatter;
 import km.lucene.applets.rake.RakeIndexingFacet;
@@ -42,9 +42,9 @@ public class Driver {
     }
 
     String cluster(String indexPath, int k, String suffix) throws IOException {
-        String matPath = Settings.DriverSettings.ROOT_FOLDER+String.format("docs-%s.mat", suffix);
-        String clusterPath = Settings.DriverSettings.ROOT_FOLDER+String.format("cluster-%s.txt", suffix);
-        String rakeIndexPath = Settings.DriverSettings.ROOT_FOLDER+String.format("rakeIndex-%s.ser", suffix);
+        String matPath = Config.settings.getDriverSettings().getRootFolder()+String.format("docs-%s.mat", suffix);
+        String clusterPath = Config.settings.getDriverSettings().getRootFolder()+String.format("cluster-%s.txt", suffix);
+        String rakeIndexPath = Config.settings.getDriverSettings().getRootFolder()+String.format("rakeIndex-%s.ser", suffix);
         if(RE_RUN_CLUSTER) {
             new DocFormatter(indexPath, matPath).run();
             new ClutoWrapper(matPath, clusterPath, k).run();
@@ -75,7 +75,7 @@ public class Driver {
     }
 
     void writeToFile(List<ScoreMap> lst, String suffix) {
-        String resultPath = Settings.DriverSettings.ROOT_FOLDER+String.format("result-%s.md", suffix);
+        String resultPath = Config.settings.getDriverSettings().getRootFolder()+String.format("result-%s.md", suffix);
 
         StringBuilder sb = new StringBuilder();
         for(ScoreMap map: lst) {
@@ -92,7 +92,7 @@ public class Driver {
     }
 
     public void postClusteredCollocation() throws Exception {
-        final String INDEX_PATH = Settings.POSTINDEX_PATH;
+        final String INDEX_PATH = Config.settings.getPostindexPath();
         for(int k: LST_K) {
             final String SUFFIX = String.format("%s-%d", "post-clustered", k);
             String rakeIndexPath = cluster(INDEX_PATH, k, SUFFIX);
@@ -106,7 +106,7 @@ public class Driver {
     }
 
     public void threadCollocation() throws Exception {
-        final String INDEX_PATH = Settings.THINDEX_PATH;
+        final String INDEX_PATH = Config.settings.getThindexPath();
         final String SUFFIX = String.format("%s", "thread");
         String rakeIndexPath = new RakeIndexingFacet().threadedIndexing();
         List<ScoreMap> lst = new ArrayList<>();
@@ -118,7 +118,7 @@ public class Driver {
     }
 
     public void postCollection() throws Exception {
-        final String INDEX_PATH = Settings.POSTINDEX_PATH;
+        final String INDEX_PATH = Config.settings.getPostindexPath();
         final String SUFFIX = String.format("%s", "post");
         String rakeIndexPath = new RakeIndexingFacet().basicIndexing();
         List<ScoreMap> lst = new ArrayList<>();

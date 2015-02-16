@@ -1,7 +1,7 @@
 package km.lucene.applets.collocations;
 
 import io.deepreader.java.commons.util.IOHandler;
-import km.common.Settings;
+import km.common.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rake4j.core.IndexWriter;
@@ -33,7 +33,7 @@ public class RakeCollocationMgr {
     }
 
     private IndexWriter getIndexWriter(Index index) {
-        return new IndexWriter(index, this.rake, Settings.RakeSettings.TOP_PERCENT);
+        return new IndexWriter(index, this.rake, Config.settings.getRakeSettings().getTopPercent());
     }
 
     public void renewPreIndex(List<String> docs) {

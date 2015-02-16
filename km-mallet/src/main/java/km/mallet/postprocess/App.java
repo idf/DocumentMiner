@@ -1,6 +1,6 @@
 package km.mallet.postprocess;
 
-import km.common.Settings;
+import km.common.Config;
 import km.common.json.JsonWriter;
 
 import java.io.File;
@@ -10,10 +10,10 @@ import java.util.List;
 public class App {
 
 	public static void main(String[] args) throws IOException {
-		File keysFile = new File(Settings.MalletSettings.ROOT_FOLDER, "keys_50.txt");
-		File topicsFile = new File(Settings.MalletSettings.ROOT_FOLDER, "topics_50.txt");
-		File weightsFile = new File(Settings.MalletSettings.ROOT_FOLDER, "topic_word_weights_50.txt");
-		File countsFile = new File(Settings.MalletSettings.ROOT_FOLDER, "word_topic_counts_50.txt");
+		File keysFile = new File(Config.settings.getMalletSettings().getRootFolder(), "keys_50.txt");
+		File topicsFile = new File(Config.settings.getMalletSettings().getRootFolder(), "topics_50.txt");
+		File weightsFile = new File(Config.settings.getMalletSettings().getRootFolder(), "topic_word_weights_50.txt");
+		File countsFile = new File(Config.settings.getMalletSettings().getRootFolder(), "word_topic_counts_50.txt");
 
 //		 List<Topic> topics = TopicParser.parse(keysFile);
 		// JSONUtil.save(topics, "E:/project/kd/data/topic/topic_terms.json");
@@ -40,6 +40,6 @@ public class App {
 //		JSONUtil.save(terms, "E:/project/kd/data/topic/term_topics.json");
 		
 		List<TermWithCount> terms = TermWithCountParser.parse(countsFile);
-		JsonWriter.saveList(terms, Settings.TopicSettings.TERMS_PATH);
+		JsonWriter.saveList(terms, Config.settings.getTopicSettings().getTermsPath());
 	}
 }

@@ -3,7 +3,7 @@ package km.lucene.applets.collocations;
 import io.deepreader.java.commons.util.Displayer;
 import io.deepreader.java.commons.util.Sorter;
 import io.deepreader.java.commons.util.Timestamper;
-import km.common.Settings;
+import km.common.Config;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
 import km.lucene.entities.ScoreMap;
@@ -51,7 +51,7 @@ public class TermCollocationExtractor {
 
     // top k
     BitSet liveDocs = new BitSet();
-    int k = Settings.COLLO_TOP_K;
+    int k = Config.settings.getColloTopK();
 
     TermCollocationHelper helper = new TermCollocationHelper();
 
@@ -63,11 +63,10 @@ public class TermCollocationExtractor {
     public static void main(String[] args) throws Exception {
         // test parameters
         args = new String[4];
-        args[0] = Settings.INDEX_PATH;
-        // args[1] = Settings.THINDEX_PATH;
-        args[1] = Settings.POSTINDEX_PATH;
-        args[2] = Settings.TAXOINDEX_PATH;
-        args[3] = Settings.RakeSettings.BASIC_INDEX_PATH;
+        args[0] = Config.settings.getIndexPath();
+        args[1] = Config.settings.getPostindexPath();
+        args[2] = Config.settings.getTaxoindexPath();
+        args[3] = Config.settings.getRakeSettings().getBasicIndexPath();
 
         if (args.length < 4) {
             System.out.println("Please specify 4 params.");

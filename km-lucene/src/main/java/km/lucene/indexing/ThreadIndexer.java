@@ -2,7 +2,7 @@ package km.lucene.indexing;
 
 import io.deepreader.java.commons.util.DateUtils;
 import io.deepreader.java.commons.util.Displayer;
-import km.common.Settings;
+import km.common.Config;
 import km.common.json.JsonReader;
 import km.lucene.constants.FieldName;
 import km.lucene.entities.Post;
@@ -32,11 +32,11 @@ public class ThreadIndexer extends AbstractIndexer {
 	@Override
 	public void run() {
 		try {
-			ThreadService.init(Settings.THREADS_PATH);
-			Map<Integer, Integer> docTopics = DocWithTopicParser.parseSimple(Settings.MalletSettings.TOPICS_PATH);
+			ThreadService.init(Config.settings.getThreadsPath());
+			Map<Integer, Integer> docTopics = DocWithTopicParser.parseSimple(Config.settings.getMalletSettings().getTopicsPath());
 
-			String postPath = Settings.SORTED_POSTS_PATH;
-			String indexPath = Settings.THINDEX_PATH;
+			String postPath = Config.settings.getSortedPostsPath();
+			String indexPath = Config.settings.getThindexPath();
 
 			logger.info(String.format("Indexing to directory '%s'...", indexPath));
 			Directory dir = FSDirectory.open(new File(indexPath));

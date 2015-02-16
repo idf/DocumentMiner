@@ -2,7 +2,7 @@ package km.lucene.indexing;
 
 import io.deepreader.java.commons.util.DateUtils;
 import io.deepreader.java.commons.util.Displayer;
-import km.common.Settings;
+import km.common.Config;
 import km.common.json.JsonReader;
 import km.lucene.constants.FieldName;
 import km.lucene.entities.Post;
@@ -34,9 +34,9 @@ public class PostIndexer extends AbstractIndexer {
     }
 
     public PostIndexer() {
-        this.postPath = Settings.SORTED_POSTS_PATH;
-        this.indexPath = Settings.POSTINDEX_PATH;
-        ThreadService.init(Settings.THREADS_PATH);
+        this.postPath = Config.settings.getSortedPostsPath();
+        this.indexPath = Config.settings.getPostindexPath();
+        ThreadService.init(Config.settings.getThreadsPath());
     }
 
     @Override

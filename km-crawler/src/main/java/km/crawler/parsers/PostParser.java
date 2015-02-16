@@ -1,21 +1,20 @@
 package km.crawler.parsers;
 
+import io.deepreader.java.commons.util.DateUtils;
+import km.crawler.entities.Page;
+import km.crawler.entities.Post;
+import km.crawler.entities.Quote;
+import km.crawler.enums.PageType;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import km.common.util.DateUtil;
-import km.crawler.entities.Page;
-import km.crawler.entities.Post;
-import km.crawler.entities.Quote;
-import km.crawler.enums.PageType;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 public class PostParser {
 
@@ -26,9 +25,9 @@ public class PostParser {
     public static void parse(Page page, String html, List<Page> pages, List<Post> posts) {
         Calendar c = Calendar.getInstance();
         c.set(2014, 6, 15);  //2014-07-15, the day the data is download
-        today = DateUtil.format(c.getTime(), "dd-MM-yyyy");
+        today = DateUtils.format(c.getTime(), "dd-MM-yyyy");
         c.add(Calendar.DATE, -1);
-        yesterday = DateUtil.format(c.getTime(), "dd-MM-yyyy");
+        yesterday = DateUtils.format(c.getTime(), "dd-MM-yyyy");
 
         String pageUrl = page.getUrl();
         String forumUrl = pageUrl.substring(0, pageUrl.indexOf("/"));

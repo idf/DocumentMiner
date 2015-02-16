@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<settings>
+    <clutoSettings>
+        <docsMat>D:/Programming/java/kd/data/cluto/docs.mat</docsMat>
+        <OUTPUT>D:/Programming/java/kd/data/cluto/docs-output.txt</OUTPUT>
+        <rootFolder>D:/Programming/java/kd/data/cluto/</rootFolder>
+        <VCLUSTER>D:/Programming/java/kd/cluto/cluto-2.1.2/MSWIN-x86_64/vcluster.exe</VCLUSTER>
+    </clutoSettings>
+    <colloTopK>500</colloTopK>
+    <contentsPath>D:/Programming/java/kd/data/contents.txt</contentsPath>
+    <dataFolder>D:/Programming/java/kd/data/</dataFolder>
+    <driverSettings>
+        <rootFolder>D:/Programming/java/kd/data/expr/</rootFolder>
+    </driverSettings>
+    <forumsPath>D:/Programming/java/kd/data/forums.txt</forumsPath>
+    <indexPath>D:/Programming/java/kd/data/index</indexPath>
+    <malletSettings>
+        <keysPath>D:/Programming/java/kd/data/mallet/50_keys.txt</keysPath>
+        <oac69Folder>D:/Programming/java/kd/data/mallet/69_OAC/</oac69Folder>
+        <postsFolder>D:/Programming/java/kd/data/mallet/posts/</postsFolder>
+        <postsMalletPath>D:/Programming/java/kd/data/mallet/posts.mallet</postsMalletPath>
+        <postsPath>D:/Programming/java/kd/data/mallet/posts.csv</postsPath>
+        <rootFolder>D:/Programming/java/kd/data/mallet/</rootFolder>
+        <topicCnt>50</topicCnt>
+        <topicsPath>D:/Programming/java/kd/data/mallet/50_topics.txt</topicsPath>
+    </malletSettings>
+    <postindexPath>D:/Programming/java/kd/data/postindex</postindexPath>
+    <postsPath>D:/Programming/java/kd/data/posts.txt</postsPath>
+    <rakeSettings>
+        <basicIndexPath>D:/Programming/java/kd/data/rake/basic_index.ser</basicIndexPath>
+        <clusteredIndexPath>D:/Programming/java/kd/data/rake/clustered_index.ser</clusteredIndexPath>
+        <rootFolder>D:/Programming/java/kd/data/rake/</rootFolder>
+        <threadedIndexPath>D:/Programming/java/kd/data/rake/threaded_index.ser</threadedIndexPath>
+        <topPercent>0.75</topPercent>
+    </rakeSettings>
+    <rawHtmlFolder>D:/Programming/java/kd/html/</rawHtmlFolder>
+    <sortedPostsPath>D:/Programming/java/kd/data/posts_sorted.txt</sortedPostsPath>
+    <taxoindexPath>D:/Programming/java/kd/data/taxoindex</taxoindexPath>
+    <thindexPath>D:/Programming/java/kd/data/thindex</thindexPath>
+    <threadsPath>D:/Programming/java/kd/data/threads.txt</threadsPath>
+    <topicSettings>
+        <rootFolder>D:/Programming/java/kd/data/topic/</rootFolder>
+        <termsPath>D:/Programming/java/kd/data/topic/terms.json</termsPath>
+    </topicSettings>
+</settings>

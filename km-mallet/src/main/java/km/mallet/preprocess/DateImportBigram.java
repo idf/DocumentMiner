@@ -4,7 +4,7 @@ import cc.mallet.pipe.*;
 import cc.mallet.pipe.iterator.CsvIterator;
 import cc.mallet.types.InstanceList;
 import cc.mallet.util.CharSequenceLexer;
-import km.common.Settings;
+import km.common.Config;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -15,8 +15,8 @@ public class DateImportBigram {
 	public static String defaultLineRegex = "^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$";
 	
 	public static void main(String[] args) throws IOException {
-		File inputFile = new File(Settings.MalletSettings.POSTS_PATH); // "E:/project/kd/data/mallet/posts.csv"
-		File outputFile = new File(Settings.MalletSettings.ROOT_FOLDER, "posts_bigram.mallet"); // "E:/project/kd/data/mallet/posts_bigram.mallet"
+		File inputFile = new File(Config.settings.getMalletSettings().getPostsPath()); // "E:/project/kd/data/mallet/posts.csv"
+		File outputFile = new File(Config.settings.getMalletSettings().getRootFolder(), "posts_bigram.mallet"); // "E:/project/kd/data/mallet/posts_bigram.mallet"
 
 		Pipe instancePipe;
 

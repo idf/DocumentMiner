@@ -1,7 +1,7 @@
 package km.lucene.applets.cluto;
 
 import io.deepreader.java.commons.util.IOHandler;
-import km.common.Settings;
+import km.common.Config;
 import km.lucene.constants.FieldName;
 import org.apache.lucene.index.*;
 import org.apache.lucene.store.FSDirectory;
@@ -28,7 +28,7 @@ public class DocFormatter implements Runnable {
 
     protected Logger logger = LoggerFactory.getLogger(DocFormatter.class);
     public static void main(String[] args) {
-        new DocFormatter(Settings.THINDEX_PATH, Settings.ClutoSettings.DOCS_MAT).run();
+        new DocFormatter(Config.settings.getThindexPath(), Config.settings.getClutoSettings().getDocsMat()).run();
     }
 
     public DocFormatter(String indexPath, String matOutputPath) {
