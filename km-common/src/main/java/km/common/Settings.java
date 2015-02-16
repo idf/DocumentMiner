@@ -29,16 +29,18 @@ public class Settings {
         public static final String KEYS_PATH = ROOT_FOLDER+TOPIC_CNT+"_keys.txt";
     }
 
+    public class TopicSettings {
+        public static final String ROOT_FOLDER = DATA_FOLDER+"topic/";
+        public static final String TERMS_PATH = ROOT_FOLDER+"terms.json";
+    }
+
     // Lucene
     public static final String INDEX_PATH = DATA_FOLDER+"index";
     public static final String TAXOINDEX_PATH = DATA_FOLDER+"taxoindex";
     public static final String THINDEX_PATH = DATA_FOLDER+"thindex";
     public static final String POSTINDEX_PATH = DATA_FOLDER+"postindex";
 
-    public class TopicSettings {
-        public static final String ROOT_FOLDER = DATA_FOLDER+"topic/";
-        public static final String TERMS_PATH = ROOT_FOLDER+"terms.json";
-    }
+    public static final int COLLO_TOP_K = 500;
 
     // RAKE
     public class RakeSettings {

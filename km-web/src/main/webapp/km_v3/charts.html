@@ -1,13 +1,9 @@
-<h3>Charts</h3>
+<h3>Co-occurrence Charts</h3>
 <div>
     <h4>Point-wise Relative Entropy Scores</h4>
-    <div ng-controller="BarController as barCtrl">
-        <canvas ng-show="barCtrl.show" ng-init="barCtrl.init('terms')" class="chart chart-bar" data="barCtrl.data" labels="barCtrl.labels" options="barCtrl.options"></canvas>
-    </div>
-    <div ng-controller="BarController as barCtrl">
-        <canvas ng-show="barCtrl.show" ng-init="barCtrl.init('phrases')" class="chart chart-bar" data="barCtrl.data" labels="barCtrl.labels" options="barCtrl.options"></canvas>
-    </div>
-    <div ng-controller="BarController as barCtrl">
-        <canvas ng-show="barCtrl.show" ng-init="barCtrl.init('phrases_excluded')" class="chart chart-bar" data="barCtrl.data" labels="barCtrl.labels" options="barCtrl.options"></canvas>
+    <div ng-repeat="attr_name in searchCtrl.results.collocations.order">
+        <div ng-controller="BarController as barCtrl" ng-init="barCtrl.init(attr_name)">
+            <canvas ng-show="barCtrl.show" class="chart chart-bar" data="barCtrl.data" labels="barCtrl.labels" options="barCtrl.options"></canvas>
+        </div>
     </div>
 </div>

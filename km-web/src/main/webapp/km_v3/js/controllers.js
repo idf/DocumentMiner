@@ -47,6 +47,10 @@
             sharedService.prepForBroadcast(vm.query.str);
             $scope.$on('collocationDataReady', function() {
                 vm.results.collocations = sharedService.msg;
+                vm.results.collocations.order = ["terms", "phrases"];
+                if(sharedService.msg.results.hasOwnProperty("phrases_excluded")) {
+                    vm.results.collocations.order.push("phrases_excluded");
+                }
                 vm.searching = false;
                 vm.show = true;
                 $scope.$broadcast('shown');
@@ -80,18 +84,17 @@
         vm.labels =[];
         vm.data = []; // push
         vm.options = {};
-        vm.setUp = setUp;
-        vm.cleanup = cleanup;
         vm.chart = null;
         vm.show = false;
 
         var steps = 10;
         vm.init = function (target) {
-          vm.target = target;
+            vm.target = target;
+            loadData();
         };
 
         function setUp(rankedList) {
-            vm.cleanup();
+            cleanup();
             var scores = [];
             for(var i=0; i<rankedList.length; i++) {
                 scores.push(rankedList[i].score*1000);
@@ -111,7 +114,10 @@
                 scaleOverride: true,
                 scaleSteps: steps,
                 scaleStepWidth: Math.ceil(vm.data[0].max()/steps),
-                scaleStartValue: 0
+                scaleStartValue: 0,
+                scaleShowLabels: false,
+                responsive: true,
+                maintainAspectRatio: true
             };
             vm.show = true;
         }
@@ -123,20 +129,23 @@
             vm.show = false;
         }
 
-        $scope.$on('collocationDataReady', function() {
+        function loadData() {
+            $scope.$apply();
             if(sharedService.msg.results.hasOwnProperty(vm.target)) {
-                vm.setUp(sharedService.msg.results[vm.target]);
+                setUp(sharedService.msg.results[vm.target]);
+                console.log("set up: "+vm.target);
             }
+            $scope.$apply();
+        }
+
+        $scope.$on('prepForBroadcast', function () {
+            cleanup();
         });
 
         $scope.$on('shown', function () {
-            console.log('event: shown');
-            $scope.$apply();  // TODO: fix $digest already in progress
+            loadData();
         });
 
-        $scope.$on('prepForBroadcast', function () {
-            vm.cleanup();
-        });
 
         $scope.$on('create', function (chart) {
             // TODO fix chart reference

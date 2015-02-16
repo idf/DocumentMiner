@@ -51,7 +51,7 @@ public class TermCollocationExtractor {
 
     // top k
     BitSet liveDocs = new BitSet();
-    int k = 500;
+    int k = Settings.COLLO_TOP_K;
 
     TermCollocationHelper helper = new TermCollocationHelper();
 
