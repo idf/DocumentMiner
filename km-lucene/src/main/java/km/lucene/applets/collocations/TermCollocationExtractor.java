@@ -302,20 +302,13 @@ public class TermCollocationExtractor {
 
     private void incrementCollocationScore(Term term, Map<String, CollocationScorer> scores, boolean top, Map<Integer, Term> map, Set<Term> termsFound, int cur_position) throws IOException {
         Term termB = map.get(cur_position);  // how to get termB
-        if(termB==null)
+        if(termB==null || termB.text().length()<3)
             return;
         if(termB.bytes().equals(term.bytes()))
             return;
-        if(CustomStopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(termB.text()))
-            return;
-        if (!this.filter.processTerm(termB.bytes().utf8ToString())) {
-            return;
+        if(this.rakeMgr.rake.getStopWordPat().matcher(termB.text()).find()) {  // filter by rake stop words
+            return ;
         }
-        /*
-        if (!StringUtils.isAlpha(termB.bytes().utf8ToString())) {
-            return;
-        }
-        */
         if(termsFound.contains(termB))
             return;
         CollocationScorer pt = scores.get(termB.bytes().utf8ToString());
