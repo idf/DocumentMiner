@@ -24,7 +24,7 @@ public class DocFormatterTest {
 
     @Test
     public void info() throws Exception {
-        IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(Config.settings.getDataFolder())));
+        IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(Config.settings.getThindexPath())));
         Fields fields = MultiFields.getFields(reader);
         Terms terms = fields.terms(FieldName.CONTENT);
         long m = terms.size();  // -1
