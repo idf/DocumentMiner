@@ -127,6 +127,7 @@
             vm.labels.length = 0;
             vm.options = {};
             vm.show = false;
+            if(vm.chart) { vm.chart.destroy(); }
         }
 
         function loadData() {
@@ -147,9 +148,7 @@
         });
 
 
-        $scope.$on('create', function (chart) {
-            // TODO fix chart reference
-            // console.log(chart);
+        $scope.$on('create', function (event, chart) {
             vm.chart = chart;
         });
     }]);
