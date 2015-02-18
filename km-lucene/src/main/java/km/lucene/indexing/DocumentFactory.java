@@ -18,7 +18,7 @@ public class DocumentFactory {
 
 	private final static ThreadService ts = new ThreadService();
 
-	public static Document create(Post post, Map<Integer, DocWithTopic> docTopics) throws IOException {
+	public static Document newInstance(Post post, Map<Integer, DocWithTopic> docTopics) throws IOException {
 		Document doc = new Document();
 		doc.add(new FacetField(FieldName.FORUM_ID, Integer.toString(post.getForumId())));
 		doc.add(new StoredField(FieldName.FORUM_ID, post.getForumId()));
@@ -40,13 +40,16 @@ public class DocumentFactory {
 		doc.add(new FacetField(FieldName.POST_YEAR, yearStr));
 		doc.add(new FacetField(FieldName.POST_MONTH, monthStr));
 
-        // add posting list
-        FieldType fieldType = new FieldType();
-        fieldType.setStoreTermVectors(true);
-        fieldType.setStoreTermVectorPositions(true);
-        fieldType.setIndexed(true);
 
-        doc.add(new Field(FieldName.CONTENT, post.getContent(), fieldType));
+		// Daniel: add posting list
+		FieldType fieldTypeDoc = new FieldType();
+		fieldTypeDoc.setStoreTermVectors(true);
+		fieldTypeDoc.setStoreTermVectorPositions(true);
+		fieldTypeDoc.setStoreTermVectorOffsets(true); // for highlighting, rake4j
+		fieldTypeDoc.setIndexed(true);
+		fieldTypeDoc.setStored(true);  //for Rake to re-analyze the content
+
+        doc.add(new Field(FieldName.CONTENT, post.getContent(), fieldTypeDoc));
 		doc.add(new IntField(FieldName.STOREY, post.getStorey(), Field.Store.YES));
 
 		String poster = post.getPoster().isEmpty() ? "Anonymous" : post.getPoster();

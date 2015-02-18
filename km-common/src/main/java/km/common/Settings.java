@@ -386,7 +386,7 @@ public class Settings {
     }
 
     public String getIndexPath() {
-        return INDEX_PATH;
+        return POSTINDEX_PATH;  // INDEX_PATH is deprecated, replaced by POSTINDEX_PATH
     }
 
     @XmlElement

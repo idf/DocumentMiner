@@ -57,7 +57,7 @@
         <script type="text/javascript" src="../js/lib/notify.js"></script>
         <script type="text/javascript" src="../js/lib/canvasjs-1.5.0-beta/source/canvasjs.js"></script>
         <script type="text/javascript" src="../js/jquery-ext.js"></script>
-        <script type="text/javascript" src="../js/commons-util-js/PrimitiveExtensions.js.js"></script>
+        <script type="text/javascript" src="../js/commons-util-js/PrimitiveExtensions.js"></script>
         <script type="text/javascript" src="../js/commons-util-js/DomUtils.js"></script>
         <script type="text/javascript" src="../js/km_v2/main.js"></script>
         <script type="text/javascript" src="../js/km_v2/menu.js"></script>

@@ -40,8 +40,7 @@ public class Indexer extends AbstractIndexer {
             System.exit(1);
         }
 
-        Indexer indexr = new Indexer(args[0], args[1], args[2]);
-        indexr.run();
+        new Indexer(args[0], args[1], args[2]).run();
     }
 
     public Indexer(String postPath, String indexPath, String taxoPath) {
@@ -50,6 +49,7 @@ public class Indexer extends AbstractIndexer {
         this.taxoPath = taxoPath;
     }
 
+    @Deprecated
     @Override
     public void run() {
         try {
@@ -67,7 +67,7 @@ public class Indexer extends AbstractIndexer {
             Post post;
             int i = 1;
             while ((post = jr.next()) != null) {
-                Document doc = DocumentFactory.create(post, docTopics);
+                Document doc = DocumentFactory.newInstance(post, docTopics);
                 indexWriter.addDocument(config.build(taxoWriter, doc));
                 logger.info(String.format("added post %d, %d", (i++), post.getId()));
             }
