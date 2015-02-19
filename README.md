@@ -24,11 +24,8 @@ git submodule foreach git pull origin master
 ###Search Engine Interface in AngularJS
 * Through Web Service: Javaxs
 * Web dependencies: [bower](https://github.com/zhangdanyangg/KnowledgeMiner/blob/develop/km-web/src/main/webapp/bower.json)
-In the directory of `bower.json`
+
+In the directory of `bower.json`:
 ```bash
 bower install
-```
-New packages
-```bash
-bower install <package-name> --save
 ```
