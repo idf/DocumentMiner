@@ -22,4 +22,13 @@ git submodule foreach git pull origin master
 * [README](https://github.com/zhangdanyangg/TopicModeling/blob/develop/km-lucene/src/main/java/km/lucene/applets/collocations)
 
 ###Search Engine Interface in AngularJS
-TODO
+* Through Web Service: Javaxs
+* Web dependencies: [bower](https://github.com/zhangdanyangg/KnowledgeMiner/blob/develop/km-web/src/main/webapp/bower.json)
+In the directory of `bower.json`
+```bash
+bower install
+```
+New packages
+```bash
+bower install <package-name> --save
+```
