@@ -98,7 +98,8 @@
             var scores = [];
             for(var i=0; i<rankedList.length; i++) {
                 scores.push(rankedList[i].score*1000);
-                vm.labels.push(rankedList[i].coincidentalTerm);
+                //vm.labels.push(rankedList[i].coincidentalTerm);
+                vm.labels.push(i+1);
             }
 
             var l = scores.length;

@@ -37,3 +37,9 @@ a.jump-link{
 img.full{
     width: 1100px; !important /* limit the width when the image is displayed as full */
 }
+
+canvas.co-occurrence-score {
+    /*width: 100% !important;*/
+    /*max-width: 800px;*/
+    /*height: 33% !important;*/
+}

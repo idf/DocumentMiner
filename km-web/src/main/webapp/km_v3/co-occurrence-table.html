@@ -1,22 +1,43 @@
-<h3>Co-occurrence Results</h3>
-<div>
-    <p>Elapsed: {{searchCtrl.results.collocations.elapsed }}ms</p>
-    <table class="table table-striped table-hover " ng-repeat="attr_name in searchCtrl.results.collocations.order">
-        <thead>
-        <tr>
-            <th class="col-md-2">#</th>
-            <th class="col-md-4">{{ attr_name }}</th>
-            <th class="col-md-3">Co-occurrence</th>
-            <th class="col-md-3">Document Frequency</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr ng-repeat="entry in searchCtrl.results.collocations.results[attr_name] ">
-            <td>{{$index + 1}}</td>
-            <td>{{ entry.coincidentalTerm }}</td>
-            <td>{{ entry.coIncidenceDocCount }}</td>
-            <td>{{ entry.termBDocFreq }}</td>
-        </tr>
-        </tbody>
-    </table>
+<div class="row">
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Co-occurrence Results</h3>
+            <p>Elapsed: {{ searchCtrl.results.collocations.elapsed }}ms</p>
+        </div>
+
+        <div class="col-md-6">
+            <h3>Co-occurrence Charts</h3>
+            <h4>Point-wise Relative Entropy Scores</h4>
+        </div>
+    </div>
+
+    <div class="row" ng-repeat="attr_name in searchCtrl.results.collocations.order">
+        <div class="col-md-6">
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th class="col-md-2">#</th>
+                    <th class="col-md-4">{{ attr_name | whitespace }}</th>
+                    <th class="col-md-3">Co-occurrence</th>
+                    <th class="col-md-3">Document Frequency</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="entry in searchCtrl.results.collocations.results[attr_name] ">
+                    <td>{{$index + 1}}</td>
+                    <td>{{ entry.coincidentalTerm }}</td>
+                    <td>{{ entry.coIncidenceDocCount }}</td>
+                    <td>{{ entry.termBDocFreq }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-6">
+            <h4>{{ attr_name | whitespace }}</h4>
+            <div ng-controller="BarController as barCtrl" ng-init="barCtrl.init(attr_name)">
+                <canvas ng-show="barCtrl.show" class="chart chart-bar co-occurrence-score" data="barCtrl.data" labels="barCtrl.labels" options="barCtrl.options"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
