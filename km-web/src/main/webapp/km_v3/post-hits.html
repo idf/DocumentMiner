@@ -1,6 +1,8 @@
 <h3>Search Results</h3>
 <div>
-    <p>Total {{searchCtrl.results.posts.pageInfo.totalThreads | numberWithComma }} threads, {{searchCtrl.results.posts.pageInfo.totalPosts | numberWithComma}} posts. Elapsed: {{searchCtrl.results.posts.elapsed | numberWithComma}}ms</p>
+    <p>Total {{searchCtrl.results.posts.pageInfo.totalThreads | numberWithComma }} threads,
+        {{searchCtrl.results.posts.pageInfo.totalPosts | numberWithComma}} posts.
+        Elapsed: {{searchCtrl.results.posts.elapsed | numberWithComma}}ms</p>
     <div>
         <ul class="pagination">
             <li ng-class="{disabled: !searchCtrl.pages.left }"><a ng-click="searchCtrl.goto(searchCtrl.pages.left.link)">«</a></li>
