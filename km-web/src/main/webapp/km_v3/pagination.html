@@ -1,0 +1,9 @@
+<div>
+    <ul class="pagination">
+        <li ng-class="{disabled: !searchCtrl.pages.left }"><a ng-click="searchCtrl.goto(searchCtrl.pages.left.link)">«</a></li>
+        <li ng-repeat="num in searchCtrl.pages.nums" ng-class="{active: !num.link}">
+            <a ng-click="searchCtrl.goto(num.link)">{{ num.page }}</a>
+        </li>
+        <li ng-class="{disabled: !searchCtrl.pages.right }"><a ng-click="searchCtrl.goto(searchCtrl.pages.right.link)">»</a></li>
+    </ul>
+</div>
