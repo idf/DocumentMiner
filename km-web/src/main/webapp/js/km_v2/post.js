@@ -30,7 +30,7 @@ var Post = Post || function(container) {
         var storey = $(this).next("div.storey:eq(0)").prop("id");
         var data = "threadId=" + threadId + "&storey=" + storey;
         $.get("/s/postsInFrontOfStorey", data, function(posts) {
-            if (posts.length == 0) {
+            if (posts.length===0) {
                 $.notify("No more posts.", "info");
                 $up.hide();
             } else {

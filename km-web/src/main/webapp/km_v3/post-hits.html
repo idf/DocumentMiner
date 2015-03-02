@@ -1,6 +1,16 @@
 <h3>Search Results</h3>
 <div>
     <p>Elapsed: {{searchCtrl.results.posts.elapsed }}ms</p>
+    <div>
+        <ul class="pagination">
+            <li ng-class="{disabled: !searchCtrl.pages.left }"><a ng-click="searchCtrl.goto(searchCtrl.pages.left.link)">«</a></li>
+            <li ng-repeat="num in searchCtrl.pages.nums" ng-class="{active: !num.link}">
+                <a ng-click="searchCtrl.goto(num.link)">{{ num.page }}</a>
+            </li>
+            <li ng-class="{disabled: !searchCtrl.pages.right }"><a ng-click="searchCtrl.goto(searchCtrl.pages.right.link)">»</a></li>
+        </ul>
+    </div>
+
     <div ng-repeat="entry in searchCtrl.results.posts.posts">
         <div class="panel panel-default">
             <div class="panel-heading" ng-bind-html="entry.threadTitle | sanitize"></div>
@@ -8,5 +18,15 @@
                 <div ng-bind-html="entry.content | sanitize"></div>
             </div>
         </div>
+    </div>
+
+    <div>
+        <ul class="pagination">
+            <li ng-class="{disabled: !searchCtrl.pages.left }"><a ng-click="searchCtrl.goto(searchCtrl.pages.left.link)">«</a></li>
+            <li ng-repeat="num in searchCtrl.pages.nums" ng-class="{active: !num.link}">
+                <a ng-click="searchCtrl.goto(num.link)">{{ num.page }}</a>
+            </li>
+            <li ng-class="{disabled: !searchCtrl.pages.right }"><a ng-click="searchCtrl.goto(searchCtrl.pages.right.link)">»</a></li>
+        </ul>
     </div>
 </div>

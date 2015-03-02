@@ -5,22 +5,59 @@
     'use strict';
     var app = angular.module('km_v3.controllers', ['chart.js']);
 
-    app.controller('SearchController', ['$http', '$scope', 'collocationDataService', function($http, $scope, sharedService) {
+    app.controller('SearchController', ['$http', '$scope', 'collocationDataService', function($http, $scope, collocService) {
         var vm = this;  // view model
         vm.debug = true;
         vm.show = false;
         vm.searching = false;
         vm.results = {};
         vm.query = {};
+        vm.pages = {};
 
         vm.pagination = pagination;
+        vm.goto = goto;
         vm.filtering = filtering;
         vm.searchQuery = searchQuery;
 
-        function pagination(pageInfo) {
-            var pageCount = pageInfo.pageCount;
-            var page = pageInfo.page;
-            // TODO: pagination
+        function pagination(page, pageCount) {
+            var span = 3;
+            vm.pages = {};
+            if(page>1) {
+                vm.pages.left = {};
+                vm.pages.left.link = page-1;
+            }
+            if(page<pageCount) {
+                vm.pages.right = {};
+                vm.pages.right.link = page+1;
+            }
+
+            vm.pages.nums = [];
+            var start = page-span;
+            var end = page+span;
+            start = start<1? 1: start;
+            end = end>pageCount? pageCount: end;
+            for(var i=start; i<=end; i++) {
+                var num = {};
+                num.page = i;
+                if(i!==page) {
+                    num.link = i;
+                }
+                vm.pages.nums.push(num);
+            }
+        }
+
+        function goto(page) {
+            console.log("goto page "+page);
+            var param = [];
+            param.push('query='+vm.query.str);
+            param.push('filter='+'postMonth:,postYear:,topicId:,forumId:,threadId:,poster:');
+            param.push('page='+page);
+            param.push('sort='+2);
+            $http.get('/s/v2/posts?'+param.join('&')).success(function(data) {
+                // console.log(data);
+                vm.results.posts = data;
+                vm.pagination(data.pageInfo.page, data.pageInfo.pageCount);
+            });
         }
 
         function filtering(){
@@ -36,7 +73,7 @@
             $http.get('/s/v2/posts?'+param.join('&')).success(function(data) {
                 // console.log(data);
                 vm.results.posts = data;
-                vm.pagination(data.pageInfo);
+                vm.pagination(data.pageInfo.page, data.pageInfo.pageCount);
             });
 
             //$http.get('/s/v2/collocations?query='+vm.query.str).success(function(data) {
@@ -44,11 +81,11 @@
             //    vm.results.collocations = data;
             //});
 
-            sharedService.prepForBroadcast(vm.query.str);
+            collocService.prepForBroadcast(vm.query.str);
             $scope.$on('collocationDataReady', function() {
-                vm.results.collocations = sharedService.msg;
+                vm.results.collocations = collocService.msg;
                 vm.results.collocations.order = ["terms", "phrases"];
-                if(sharedService.msg.results.hasOwnProperty("phrases_excluded")) {
+                if(collocService.msg.results.hasOwnProperty("phrases_excluded")) {
                     vm.results.collocations.order.push("phrases_excluded");
                 }
                 vm.searching = false;
@@ -79,7 +116,7 @@
         return sharedService;
     }]);
 
-    app.controller('BarController', ['$scope', 'collocationDataService', function($scope, sharedService) {
+    app.controller('BarController', ['$scope', 'collocationDataService', function($scope, collocService) {
         var vm = this;
         vm.labels =[];
         vm.data = []; // push
@@ -133,8 +170,8 @@
 
         function loadData() {
             $scope.$apply();
-            if(sharedService.msg.results.hasOwnProperty(vm.target)) {
-                setUp(sharedService.msg.results[vm.target]);
+            if(collocService.msg.results.hasOwnProperty(vm.target)) {
+                setUp(collocService.msg.results[vm.target]);
                 console.log("set up: "+vm.target);
             }
             $scope.$apply();
