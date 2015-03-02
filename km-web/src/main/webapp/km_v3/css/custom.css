@@ -20,7 +20,7 @@ html, body {
 section,
 article,
 footer{
-    text-align: justify;
+    /*text-align: justify;*/  /* commented out otherwise justfy the label and take up the entire line */
 }
 footer{
     background-color: #222222;

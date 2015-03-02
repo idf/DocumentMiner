@@ -1,6 +1,6 @@
 <h3>Search Results</h3>
 <div>
-    <p>Elapsed: {{searchCtrl.results.posts.elapsed }}ms</p>
+    <p>Total {{searchCtrl.results.posts.pageInfo.totalThreads | numberWithComma }} threads, {{searchCtrl.results.posts.pageInfo.totalPosts | numberWithComma}} posts. Elapsed: {{searchCtrl.results.posts.elapsed | numberWithComma}}ms</p>
     <div>
         <ul class="pagination">
             <li ng-class="{disabled: !searchCtrl.pages.left }"><a ng-click="searchCtrl.goto(searchCtrl.pages.left.link)">«</a></li>
@@ -12,11 +12,22 @@
     </div>
 
     <div ng-repeat="entry in searchCtrl.results.posts.posts">
-        <div class="panel panel-default">
-            <div class="panel-heading" ng-bind-html="entry.threadTitle | sanitize"></div>
-            <div class="panel-body">
-                <div ng-bind-html="entry.content | sanitize"></div>
-            </div>
+        <div ng-if="entry.threadId!=searchCtrl.results.posts.posts[$index-1].threadId">
+            <span class="label label-primary label-forum" style="text-align: left;">{{ entry.forumTitle }}</span>
+            <span>Thread: <span class="thread_title" ng-bind-html="entry.threadTitle | sanitize"></span></span>
+        </div>
+
+        <div class="post_panel" >
+            <blockquote ng-if="entry.quotes" class="quote">
+                <div ng-repeat="quote in entry.quotes">
+                    <div class="quote_panel" ng-attr-id="{{quote.id}}">
+                        <div class='quote' ng-bind-html="quote.content | sanitize"></div>
+                    </div>
+                </div>
+            </blockquote>
+            <div class="content" ng-bind-html="entry.content | sanitize"></div>
+            <div class="remark">{{ entry.poster}} {{entry.postDate}}</div>
+            <div class="storey">#{{ entry.storey }}</div>
         </div>
     </div>
 
