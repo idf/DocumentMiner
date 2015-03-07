@@ -47,7 +47,7 @@
         }
 
         function goto(page) {
-            console.log("goto page "+page);
+            // console.log("goto page "+page);
             var param = [];
             param.push('query='+vm.query.str);
             param.push('filter='+'postMonth:,postYear:,topicId:,forumId:,threadId:,poster:');
@@ -76,11 +76,6 @@
                 vm.pagination(data.pageInfo.page, data.pageInfo.pageCount);
             });
 
-            //$http.get('/s/v2/collocations?query='+vm.query.str).success(function(data) {
-            //    console.log(data);
-            //    vm.results.collocations = data;
-            //});
-
             collocService.prepForBroadcast(vm.query.str);
             $scope.$on('collocationDataReady', function() {
                 vm.results.collocations = collocService.msg;
@@ -107,7 +102,7 @@
         function prepForBroadcast(str) {
             $rootScope.$broadcast('prepForBroadcast');
             $http.get('/s/v2/collocations?query='+str).success(function(data) {
-                console.log(data);
+                // console.log(data);
                 sharedService.msg = data;
                 $rootScope.$broadcast('collocationDataReady');
             });
@@ -172,7 +167,7 @@
             $scope.$apply();
             if(collocService.msg.results.hasOwnProperty(vm.target)) {
                 setUp(collocService.msg.results[vm.target]);
-                console.log("set up: "+vm.target);
+                // console.log("set up: "+vm.target);
             }
             $scope.$apply();
         }

@@ -20,7 +20,7 @@ import java.io.Reader;
  * such as company names, email addresses, and hostnames.
  * It also lowercaes each token and
  * removes stop words and punctuation.
- * CustomAnalyzer = StandardAnalyzer + PorterStemFilter
+ * CustomAnalyzer = StandardAnalyzer + KStemFilter
  */
 public class CustomAnalyzer extends StopwordAnalyzerBase {
 
@@ -55,8 +55,7 @@ public class CustomAnalyzer extends StopwordAnalyzerBase {
         TokenStream tok = new StandardFilter(matchVersion, src);
         tok = new LowerCaseFilter(matchVersion, tok);
         tok = new StopFilter(matchVersion, tok, stopwords);
-        // tok = new PorterStemFilter(tok);
-        tok = new KStemFilter(tok);  // got get nus rather than nu
+        tok = new KStemFilter(tok);  // to get "nus" rather than "nu"; Porter is aggressive  // tok = new PorterStemFilter(tok);
         return new TokenStreamComponents(src, tok) {
             @Override
             protected void setReader(final Reader reader) throws IOException {

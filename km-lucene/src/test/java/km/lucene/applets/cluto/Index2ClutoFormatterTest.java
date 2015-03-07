@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import java.io.File;
 
-public class DocFormatterTest {
+public class Index2ClutoFormatterTest {
 
     @Before
     public void setUp() throws Exception {

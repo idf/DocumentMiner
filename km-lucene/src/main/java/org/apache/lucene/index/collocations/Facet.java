@@ -3,13 +3,10 @@ package org.apache.lucene.index.collocations;
 import km.common.Config;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.CorruptIndexException;
-import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import util.LuceneUtils;
 
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -27,14 +24,13 @@ public class Facet {
         Facet facet = new Facet();
         facet.extractCollocations();
     }
+    
     private void extractCollocations() throws IOException, CorruptIndexException {
-        Directory dir = FSDirectory.open(new File(indexDir));
-        IndexReader reader = DirectoryReader.open(dir);
+        IndexReader reader = LuceneUtils.reader(indexDir);
         CollocationExtractor collocationExtractor = new CollocationExtractor(reader);
         CollocationIndexer collocationIndexer = new CollocationIndexer(collocsDir, new StandardAnalyzer(Version.LUCENE_48));
         collocationExtractor.extract(collocationIndexer);
         collocationIndexer.close();
         reader.close();
     }
-
 }

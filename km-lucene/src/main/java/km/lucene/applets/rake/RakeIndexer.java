@@ -20,13 +20,17 @@ import java.util.Iterator;
  * Date: 1/13/2015
  * Time: 16:16
  */
+
+/**
+ * Build Rake Index of phrases with tf df from a list of documents
+ */
 public class RakeIndexer implements Runnable {
     String indexPath;
-    Iterator<String> itr;
+    Iterator<String> docItr;
 
-    public RakeIndexer(String indexPath, Iterator<String> itr) {
+    public RakeIndexer(String indexPath, Iterator<String> docItr) {
         this.indexPath = indexPath;
-        this.itr = itr;
+        this.docItr = docItr;
     }
 
     @Override
@@ -47,8 +51,8 @@ public class RakeIndexer implements Runnable {
 
         int i = 1;
         int maxDocs = 1<<31-1; //1<<31-1;
-        while (itr.hasNext() && i<maxDocs) { // debug
-            String content = itr.next();
+        while (docItr.hasNext() && i<maxDocs) { // debug
+            String content = docItr.next();
             Document doc = new Document(content);
             iw.addDocument(doc);
             logger.trace(String.format("added document count %d", (i++)));

@@ -1,6 +1,7 @@
 package km.lucene.applets.rake;
 
 import io.deepreader.java.commons.util.Displayer;
+import io.deepreader.java.commons.util.ExceptionUtils;
 import io.deepreader.java.commons.util.IOHandler;
 import io.deepreader.java.commons.util.Transformer;
 import km.common.Config;
@@ -31,6 +32,7 @@ import java.util.stream.Stream;
 public class RakeIndexingFacet implements Runnable {
     String postPath = Config.settings.getSortedPostsPath();
     protected Logger logger = LoggerFactory.getLogger(RakeIndexingFacet.class);
+
     /**
      * Does not need the position of the phrase, just need to store the scores of the words.
      * @param args
@@ -43,10 +45,10 @@ public class RakeIndexingFacet implements Runnable {
     @Override
     public void run() {
         try {
-            basicIndexing();
+            basicIndexing();  // plug with different
         }
         catch (IOException e) {
-            throw new RuntimeException(e);
+            ExceptionUtils.stifleCompileTime(e);
         }
     }
 
@@ -54,9 +56,10 @@ public class RakeIndexingFacet implements Runnable {
         JsonReader<Post> jr = new JsonReader<>(postPath, Post.class);
         final String INDEX_PATH = Config.settings.getRakeSettings().getBasicIndexPath();
         Iterator<String> itr = jr.getList().parallelStream()
-                .map(e -> e.getContent())
+                .map(Post::getContent)
                 .iterator();
         jr.close();
+
         RakeIndexer indexer = new RakeIndexer(INDEX_PATH, itr);
         indexer.run();
         logger.info("Basic indexing completed");
@@ -122,7 +125,7 @@ public class RakeIndexingFacet implements Runnable {
 
         // indexing
         List<String> lst = new ArrayList<>();
-        IndexReader reader =  LuceneUtils.getReader(luceneIndexPath);
+        IndexReader reader =  LuceneUtils.reader(luceneIndexPath);
         for(Map.Entry<Integer, List<Integer>> e: cluster2docs.entrySet()) {
             if(e.getKey()==-1) {  // unclustered
                 for(Integer i: e.getValue()) {

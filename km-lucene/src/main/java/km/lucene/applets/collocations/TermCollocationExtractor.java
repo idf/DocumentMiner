@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
  * Time: 2:12 PM
  */
 public class TermCollocationExtractor {
-    // refactor: later
     IndexReader reader;
     IndexSearcher searcher;
     private Logger logger = LoggerFactory.getLogger(TermCollocationExtractor.class);
@@ -57,7 +56,7 @@ public class TermCollocationExtractor {
 
     // JSON entries
     static final String PHRASES_STR = "phrases";
-    static final String TERMS_STR= "terms";
+    static final String TERMS_STR = "terms";
     static final String PHRASES_EXCLUDED_STR = "phrases_excluded";
 
     public static void main(String[] args) throws Exception {
@@ -85,14 +84,13 @@ public class TermCollocationExtractor {
 
     public TermCollocationExtractor(String indexPath, String mainIndexPath, String taxoPath, String rakeIndexPath) {
         try {
-            this.reader = LuceneUtils.getReader(mainIndexPath);
-            this.searcher = new IndexSearcher(this.reader);
+            this.reader = LuceneUtils.reader(mainIndexPath);
+            this.searcher = LuceneUtils.searcher(reader);
 
-            Fields fields = MultiFields.getFields(this.reader);
-            Terms terms = fields.terms(this.fieldName);
-            TermsEnum iterator = terms.iterator(null);
+            Terms terms = LuceneUtils.terms(reader, fieldName);
+            TermsEnum te = terms.iterator(null);
             BytesRef byteRef = null;
-            while((byteRef = iterator.next()) != null) {
+            while((byteRef=te.next())!=null) {
                 this.totalVocabulary++;
             }
             this.liveDocs = new BitSet(this.reader.numDocs());
@@ -109,6 +107,8 @@ public class TermCollocationExtractor {
     public Map<String, ScoreMap> search(String queryString) throws ParseException, IOException, URISyntaxException {
         Timestamper timestamper = new Timestamper();
         timestamper.loudStart();
+
+        // query
         QueryParser queryParser = new QueryParser(Version.LUCENE_48, this.fieldName, new CustomAnalyzer(Version.LUCENE_48));
         Query query = queryParser.parse(queryString);
         TopScoreDocCollector collector = TopScoreDocCollector.create(this.k, true);
@@ -121,6 +121,7 @@ public class TermCollocationExtractor {
             this.liveDocs.set(topDocs.scoreDocs[j].doc);
         }
 
+        // collocation
         List<Map<String, ScoreMap>> rets = new ArrayList<>();
         for(Term t : terms) {
             // rakePreprocess(topDocs);
@@ -129,14 +130,18 @@ public class TermCollocationExtractor {
         }
         Map<String, ScoreMap> ret = mergeSearch(rets);
 
+        // merge individual collocation results
         List<String> termStrs = terms.stream().map(Term::text).collect(Collectors.toList());
         ret.get(TERMS_STR).excludeMathAny(termStrs);
         ret.get(PHRASES_STR).excludeMathAll(termStrs);
-        if(termStrs.size()==1) {
+
+        // construct phrases excluding query string
+        if(termStrs.size()==1) {  // single term query
             ScoreMap temp = new ScoreMap(ret.get(PHRASES_STR));
             temp.excludeMathAny(termStrs);
             ret.put(PHRASES_EXCLUDED_STR, temp);
         }
+
         timestamper.loudEnd();
         return ret;
     }
@@ -171,6 +176,7 @@ public class TermCollocationExtractor {
 
     /**
      * Merge the search results of phrase query
+     * Merge the results form each term from the phrase query 
      * @param rets
      * @return
      */
@@ -178,7 +184,7 @@ public class TermCollocationExtractor {
         Map<String, ScoreMap> ret = new HashMap<>();
         List<ScoreMap> terms = new ArrayList<>();
         List<ScoreMap> phrases = new ArrayList<>();
-        for(Map<String, ScoreMap> r: rets) {
+        for(Map<String, ScoreMap> r: rets) {  // length of rets == length of query terms
             terms.add(r.get("terms"));
             phrases.add(r.get("phrases"));
         }

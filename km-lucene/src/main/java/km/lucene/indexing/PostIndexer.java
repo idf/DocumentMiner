@@ -8,7 +8,6 @@ import km.lucene.entities.Post;
 import km.lucene.services.DocWithTopicParser;
 import km.lucene.services.ThreadService;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
 import org.apache.lucene.index.IndexWriter;
@@ -27,19 +26,12 @@ import java.util.Map;
  * Time: 20:46
  */
 public class PostIndexer extends AbstractIndexer {
-    private final static FacetsConfig config = new FacetsConfig();
-    private String postPath;
-    private String indexPath;
-    private String taxoPath;
-
     public static void main(String[] args) {
         new PostIndexer().run();
     }
 
     public PostIndexer() {
-        this.postPath = Config.settings.getSortedPostsPath();
-        this.indexPath = Config.settings.getPostindexPath();
-        this.taxoPath = Config.settings.getTaxoindexPath();
+        super();
         ThreadService.init(Config.settings.getThreadsPath());
     }
 

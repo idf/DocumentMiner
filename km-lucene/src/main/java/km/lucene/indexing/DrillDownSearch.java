@@ -25,6 +25,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
+/**
+ * Experimental use
+ */
 public class DrillDownSearch {
 
 	private static final FacetsConfig config = new FacetsConfig();

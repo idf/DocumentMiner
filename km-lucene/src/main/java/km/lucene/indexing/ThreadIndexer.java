@@ -64,6 +64,7 @@ public class ThreadIndexer extends AbstractIndexer {
 					prevThreadId = post.getThreadId();
 				}
 
+                // loop logic different from DocumentFactory.newInstance(..)
 				doc.add(new IntField(FieldName.ID, post.getId(), Field.Store.YES));
 
 				String postDateStr = post.getPostDate();
@@ -102,6 +103,8 @@ public class ThreadIndexer extends AbstractIndexer {
 				}
 
 				doc.add(new IntField(FieldName.TOPIC_ID, docTopics.get(post.getId()), Field.Store.NO));
+
+
 				String info = String.format("added post %d, %d", (i++), post.getId());
 				if(i%1000==0)
 					logger.info(info);

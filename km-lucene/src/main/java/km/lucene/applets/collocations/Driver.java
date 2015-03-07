@@ -4,7 +4,7 @@ import io.deepreader.java.commons.util.IOHandler;
 import io.deepreader.java.commons.util.Sorter;
 import km.common.Config;
 import km.lucene.applets.cluto.ClutoWrapper;
-import km.lucene.applets.cluto.DocFormatter;
+import km.lucene.applets.cluto.Index2ClutoFormatter;
 import km.lucene.applets.rake.RakeIndexingFacet;
 import km.lucene.entities.ScoreMap;
 import org.apache.lucene.index.collocations.CollocationScorer;
@@ -46,7 +46,7 @@ public class Driver {
         String clusterPath = Config.settings.getDriverSettings().getRootFolder()+String.format("cluster-%s.txt", suffix);
         String rakeIndexPath = Config.settings.getDriverSettings().getRootFolder()+String.format("rakeIndex-%s.ser", suffix);
         if(RE_RUN_CLUSTER) {
-            new DocFormatter(indexPath, matPath).run();
+            new Index2ClutoFormatter(indexPath, matPath).run();
             new ClutoWrapper(matPath, clusterPath, k).run();
         }
         if(RE_RUN_RAKE_INDEX) {

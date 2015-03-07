@@ -4,12 +4,11 @@ import io.deepreader.java.commons.util.IOHandler;
 import km.common.Config;
 import km.lucene.constants.FieldName;
 import org.apache.lucene.index.*;
-import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.LuceneUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,18 +19,28 @@ import java.util.stream.Collectors;
  * Date: 1/15/2015
  * Time: 15:20
  *
- * Similar to Stack Overflow: Generate Term-Document matrix using Lucene 4.4
  */
-public class DocFormatter implements Runnable {
+
+/**
+ * Construct Cluto readable matrix format from Lucene index directory
+ */
+public class Index2ClutoFormatter implements Runnable {
     private String indexPath;
     private String matOutputPath;
 
-    protected Logger logger = LoggerFactory.getLogger(DocFormatter.class);
+    protected Logger logger = LoggerFactory.getLogger(Index2ClutoFormatter.class);
     public static void main(String[] args) {
-        new DocFormatter(Config.settings.getThindexPath(), Config.settings.getClutoSettings().getDocsMat()).run();
+        new Index2ClutoFormatter(Config.settings.getThindexPath(),
+                Config.settings.getClutoSettings().getDocsMat())
+                .run();
     }
 
-    public DocFormatter(String indexPath, String matOutputPath) {
+    /**
+     *
+     * @param indexPath input path, the path to Lucene index directory
+     * @param matOutputPath output path, the path to the readable matrix file
+     */
+    public Index2ClutoFormatter(String indexPath, String matOutputPath) {
         this.indexPath = indexPath;
         this.matOutputPath = matOutputPath;
     }
@@ -39,7 +48,7 @@ public class DocFormatter implements Runnable {
     @Override
     public void run() {
         try {
-            IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(indexPath)));
+            IndexReader reader = LuceneUtils.reader(indexPath);
             String ret = getVectorSpaceMatrix(reader, FieldName.CONTENT);
             IOHandler.write(matOutputPath, ret);
             logger.info("Matrix written to "+matOutputPath);
@@ -52,6 +61,7 @@ public class DocFormatter implements Runnable {
     /**
      * 12GB Barely helps for sparse matrix with all entries
      * 4GB is more than sufficient for sparse matrix with non-zero entries
+     *
      * VM Options -Xmx12g -d64
      *
      * The non-zero entries of each row are specified as a space-separated list of pairs. Each pair contains the column
@@ -65,10 +75,9 @@ public class DocFormatter implements Runnable {
      * @throws IOException
      */
     String getVectorSpaceMatrix(IndexReader reader, String fieldName) throws IOException {
-        Fields fields = MultiFields.getFields(reader);
-        Terms terms = fields.terms(fieldName);
-        int m = 0;
+        Terms terms = LuceneUtils.terms(reader, fieldName);
         TermsEnum te = terms.iterator(null);
+        int m = 0;
         while(te.next()!=null)
             m++;
         assert m>0;
@@ -94,7 +103,7 @@ public class DocFormatter implements Runnable {
             }
             i++;
         }
-        logger.info("Converted Lucene Index to Sprase Matrix");
+        logger.info("Converted Lucene Index to Sparse Matrix");
         return String.format("%d %d %d\n", n, m, cntNonZero)+display(docs);
     }
 
@@ -104,8 +113,9 @@ public class DocFormatter implements Runnable {
      * @param mat
      * @return
      */
+    @Deprecated
     String display(int[][] mat) {
-        StringBuilder sb = new StringBuilder();  // faster than StringBuffer
+        StringBuilder sb = new StringBuilder();
         int n = mat.length;
         if(n==0)
             return null;

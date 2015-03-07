@@ -23,6 +23,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+/**
+ * Experimental use
+ */
 public class Searcher {
 	private static final FacetsConfig config = new FacetsConfig();
 	
