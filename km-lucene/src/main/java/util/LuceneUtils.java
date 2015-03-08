@@ -2,11 +2,15 @@ package util;
 
 import io.deepreader.java.commons.util.ExceptionUtils;
 import io.deepreader.java.commons.util.Generator;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.*;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.util.Version;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,8 +46,33 @@ public class LuceneUtils {
         return DirectoryReader.open(FSDirectory.open(new File(path)));
     }
 
+    /**
+     * Get Index Searcher from reader
+     * @param reader Index reader
+     * @return
+     */
     public static IndexSearcher searcher(IndexReader reader) {
         return new IndexSearcher(reader);
+    }
+
+    /**
+     * return index writer to add documents subsequently
+     * @param indexPath
+     * @param analyzer
+     * @param ver
+     * @return
+     * @throws IOException
+     */
+    public static IndexWriter indexWriter(String indexPath, Analyzer analyzer, Version ver) throws IOException {
+        Directory dir = FSDirectory.open(new File(indexPath));
+        IndexWriterConfig iwc = new IndexWriterConfig(ver, analyzer);
+        iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+        IndexWriter indexWriter = new IndexWriter(dir, iwc);
+        return indexWriter;
+    }
+
+    public static DocsAndPositionsEnum dpe(IndexReader r, Bits liveDocs, String field, BytesRef term) throws IOException {
+        return MultiFields.getTermPositionsEnum(r, liveDocs, field, term);
     }
 
     public static Terms terms(IndexReader reader, String filedName) throws IOException {

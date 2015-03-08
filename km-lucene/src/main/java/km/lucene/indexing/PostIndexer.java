@@ -11,10 +11,9 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import util.LuceneUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,10 +41,7 @@ public class PostIndexer extends AbstractIndexer {
             TaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(FSDirectory.open(new File(taxoPath)));
 
             logger.info(String.format("Indexing to directory '%s'...", indexPath));
-            Directory dir = FSDirectory.open(new File(indexPath));
-            IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_48, analyzer);
-            iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
-            IndexWriter indexWriter = new IndexWriter(dir, iwc);
+            IndexWriter indexWriter = LuceneUtils.indexWriter(indexPath, analyzer, Version.LUCENE_48);
 
             JsonReader<Post> jr = new JsonReader<>(postPath, Post.class);
             Post post;

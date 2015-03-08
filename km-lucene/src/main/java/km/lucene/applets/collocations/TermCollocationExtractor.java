@@ -44,6 +44,7 @@ public class TermCollocationExtractor {
     int slopSize = 10;
     long totalVocabulary = 0;
     TermFilter filter = new TermFilter();
+    boolean onceInDoc = true;
 
     // rake
     RakeCollocationMgr rakeMgr;
@@ -176,8 +177,8 @@ public class TermCollocationExtractor {
 
     /**
      * Merge the search results of phrase query
-     * Merge the results form each term from the phrase query 
-     * @param rets
+     * Merge the results form each term from the phrase query
+     * @param rets List: listed by query terms; Map: Json-like; ScoreMap: storing collocation scoring results
      * @return
      */
     private Map<String, ScoreMap> mergeSearch(List<Map<String, ScoreMap>> rets) {
@@ -185,8 +186,8 @@ public class TermCollocationExtractor {
         List<ScoreMap> terms = new ArrayList<>();
         List<ScoreMap> phrases = new ArrayList<>();
         for(Map<String, ScoreMap> r: rets) {  // length of rets == length of query terms
-            terms.add(r.get("terms"));
-            phrases.add(r.get("phrases"));
+            terms.add(r.get(TERMS_STR));
+            phrases.add(r.get(PHRASES_STR));
         }
         ret.put(TERMS_STR, ScoreMap.mergeMaps(terms));
         ret.put(PHRASES_STR, ScoreMap.mergeMaps(phrases));
@@ -212,7 +213,7 @@ public class TermCollocationExtractor {
 
     /**
      * Sample: tce.extract(new Term(tce.fieldName, "ntu"));
-     * extract collocations from all the documents
+     * extract collocations from ALL the documents
      * @param t
      * @throws IOException
      * @throws ParseException
@@ -240,7 +241,7 @@ public class TermCollocationExtractor {
         }
         // get dpe in first hand
         DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, term.bytes());
-        HashMap<String, CollocationScorer> termBScores = new HashMap<>();
+        HashMap<String, CollocationScorer> termBScores = new HashMap<>();  // variation of ScoreMap
         HashMap<String, CollocationScorer> phraseBScores = new HashMap<>();
 
         while (dpe.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
@@ -277,7 +278,7 @@ public class TermCollocationExtractor {
             // dpeB.advance(docId);
             DocsAndPositionsEnum dpeB = te.docsAndPositions(null, null); // to speed up, rather than advance
             if (dpeB.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
-                // remember all positions of the term in this doc
+                // remember (memory) all positions of the term in this doc
                 for (int j = 0; j < dpeB.freq(); j++) {
                     int pos = dpeB.nextPosition();
                     Pair<Integer, Integer> offsets = new ImmutablePair<>(dpeB.startOffset(), dpeB.endOffset());
@@ -290,9 +291,9 @@ public class TermCollocationExtractor {
         // rake
         rake4j.core.model.Document rake_doc = this.rakeMgr.analyze(this.searcher.doc(docId).get(FieldName.CONTENT));
         // update scorer
-        Set<Term> termsFound = new HashSet<>();
+        Set<Term> termsFound = new HashSet<>();  // only count once for the termB in one document
         Set<String> phraseFound = new HashSet<>();
-        for (int k = 0; (k < dpeA.freq()); k++) {  // for term A
+        for (int k=0; k<dpeA.freq(); k++) {  // for term A
             Integer position = dpeA.nextPosition();
             Integer startpos = Math.max(0, position - this.slopSize);
             Integer endpos = position + this.slopSize;
@@ -306,7 +307,10 @@ public class TermCollocationExtractor {
     }
 
     private void incrementCollocationScore(Term term, Map<String, CollocationScorer> scores, boolean top, Map<Integer, Term> map, Set<Term> termsFound, int cur_position) throws IOException {
-        Term termB = map.get(cur_position);  // how to get termB
+        // getting termB
+        Term termB = map.get(cur_position);
+
+        // filtering
         if(termB==null || termB.text().length()<3)
             return;
         if(termB.bytes().equals(term.bytes()))
@@ -316,6 +320,8 @@ public class TermCollocationExtractor {
         }
         if(termsFound.contains(termB))
             return;
+
+        // scoring
         CollocationScorer pt = scores.get(termB.bytes().utf8ToString());
 
         if (pt==null) {  // if not exist
@@ -341,22 +347,28 @@ public class TermCollocationExtractor {
         }
 
         pt.incCoIncidenceDocCount();
-        termsFound.add(termB);  // whether to check the same doc multiple times
+        if(this.onceInDoc)
+            termsFound.add(termB);  // depends on whether to check the same doc multiple times
     }
 
     private void incrementCollocationScore(Term term, Map<String, CollocationScorer> scores, boolean top, rake4j.core.model.Document doc, Set<String> phrasesFound, int cur_offset) throws IOException {
+        // get term B
         if(!doc.getTermMap().containsKey(cur_offset))
             return ;
         String phraseB = doc.getTermMap().get(cur_offset).getTermText();
         this.logger.trace("collocation: "+phraseB);
+
+        // filtering
         if(phraseB==null)
             return;
-        if(this.rakeMgr.index.docFreq(phraseB)<=0)
+        if(this.rakeMgr.index.docFreq(phraseB)<=0)  // filtering by doc freq (will be filtered again later)
             return ;
         if(phraseB.equals(term.bytes()))
             return;
         if(phrasesFound.contains(phraseB))
             return;
+
+        // scoring
         CollocationScorer pt = scores.get(phraseB);
 
         if (pt==null) {  // if not exist
@@ -369,6 +381,7 @@ public class TermCollocationExtractor {
             scores.put(pt.getCoincidentalTerm(), pt);
         }
         pt.incCoIncidenceDocCount();
-        phrasesFound.add(phraseB);  // whether to check the same doc multiple times
+        if(this.onceInDoc)
+            phrasesFound.add(phraseB);  // depends on whether to check the same doc multiple times
     }
 }
