@@ -12,21 +12,24 @@
     app.directive('coOccurrenceTable', function() {
        return {
            restrict: 'E',
-           templateUrl: 'co-occurrence-table.html'
+           templateUrl: 'co-occurrence-table.html',
+           require: '^searchCtrl'
        };
     });
 
     app.directive('charts', function() {
         return {
             restrict: 'E',
-            templateUrl: 'charts.html'
+            templateUrl: 'charts.html',
+            require: '^searchCtrl'
         };
     });
 
     app.directive('pagination', function () {
        return {
            restrict: 'E',
-           templateUrl: 'pagination.html'
+           templateUrl: 'pagination.html',
+           require: '^searchCtrl'
        };
     });
 })();

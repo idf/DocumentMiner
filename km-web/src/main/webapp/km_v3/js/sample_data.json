@@ -1,0 +1,36 @@
+{
+  "elapsed": "111",
+  "pageInfo": {
+    "totalThreads": 648,
+    "totalPosts": 17895,
+    "pageCount": 65,
+    "page": 1
+  },
+  "posts": [
+    {
+      "score": 2.5904653,
+      "forumId": 304,
+      "forumTitle": "NTU",
+      "threadId": 832093,
+      "threadTitle": "<B>NTU</B> ppl lip lai!",
+      "id": 19877063,
+      "postDate": "2006-08-20 11:19",
+      "content": " In <B>ntu</B>??? .",
+      "full": true,
+      "storey": 21559,
+      "poster": "kokchu",
+      "posterLevel": "",
+      "joinDate": "",
+      "totalPost": 0,
+      "quotes": [
+        {
+          "id": 0,
+          "refId": 0,
+          "poster": "siandiao",
+          "content": "3 cute fat cats in <B>NTU</B>!! . .   . . guess where this was taken? .",
+          "full": true
+        }
+      ]
+    }
+  ]
+}

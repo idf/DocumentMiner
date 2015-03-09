@@ -7,11 +7,10 @@
 
     app.controller('SearchController', ['$http', '$scope', 'collocationDataService', function($http, $scope, collocService) {
         var vm = this;  // view model
-        vm.debug = true;
         vm.show = false;
         vm.searching = false;
         vm.results = {};
-        vm.query = {};
+        vm.query = {'str': ''};  // predefined structure
         vm.pages = {};
 
         vm.pagination = pagination;
@@ -54,14 +53,22 @@
             param.push('page='+page);
             param.push('sort='+2);
             $http.get('/s/v2/posts?'+param.join('&')).success(function(data) {
-                // console.log(data);
-                vm.results.posts = data;
-                vm.pagination(data.pageInfo.page, data.pageInfo.pageCount);
+                pushReturnDataToAttributes(data);
             });
         }
 
         function filtering(){
             // TODO
+        }
+
+
+        /**
+         * @param data  {{ pageInfo: * }}
+         */
+        function pushReturnDataToAttributes(data) {
+            // console.log(data);
+            vm.results.posts = data;
+            vm.pagination(data.pageInfo.page, data.pageInfo.pageCount);
         }
 
         function searchQuery() {
@@ -72,9 +79,7 @@
             param.push('page='+1);
             param.push('sort='+2);
             $http.get('/s/v2/posts?'+param.join('&')).success(function(data) {
-                // console.log(data);
-                vm.results.posts = data;
-                vm.pagination(data.pageInfo.page, data.pageInfo.pageCount);
+                pushReturnDataToAttributes(data);
             });
 
             collocService.prepForBroadcast(vm.query.str);
