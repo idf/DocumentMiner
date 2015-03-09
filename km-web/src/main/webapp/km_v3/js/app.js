@@ -8,6 +8,9 @@
         /* Shared Modules */
         'filters',
 
+        /* 3rd party */
+        'angularSpinner',
+
         /* Feature ares */
         'km_v3.controllers',
         'km_v3.directives'

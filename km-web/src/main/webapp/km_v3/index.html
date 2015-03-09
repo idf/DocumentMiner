@@ -6,15 +6,19 @@
     <link rel="stylesheet" type="text/css" href="css/custom.css" />
     <link rel="stylesheet" type="text/css" href="css/posts.css"/>
 
-    <script type="text/javascript" src="/bower_components/angularjs/angular.min.js"></script>
+    <script type="text/javascript" src="/bower_components/angular/angular.min.js"></script>
     <script type="text/javascript" src="/bower_components/Chart.js/Chart.min.js"></script>
     <script type="text/javascript" src="/bower_components/angular-chart.js/dist/angular-chart.js"></script>
+    <script type="text/javascript" src="/bower_components/spin.js/spin.js"></script>
+    <script type="text/javascript" src="/bower_components/angular-spinner/angular-spinner.min.js"></script>
+
     <script type="text/javascript" src="/js/commons-util-js/PrimitiveExtensions.js"></script>
 
     <script type="text/javascript" src="/js/commons-util-js/angularjs/filters.js"></script>
     <script type="text/javascript" src="js/controllers.js"></script>
     <script type="text/javascript" src="js/directives.js"></script>
     <script type="text/javascript" src="js/app.js"></script>
+
     <title>Document Miner</title>
 </head>
 
@@ -47,6 +51,8 @@
         </header>
 
         <section class="container-fluid">
+            <span ng-show="searchCtrl.searching" us-spinner="{radius:15, width:4, length: 8}" spinner-key="spinner-1" spinner-start-active="true"></span>
+
             <div class="row">
                 <div class="col-md-4" ng-show="searchCtrl.show">
                     <post-hits></post-hits>

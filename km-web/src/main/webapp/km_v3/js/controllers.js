@@ -65,6 +65,7 @@
         }
 
         function searchQuery() {
+            vm.searching = true;
             var param = [];
             param.push('query='+vm.query.str);
             param.push('filter='+'postMonth:,postYear:,topicId:,forumId:,threadId:,poster:');
