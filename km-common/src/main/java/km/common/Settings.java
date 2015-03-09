@@ -158,6 +158,7 @@ public class Settings {
     static String POSTINDEX_PATH = DATA_FOLDER+"postindex";
 
     static int COLLO_TOP_K = 500;
+    static int SLOP_SIZE = 10;
 
     // RAKE
     @XmlRootElement
@@ -430,12 +431,20 @@ public class Settings {
         COLLO_TOP_K = colloTopK;
     }
 
+    public int getSlopSize() {
+        return SLOP_SIZE;
+    }
+
+    @XmlElement
+    public void setSlopSize(int slopSize) {
+        SLOP_SIZE = slopSize;
+    }
 
     /**
      * generate default configurations
      * @param args
      */
-    static void main(String[] args) {
+    public static void main(String[] args) {
         try {
             File file = new File(Settings.class.getResource("/settings.xml").toURI());
             JAXBContext jaxbContext = JAXBContext.newInstance(Settings.class);

@@ -1,6 +1,7 @@
 package km.lucene.applets.collocations;
 
 import io.deepreader.java.commons.util.Displayer;
+import io.deepreader.java.commons.util.ExceptionUtils;
 import io.deepreader.java.commons.util.Sorter;
 import io.deepreader.java.commons.util.Timestamper;
 import km.common.Config;
@@ -41,7 +42,7 @@ public class TermCollocationExtractor {
     static int DEFAULT_MAX_NUM_DOCS_TO_ANALYZE = 120000;
     static int maxNumDocsToAnalyze = DEFAULT_MAX_NUM_DOCS_TO_ANALYZE;
     String fieldName = FieldName.CONTENT;
-    int slopSize = 10;
+    int slopSize = Config.settings.getSlopSize();
     long totalVocabulary = 0;
     TermFilter filter = new TermFilter();
     boolean onceInDoc = true;
@@ -79,7 +80,7 @@ public class TermCollocationExtractor {
         String rakeIndexPath = args[3];
 
         TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, mainIndexPath, taxoPath, rakeIndexPath);
-        Map<String, ScoreMap> sorts = tce.search("ntu sce");
+        Map<String, ScoreMap> sorts = tce.search("ntu nus eee sce");
         sorts.entrySet().forEach(e -> tce.helper.display(Sorter.topEntries(e.getValue(), 10, tce.helper.getComparator())));
     }
 
@@ -123,17 +124,22 @@ public class TermCollocationExtractor {
         }
 
         // collocation
-        List<Map<String, ScoreMap>> rets = new ArrayList<>();
-        for(Term t : terms) {
-            // rakePreprocess(topDocs);
-            Map<String, ScoreMap> ret = collocateIndividualTerm(t, topDocs);
-            rets.add(ret);
+        List<Map<String, ScoreMap>> rets;
+        if(terms.size()<3) {
+            rets = terms.stream()
+                    .map(e -> collocateIndividualTerm(e, topDocs))
+                    .collect(Collectors.toList());
+        } else {
+            rets = terms.parallelStream()
+                    .map(e -> collocateIndividualTerm(e, topDocs))
+                    .collect(Collectors.toList());
         }
+
         Map<String, ScoreMap> ret = mergeSearch(rets);
 
         // merge individual collocation results
         List<String> termStrs = terms.stream().map(Term::text).collect(Collectors.toList());
-        ret.get(TERMS_STR).excludeMathAny(termStrs);
+        ret.get(TERMS_STR).excludeMathAny(termStrs);  // 200 ms
         ret.get(PHRASES_STR).excludeMathAll(termStrs);
 
         // construct phrases excluding query string
@@ -154,15 +160,21 @@ public class TermCollocationExtractor {
      * @return
      * @throws IOException
      */
-    private Map<String, ScoreMap> collocateIndividualTerm(Term t, TopDocs topDocs) throws IOException {
+    private Map<String, ScoreMap> collocateIndividualTerm(Term t, TopDocs topDocs) {
         Map<String, CollocationScorer> termBScores = new HashMap<>();
         Map<String, CollocationScorer> phraseBScores = new HashMap<>();
-        for (int j = 0; j < Math.min(this.k, topDocs.totalHits); j++) {
-            DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, t.bytes());
-            int docID = topDocs.scoreDocs[j].doc;
-            dpe.advance(docID);
-            this.processDocForTerm(t, dpe, termBScores, phraseBScores, true);
+        try {
+            for(int j = 0; j < Math.min(this.k, topDocs.totalHits); j++){
+                DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, t.bytes());
+                int docID = topDocs.scoreDocs[j].doc;
+                dpe.advance(docID);
+                this.processDocForTerm(t, dpe, termBScores, phraseBScores, true);
+            }
         }
+        catch (IOException e) {
+            ExceptionUtils.stifleCompileTime(e);
+        }
+
         termBScores = this.helper.filterByTermFreq(termBScores, 5);
         phraseBScores = this.helper.filterByTermFreq(phraseBScores, 5);
         ScoreMap sortedTermBScores = ScoreMap.sortScores(termBScores);
@@ -277,9 +289,9 @@ public class TermCollocationExtractor {
             // DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, te.term());
             // dpeB.advance(docId);
             DocsAndPositionsEnum dpeB = te.docsAndPositions(null, null); // to speed up, rather than advance
-            if (dpeB.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
+            if (dpeB.nextDoc()!=DocIdSetIterator.NO_MORE_DOCS) {
                 // remember (memory) all positions of the term in this doc
-                for (int j = 0; j < dpeB.freq(); j++) {
+                for (int j=0; j<dpeB.freq(); j++) {
                     int pos = dpeB.nextPosition();
                     Pair<Integer, Integer> offsets = new ImmutablePair<>(dpeB.startOffset(), dpeB.endOffset());
                     pos2offset.put(pos, offsets);
