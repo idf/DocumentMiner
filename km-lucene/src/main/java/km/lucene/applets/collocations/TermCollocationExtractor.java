@@ -323,14 +323,12 @@ public class TermCollocationExtractor {
         Term termB = map.get(cur_position);
 
         // filtering
-        if(termB==null || termB.text().length()<3)
-            return;
-        if(termB.bytes().equals(term.bytes()))
-            return;
-        if(this.rakeMgr.rake.getStopWordPat().matcher(termB.text()).find()) {  // filter by rake stop words
-            return ;
-        }
-        if(termsFound.contains(termB))
+        if(termB==null ||
+                termB.text().length()<3 ||
+                termB.bytes().equals(term.bytes()) ||
+                this.rakeMgr.rake.getStopWordPat().matcher(termB.text()).find() || // filter by rake stop words
+                termsFound.contains(termB)
+                )
             return;
 
         // scoring
@@ -371,13 +369,11 @@ public class TermCollocationExtractor {
         this.logger.trace("collocation: "+phraseB);
 
         // filtering
-        if(phraseB==null)
-            return;
-        if(this.rakeMgr.index.docFreq(phraseB)<=0)  // filtering by doc freq (will be filtered again later)
-            return ;
-        if(phraseB.equals(term.bytes()))
-            return;
-        if(phrasesFound.contains(phraseB))
+        if(phraseB==null ||
+                this.rakeMgr.index.docFreq(phraseB)<=0 ||
+                phraseB.equals(term.bytes()) ||
+                phrasesFound.contains(phraseB)
+                )
             return;
 
         // scoring
