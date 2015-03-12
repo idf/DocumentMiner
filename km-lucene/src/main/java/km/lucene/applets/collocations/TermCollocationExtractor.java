@@ -8,6 +8,7 @@ import km.common.Config;
 import km.lucene.analysis.CustomAnalyzer;
 import km.lucene.constants.FieldName;
 import km.lucene.entities.ScoreMap;
+import km.lucene.entities.UnsortedScoreMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.lucene.document.Document;
@@ -80,8 +81,8 @@ public class TermCollocationExtractor {
         String rakeIndexPath = args[3];
 
         TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, mainIndexPath, taxoPath, rakeIndexPath);
-        Map<String, ScoreMap> sorts = tce.search("ntu nus eee sce");
-        sorts.entrySet().forEach(e -> tce.helper.display(Sorter.topEntries(e.getValue(), 10, tce.helper.getComparator())));
+        Map<String, UnsortedScoreMap> unsorts = tce.search("ntu");
+        unsorts.entrySet().forEach(e -> tce.helper.display(Sorter.topEntries(ScoreMap.sortScores(e.getValue()), 10, tce.helper.getComparator())));
     }
 
     public TermCollocationExtractor(String indexPath, String mainIndexPath, String taxoPath, String rakeIndexPath) {
@@ -106,7 +107,7 @@ public class TermCollocationExtractor {
 
 
 
-    public Map<String, ScoreMap> search(String queryString) throws ParseException, IOException, URISyntaxException {
+    public Map<String, UnsortedScoreMap> search(String queryString) throws ParseException, IOException, URISyntaxException {
         Timestamper timestamper = new Timestamper();
         timestamper.loudStart();
 
@@ -124,7 +125,7 @@ public class TermCollocationExtractor {
         }
 
         // collocation
-        List<Map<String, ScoreMap>> rets;
+        List<Map<String, UnsortedScoreMap>> rets;
         if(terms.size()<3) {
             rets = terms.stream()
                     .map(e -> collocateIndividualTerm(e, topDocs))
@@ -135,7 +136,7 @@ public class TermCollocationExtractor {
                     .collect(Collectors.toList());
         }
 
-        Map<String, ScoreMap> ret = mergeSearch(rets);
+        Map<String, UnsortedScoreMap> ret = mergeSearch(rets);
 
         // merge individual collocation results
         List<String> termStrs = terms.stream().map(Term::text).collect(Collectors.toList());
@@ -144,7 +145,7 @@ public class TermCollocationExtractor {
 
         // construct phrases excluding query string
         if(termStrs.size()==1) {  // single term query
-            ScoreMap temp = new ScoreMap(ret.get(PHRASES_STR));
+            UnsortedScoreMap temp = new UnsortedScoreMap(ret.get(PHRASES_STR));
             temp.excludeMatchAny(termStrs);
             ret.put(PHRASES_EXCLUDED_STR, temp);
         }
@@ -160,7 +161,7 @@ public class TermCollocationExtractor {
      * @return
      * @throws IOException
      */
-    private Map<String, ScoreMap> collocateIndividualTerm(Term t, TopDocs topDocs) {
+    private Map<String, UnsortedScoreMap> collocateIndividualTerm(Term t, TopDocs topDocs) {
         Map<String, CollocationScorer> termBScores = new HashMap<>();
         Map<String, CollocationScorer> phraseBScores = new HashMap<>();
         try {
@@ -177,12 +178,12 @@ public class TermCollocationExtractor {
 
         termBScores = this.helper.filterByTermFreq(termBScores, 5);
         phraseBScores = this.helper.filterByTermFreq(phraseBScores, 5);
-        ScoreMap sortedTermBScores = ScoreMap.sortScores(termBScores);
-        ScoreMap sortedPhraseBScores = ScoreMap.sortScores(phraseBScores);
+        UnsortedScoreMap unsortedTermBScores = new UnsortedScoreMap(termBScores);
+        UnsortedScoreMap unsortedPhraseBScores = new UnsortedScoreMap(phraseBScores);
 
-        Map<String, ScoreMap> ret = new HashMap<>();
-        ret.put(TERMS_STR, sortedTermBScores);
-        ret.put(PHRASES_STR, sortedPhraseBScores);
+        Map<String, UnsortedScoreMap> ret = new HashMap<>();
+        ret.put(TERMS_STR, unsortedTermBScores);
+        ret.put(PHRASES_STR, unsortedPhraseBScores);
         logger.info("Search " + t.text() + " completed");
         return ret;
     }
@@ -193,16 +194,16 @@ public class TermCollocationExtractor {
      * @param rets List: listed by query terms; Map: Json-like; ScoreMap: storing collocation scoring results
      * @return
      */
-    private Map<String, ScoreMap> mergeSearch(List<Map<String, ScoreMap>> rets) {
-        Map<String, ScoreMap> ret = new HashMap<>();
-        List<ScoreMap> terms = new ArrayList<>();
-        List<ScoreMap> phrases = new ArrayList<>();
-        for(Map<String, ScoreMap> r: rets) {  // length of rets == length of query terms
+    private Map<String, UnsortedScoreMap> mergeSearch(List<Map<String, UnsortedScoreMap>> rets) {
+        Map<String, UnsortedScoreMap> ret = new HashMap<>();
+        List<UnsortedScoreMap> terms = new ArrayList<>();
+        List<UnsortedScoreMap> phrases = new ArrayList<>();
+        for(Map<String, UnsortedScoreMap> r: rets) {  // length of rets == length of query terms
             terms.add(r.get(TERMS_STR));
             phrases.add(r.get(PHRASES_STR));
         }
-        ret.put(TERMS_STR, ScoreMap.mergeMaps(terms));
-        ret.put(PHRASES_STR, ScoreMap.mergeMaps(phrases));
+        ret.put(TERMS_STR, UnsortedScoreMap.mergeMaps(terms));
+        ret.put(PHRASES_STR, UnsortedScoreMap.mergeMaps(phrases));
         return ret;
     }
 

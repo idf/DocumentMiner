@@ -7,6 +7,7 @@ import km.lucene.applets.cluto.ClutoWrapper;
 import km.lucene.applets.cluto.Index2ClutoFormatter;
 import km.lucene.applets.rake.RakeIndexingFacet;
 import km.lucene.entities.ScoreMap;
+import km.lucene.entities.UnsortedScoreMap;
 import org.apache.lucene.index.collocations.CollocationScorer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,9 +68,9 @@ public class Driver {
     }
 
     ScoreMap collocate(TermCollocationExtractor tce, String term) throws Exception {
-        Map<String , ScoreMap> sorts = tce.search(term);
+        Map<String , UnsortedScoreMap> sorts = tce.search(term);
         logger.info("Collocation scoring completed");
-        return Sorter.topEntries(sorts.get("phrases"), TOP,
+        return Sorter.topEntries(ScoreMap.sortScores(sorts.get("phrases")), TOP,
                 (e1, e2) -> Float.compare(e1.getValue().getScore(), e2.getValue().getScore()));
 
     }
