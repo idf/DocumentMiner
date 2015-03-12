@@ -25,11 +25,11 @@ public class ScoreMap extends TreeMap<String, CollocationScorer> {
         Transformer.removeByKey(this, e -> e.contains(t));
     }
 
-    public void excludeMathAll(List<String> t) {
+    public void excludeMatchAll(List<String> t) {
         Transformer.removeByKey(this, e -> t.stream().allMatch(e::contains) && t.size()==e.split("\\s+").length);
     }
 
-    public void excludeMathAny(List<String> t) {
+    public void excludeMatchAny(List<String> t) {
         Transformer.removeByKey(this, e -> t.stream().anyMatch(e::contains));
     }
 

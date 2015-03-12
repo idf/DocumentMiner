@@ -139,13 +139,13 @@ public class TermCollocationExtractor {
 
         // merge individual collocation results
         List<String> termStrs = terms.stream().map(Term::text).collect(Collectors.toList());
-        ret.get(TERMS_STR).excludeMathAny(termStrs);  // 200 ms
-        ret.get(PHRASES_STR).excludeMathAll(termStrs);
+        ret.get(TERMS_STR).excludeMatchAny(termStrs);  // 200 ms
+        ret.get(PHRASES_STR).excludeMatchAll(termStrs);
 
         // construct phrases excluding query string
         if(termStrs.size()==1) {  // single term query
             ScoreMap temp = new ScoreMap(ret.get(PHRASES_STR));
-            temp.excludeMathAny(termStrs);
+            temp.excludeMatchAny(termStrs);
             ret.put(PHRASES_EXCLUDED_STR, temp);
         }
 
@@ -370,7 +370,7 @@ public class TermCollocationExtractor {
 
         // filtering
         if(phraseB==null ||
-                this.rakeMgr.index.docFreq(phraseB)<=0 ||
+                this.rakeMgr.index.docFreq(phraseB)<=0 ||  // filtering by doc freq (will be filtered again later)
                 phraseB.equals(term.bytes()) ||
                 phrasesFound.contains(phraseB)
                 )
