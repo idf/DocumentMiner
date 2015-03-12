@@ -82,7 +82,11 @@ public class TermCollocationExtractor {
 
         TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, mainIndexPath, taxoPath, rakeIndexPath);
         Map<String, UnsortedScoreMap> unsorts = tce.search("ntu");
+
+        Timestamper timer = new Timestamper();
+        timer.loudStart();
         unsorts.entrySet().forEach(e -> tce.helper.display(Sorter.topEntries(ScoreMap.sortScores(e.getValue()), 10, tce.helper.getComparator())));
+        timer.loudEnd();
     }
 
     public TermCollocationExtractor(String indexPath, String mainIndexPath, String taxoPath, String rakeIndexPath) {
