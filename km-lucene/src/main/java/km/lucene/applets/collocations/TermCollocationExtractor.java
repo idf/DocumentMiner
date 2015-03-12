@@ -124,16 +124,9 @@ public class TermCollocationExtractor {
         }
 
         // collocation
-        List<Map<String, ScoreMap>> rets;
-        if(terms.size()<3) {
-            rets = terms.stream()
-                    .map(e -> collocateIndividualTerm(e, topDocs))
-                    .collect(Collectors.toList());
-        } else {
-            rets = terms.parallelStream()
-                    .map(e -> collocateIndividualTerm(e, topDocs))
-                    .collect(Collectors.toList());
-        }
+        List<Map<String, ScoreMap>> rets = terms.stream()
+                .map(e -> collocateIndividualTerm(e, topDocs))
+                .collect(Collectors.toList());
 
         Map<String, ScoreMap> ret = mergeSearch(rets);
 
