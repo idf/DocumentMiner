@@ -114,7 +114,7 @@ public class CollocationScorer {
         if(this.coincidentalTerm.equals(other.coincidentalTerm))
             this.coIncidenceDocCount += other.coIncidenceDocCount;
         if(!this.term.equals(other.term))
-            this.term = this.term+" "+other.term;  // better algorithm
+            this.term = this.term+" "+other.term;  // better algorithm; does not affect scoring process; but affecting exclusion
         return this;
     }
 
