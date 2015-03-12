@@ -13,7 +13,11 @@ import java.util.Map;
  * Time: 13:30
  */
 public class UnsortedScoreMap extends HashMap<String, CollocationScorer> {
-    public UnsortedScoreMap(HashMap map) {
+    public UnsortedScoreMap() {
+        super();
+    }
+
+    public UnsortedScoreMap(Map map) {
         super(map);
     }
 
@@ -29,8 +33,8 @@ public class UnsortedScoreMap extends HashMap<String, CollocationScorer> {
         Transformer.removeByKey(this, e -> t.stream().anyMatch(e::contains));
     }
 
-    public ScoreMap merge(List<UnsortedScoreMap> lst) {
-        Map<String, CollocationScorer> ret = new HashMap<>(this);  // Cannot use TreeMap for ret, issue with put key
+    public UnsortedScoreMap merge(List<UnsortedScoreMap> lst) {
+        UnsortedScoreMap ret = new UnsortedScoreMap(this);  // Cannot use TreeMap for ret, issue with put key
         for(UnsortedScoreMap map: lst) {
             for(Map.Entry<String, CollocationScorer> e: map.entrySet()) {
                 if(ret.containsKey(e.getKey())) {
@@ -41,10 +45,10 @@ public class UnsortedScoreMap extends HashMap<String, CollocationScorer> {
                 }
             }
         }
-        return ScoreMap.sortScores(ret);
+        return ret;
     }
 
-    public static ScoreMap mergeMaps(List<UnsortedScoreMap> lst) {
+    public static UnsortedScoreMap mergeMaps(List<UnsortedScoreMap> lst) {
         return  lst.get(0).merge(lst.subList(1, lst.size()));
     }
 }
