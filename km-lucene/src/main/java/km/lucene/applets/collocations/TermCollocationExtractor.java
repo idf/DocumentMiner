@@ -162,6 +162,8 @@ public class TermCollocationExtractor {
                 DocsAndPositionsEnum dpe = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, t.bytes());
                 int docID = topDocs.scoreDocs[j].doc;
                 dpe.advance(docID);
+                if(dpe.docID()!=docID)  // issue #17
+                    continue;
                 this.processDocForTerm(t, dpe, termBScores, phraseBScores, true);
             }
         }
@@ -271,11 +273,11 @@ public class TermCollocationExtractor {
                                    Map<String, CollocationScorer> termBScores,
                                    Map<String, CollocationScorer> phraseBScores,
                                    boolean top) throws IOException {
-        int docId = dpeA.docID();
-        this.logger.trace("Processing docId: "+docId);
+        int docID = dpeA.docID();
+        this.logger.trace("Processing docId: "+docID);
 
         // restore the structure
-        Terms tv = this.reader.getTermVector(docId, this.fieldName);
+        Terms tv = this.reader.getTermVector(docID, this.fieldName);
         TermsEnum te = tv.iterator(null);
         HashMap<Integer, Term> pos2term = new HashMap<>();
         HashMap<Integer, Pair<Integer, Integer>> pos2offset = new HashMap<>();
@@ -295,7 +297,7 @@ public class TermCollocationExtractor {
         }
 
         // rake
-        rake4j.core.model.Document rake_doc = this.rakeMgr.analyze(this.searcher.doc(docId).get(FieldName.CONTENT));
+        rake4j.core.model.Document rake_doc = this.rakeMgr.analyze(this.searcher.doc(docID).get(FieldName.CONTENT));
         // update scorer
         Set<Term> termsFound = new HashSet<>();  // only count once for the termB in one document
         Set<String> phraseFound = new HashSet<>();
