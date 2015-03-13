@@ -25,7 +25,7 @@
                 <tbody>
                 <tr ng-repeat="entry in searchCtrl.results.collocations.results[attr_name] ">
                     <td>{{$index + 1}}</td>
-                    <td>{{ entry.coincidentalTerm }}</td>
+                    <td><a ng-click="searchCtrl.search(entry.coincidentalTerm)">{{ entry.coincidentalTerm }}</a></td>
                     <td>{{ entry.coIncidenceDocCount }}</td>
                     <td>{{ entry.termBDocFreq }}</td>
                 </tr>

@@ -17,6 +17,7 @@
         vm.goto = goto;
         vm.filtering = filtering;
         vm.searchQuery = searchQuery;
+        vm.search = search;
 
         function pagination(page, pageCount) {
             var span = 3;
@@ -69,6 +70,11 @@
             // console.log(data);
             vm.results.posts = data;
             vm.pagination(data.pageInfo.page, data.pageInfo.pageCount);
+        }
+
+        function search(query) {
+            vm.query.str = query;
+            searchQuery();
         }
 
         function searchQuery() {

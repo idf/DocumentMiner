@@ -112,6 +112,7 @@ public class TermCollocationExtractor {
 
         // query
         QueryParser queryParser = new QueryParser(Version.LUCENE_48, this.fieldName, new CustomAnalyzer(Version.LUCENE_48));
+        // queryParser.setAutoGeneratePhraseQueries(true);  // phrase query?
         Query query = queryParser.parse(queryString);
         TopScoreDocCollector collector = TopScoreDocCollector.create(this.k, true);
         this.searcher.search(query, collector);
