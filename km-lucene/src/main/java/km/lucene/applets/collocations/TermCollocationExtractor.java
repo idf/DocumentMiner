@@ -104,7 +104,15 @@ public class TermCollocationExtractor {
         }
     }
 
+    private void adjustK(int div) {
+        this.k /= div;
+        if(this.k<75)
+            this.k = 75;
+    }
 
+    private void adjustK() {
+        this.k = Config.settings.getColloTopK();
+    }
 
     public Map<String, ScoreMap> search(String queryString) throws ParseException, IOException, URISyntaxException {
         Timestamper timestamper = new Timestamper();
@@ -114,10 +122,12 @@ public class TermCollocationExtractor {
         QueryParser queryParser = new QueryParser(Version.LUCENE_48, this.fieldName, new CustomAnalyzer(Version.LUCENE_48));
         // queryParser.setAutoGeneratePhraseQueries(true);  // phrase query?
         Query query = queryParser.parse(queryString);
-        TopScoreDocCollector collector = TopScoreDocCollector.create(this.k, true);
-        this.searcher.search(query, collector);
         Set<Term> terms = new HashSet<>();
         query.extractTerms(terms);
+        adjustK(terms.size());  // dynamic adjusted; for speed performance
+
+        TopScoreDocCollector collector = TopScoreDocCollector.create(this.k, true);
+        this.searcher.search(query, collector);
         TopDocs topDocs = collector.topDocs();
 
         for(int j=0; j<Math.min(this.k, topDocs.totalHits); j++) {
@@ -143,6 +153,7 @@ public class TermCollocationExtractor {
             ret.put(PHRASES_EXCLUDED_STR, temp);
         }
 
+        adjustK();
         timestamper.loudEnd();
         return ret;
     }
