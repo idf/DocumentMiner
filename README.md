@@ -39,3 +39,6 @@ In the directory of `bower.json`:
 ```bash
 bower install
 ```
+
+##Component Diagram
+![](/img/DocumentMinerComponent.png)
