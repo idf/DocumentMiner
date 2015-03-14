@@ -53,6 +53,7 @@ public class TermCollocationExtractor {
     // top k
     BitSet liveDocs = new BitSet();
     int k = Config.settings.getColloTopK();
+    int displayTopK = Config.settings.getDisplayTopK();
 
     TermCollocationHelper helper = new TermCollocationHelper();
 
@@ -81,7 +82,7 @@ public class TermCollocationExtractor {
 
         TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, mainIndexPath, taxoPath, rakeIndexPath);
         Map<String, ScoreMap> sorts = tce.search("ntu nus sce eee");
-        sorts.entrySet().forEach(e -> tce.helper.display(Sorter.topEntries(e.getValue(), 10, tce.helper.getComparator())));
+        sorts.entrySet().forEach(e -> tce.helper.display(Sorter.topEntries(e.getValue(), tce.displayTopK, tce.helper.getComparator())));
     }
 
     public TermCollocationExtractor(String indexPath, String mainIndexPath, String taxoPath, String rakeIndexPath) {

@@ -9,6 +9,7 @@
     <colloTopK>500</colloTopK>
     <contentsPath>D:/Programming/java/kd/data/contents.txt</contentsPath>
     <dataFolder>D:/Programming/java/kd/data/</dataFolder>
+    <displayTopK>10</displayTopK>
     <driverSettings>
         <rootFolder>D:/Programming/java/kd/data/expr/</rootFolder>
     </driverSettings>

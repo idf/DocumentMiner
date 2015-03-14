@@ -53,12 +53,13 @@ public class WebServiceV2 {
     ) throws Exception {
         Timestamper timer = new Timestamper();
         timer.start();
+        int displayTopK = Config.settings.getDisplayTopK();
         TermCollocationHelper helper = new TermCollocationHelper();
         Map<String, Object> ret = new HashMap<>();
         Map<String, ScoreMap> sorts = tce.search(queryStr);  // terms, phrases, phrases_excluded
         Map<String, List<CollocationScorer>> results = sorts.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey,
-                            e-> Sorter.topEntries(e.getValue(), 10, helper.getComparator())
+                            e-> Sorter.topEntries(e.getValue(), displayTopK, helper.getComparator())
                                     .entrySet().stream()
                                     .map(Map.Entry::getValue)
                                     .collect(Collectors.toList())

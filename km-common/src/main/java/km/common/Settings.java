@@ -159,6 +159,7 @@ public class Settings {
 
     static int COLLO_TOP_K = 500;
     static int SLOP_SIZE = 10;
+    static int DISPLAY_TOP_K = 10;
 
     // RAKE
     @XmlRootElement
@@ -438,6 +439,15 @@ public class Settings {
     @XmlElement
     public void setSlopSize(int slopSize) {
         SLOP_SIZE = slopSize;
+    }
+
+    public int getDisplayTopK() {
+        return DISPLAY_TOP_K;
+    }
+
+    @XmlElement
+    public void setDisplayTopK(int displayTopK) {
+        DISPLAY_TOP_K = displayTopK;
     }
 
     /**
