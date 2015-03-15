@@ -3,7 +3,12 @@ package km.lucene.applets.cluto;
 import io.deepreader.java.commons.util.IOHandler;
 import km.common.Config;
 import km.lucene.constants.FieldName;
-import org.apache.lucene.index.*;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.lucene.index.DocsEnum;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Terms;
+import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.util.BytesRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +87,7 @@ public class Index2ClutoFormatter implements Runnable {
             m++;
         assert m>0;
         int n = reader.numDocs();
-        List<List<Integer>> docs = new ArrayList<>(n);
+        List<List<Pair<Integer, Float>>> docs = new ArrayList<>(n);
         for(int i=0; i<n; i++) {
             docs.add(new ArrayList<>());
         }
@@ -96,15 +101,38 @@ public class Index2ClutoFormatter implements Runnable {
             while(de.nextDoc()!=DocsEnum.NO_MORE_DOCS) {
                 int docId = de.docID();
                 int tf = de.freq();
-                docs.get(docId).add(i + 1);
-                docs.get(docId).add(tf);
+                // docs.get(docId).add(new ImmutablePair<>(i+1, simpleWeight(tf)));
+                docs.get(docId).add(new ImmutablePair<>(i+1, tfIdfWeight(tf, te.docFreq(), n)));
                 if(tf!=0)
                     cntNonZero++;
             }
             i++;
         }
         logger.info("Converted Lucene Index to Sparse Matrix");
-        return String.format("%d %d %d\n", n, m, cntNonZero)+display(docs);
+        return String.format("%d %d %d\n", n, m, cntNonZero)+display_pair(docs);
+    }
+
+    /**
+     * No weighting
+     * @param tf
+     * @return
+     */
+    private float simpleWeight(int tf) {
+        return tf;
+    }
+
+    /**
+     * tf-idf weighting
+     * @param tf_td
+     * @param df_t
+     * @param D
+     * @return
+     */
+    private float tfIdfWeight(int tf_td, int df_t, int D) {
+        if(tf_td==0 || df_t==0)
+            return 0;
+        double score = (1+Math.log(tf_td))*Math.log(D/df_t);
+        return (float) score;
     }
 
     /**
@@ -140,9 +168,21 @@ public class Index2ClutoFormatter implements Runnable {
      * @param docs
      * @return string as the sparse matrix
      */
+    @Deprecated
     String display(List<List<Integer>> docs) {
         return docs.parallelStream()
                 .map(e -> e.stream().map(Object::toString).collect(Collectors.joining(" ")))
+                .collect(Collectors.joining("\n"));
+    }
+
+    /**
+     *
+     * @param docs
+     * @return string as the sparse matrix
+     */
+    String display_pair(List<List<Pair<Integer, Float>>> docs) {
+        return docs.parallelStream()
+                .map(e -> e.stream().map(ee -> String.format("%d %f", ee.getKey(), ee.getValue())).collect(Collectors.joining(" ")))
                 .collect(Collectors.joining("\n"));
     }
 }

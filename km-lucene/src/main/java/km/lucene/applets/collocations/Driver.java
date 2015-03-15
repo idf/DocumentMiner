@@ -25,15 +25,14 @@ import java.util.stream.IntStream;
 public class Driver {
     final int DOC_NUM = 327454;
     final int BASE = (int) Math.sqrt(DOC_NUM);  // 572
-    final int UPPER = 5;  // 5th, 9152 would be 7 hours  // (int) (Math.log(BASE)/Math.log(2))
+    final int UPPER = 4;  // 5th, 9152 would be 7 hours  // (int) (Math.log(BASE)/Math.log(2))
     final int[] LST_K = IntStream.range(0, UPPER)
             .map(e -> (int) Math.pow(2, e)* BASE)
             .toArray();
-    final boolean RE_RUN_CLUSTER = false;
-    final boolean RE_RUN_RAKE_INDEX = false;
+    final boolean RE_RUN_CLUSTER = true;
+    final boolean RE_RUN_RAKE_INDEX = true;
 
     final String [] TERMS = {"ntu", "sce", "nbs", "nus", "soc", "smu", "computer", "hardware", "software", "degree", "school", "food"};
-    final int TOP = 10;
     protected Logger logger = LoggerFactory.getLogger(Driver.class);
 
     public static void main(String[] args) throws Exception {
@@ -69,7 +68,7 @@ public class Driver {
     ScoreMap collocate(TermCollocationExtractor tce, String term) throws Exception {
         Map<String , ScoreMap> sorts = tce.search(term);
         logger.info("Collocation scoring completed");
-        return Sorter.topEntries(sorts.get("phrases"), TOP,
+        return Sorter.topEntries(sorts.get("phrases"), Config.settings.getDisplayTopK(),
                 (e1, e2) -> Float.compare(e1.getValue().getScore(), e2.getValue().getScore()));
 
     }
@@ -91,10 +90,11 @@ public class Driver {
         IOHandler.write(resultPath, sb.toString());
     }
 
+    ///////
     public void postClusteredCollocation() throws Exception {
         final String INDEX_PATH = Config.settings.getPostindexPath();
         for(int k: LST_K) {
-            final String SUFFIX = String.format("%s-%d", "post-clustered", k);
+            final String SUFFIX = String.format("%s-%d", "post-clustered-weighted", k);
             String rakeIndexPath = cluster(INDEX_PATH, k, SUFFIX);
             List<ScoreMap> lst = new ArrayList<>();
             TermCollocationExtractor tce = getTCE(INDEX_PATH, rakeIndexPath);

@@ -71,7 +71,7 @@ public class ClutoWrapper implements Runnable {
         kwargs.put("-clmethod", "rbr");
         kwargs.put("-sim", "cos");
         kwargs.put("-crfun", "h2");
-        kwargs.put("-ntrials", "10");
+        kwargs.put("-ntrials", "7");
         kwargs.put("-clustfile", clusterOutputPath);
         // kwargs.put("", "");
         // kwargs.put("-plotformat", "gif");

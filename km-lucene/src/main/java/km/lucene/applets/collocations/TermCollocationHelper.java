@@ -48,10 +48,19 @@ public class TermCollocationHelper {
         while(it.hasNext()) {
             Map.Entry<String, CollocationScorer> pair = (Map.Entry) it.next();
             i++;
-            System.out.println("# "+i);
-            System.out.println(pair.getKey()+" = "+pair.getValue().getScore());
-            System.out.println(pair.getKey()+" = "+pair.getValue());  // details
+            tabularDisplay(i, pair);
         }
+    }
+
+    private void fineGrainedDisplay(int i, Map.Entry<String, CollocationScorer> pair) {
+        System.out.println("# "+i);
+        System.out.println(pair.getKey()+" = "+pair.getValue().getScore());
+        System.out.println(pair.getKey()+" = "+pair.getValue());  // details
+    }
+
+    private void tabularDisplay(int i, Map.Entry<String, CollocationScorer> pair) {
+        String s = String.format("%d\t%s\t%.4f\t", i, pair.getKey(), pair.getValue().getScore());
+        System.out.println(s);
     }
 
     public Comparator<Map.Entry<String, CollocationScorer>> getComparator() {
