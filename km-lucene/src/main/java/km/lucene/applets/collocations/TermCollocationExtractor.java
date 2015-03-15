@@ -68,7 +68,7 @@ public class TermCollocationExtractor {
         args[0] = Config.settings.getIndexPath();
         args[1] = Config.settings.getPostindexPath();
         args[2] = Config.settings.getTaxoindexPath();
-        args[3] = Config.settings.getRakeSettings().getBasicIndexPath();
+        args[3] = Config.settings.getDriverSettings().getClusteredIndexPath();  // args[3] = Config.settings.getRakeSettings().getBasicIndexPath();
 
         if (args.length < 4) {
             System.out.println("Please specify 4 params.");

@@ -268,6 +268,7 @@ public class Settings {
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class DriverSettings {
         static String ROOT_FOLDER = DATA_FOLDER+"expr/";
+        static String CLUSTERED_INDEX_PATH = ROOT_FOLDER+"rakeIndex-post-clustered-9152.ser";
 
         public String getRootFolder() {
             return ROOT_FOLDER;
@@ -276,6 +277,15 @@ public class Settings {
         @XmlElement
         public void setRootFolder(String rootFolder) {
             ROOT_FOLDER = rootFolder;
+        }
+
+        public String getClusteredIndexPath() {
+            return CLUSTERED_INDEX_PATH;
+        }
+
+        @XmlElement
+        public void setClusteredIndexPath(String clusteredIndexPath) {
+            CLUSTERED_INDEX_PATH = clusteredIndexPath;
         }
     }
 

@@ -11,6 +11,7 @@
     <dataFolder>D:/Programming/java/kd/data/</dataFolder>
     <displayTopK>10</displayTopK>
     <driverSettings>
+        <clusteredIndexPath>D:/Programming/java/kd/data/expr/rakeIndex-post-clustered-9152.ser</clusteredIndexPath>
         <rootFolder>D:/Programming/java/kd/data/expr/</rootFolder>
     </driverSettings>
     <forumsPath>D:/Programming/java/kd/data/forums.txt</forumsPath>

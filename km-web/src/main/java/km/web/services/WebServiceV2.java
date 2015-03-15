@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Path("/v2")
 public class WebServiceV2 {
     static PostService ps  = new PostService(Config.settings.getIndexPath(), Config.settings.getTaxoindexPath());
-    static TermCollocationExtractor tce = new TermCollocationExtractor("", Config.settings.getPostindexPath(), "", Config.settings.getDriverSettings().getRootFolder()+"rakeIndex-post-clustered-9152.ser");
+    static TermCollocationExtractor tce = new TermCollocationExtractor("", Config.settings.getPostindexPath(), "", Config.settings.getDriverSettings().getClusteredIndexPath());
 
     @GET
     @Path("/posts")
