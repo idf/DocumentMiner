@@ -38,6 +38,7 @@ public class CollocationScorer {
     private long totalDocFreq;
 
     private long termBTermFreq;  // information for filter
+    private long sampleNum;
 
     /**
      * @param coincidentalTerm
@@ -54,19 +55,20 @@ public class CollocationScorer {
         this.termADocFreq = termADocFreq;
         this.termBDocFreq = termBDocFreq;
         this.termBTermFreq = termBTermFreq;
-        this.totalDocFreq = 0;
+        this.totalDocFreq = 0;  // using simple score
     }
 
-    public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq, long termBTermFreq, long totalDocFreq) {
+    public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq, long termBTermFreq, long totalDocFreq, long sampleNum) {
         this(term, coincidentalTerm, termADocFreq, termBDocFreq, termBTermFreq);
         this.totalDocFreq = totalDocFreq;
+        this.sampleNum = sampleNum;
     }
 
     public float getScore() {
-        if(this.totalDocFreq ==0)
+        if(this.totalDocFreq==0)
             return this.getSimpleScore();
         else
-            return this.getEntropyScore();
+            return this.getRelativeEntropyScore();
     }
 
     public int getCoIncidenceDocCount() {
@@ -103,11 +105,19 @@ public class CollocationScorer {
      * @return
      */
     private float getEntropyScore() {
-        double P_x = this.coIncidenceDocCount / (double) this.termADocFreq;
-        double P_y = this.termBDocFreq/ (double) (this.totalDocFreq);
+        double P_x = this.coIncidenceDocCount / (double) this.sampleNum;
+        double P_y = this.termBDocFreq/ (double) (this.totalDocFreq);  // considering termADoc frequency?
         double score = P_x * Math.log(P_x/P_y);
         return (float) score;
 
+    }
+
+    private float getRelativeEntropyScore() {
+        double p_ab = this.coIncidenceDocCount / (double) this.sampleNum;
+        double p_a = this.termADocFreq / (double) (this.totalDocFreq);
+        double p_b = this.termBDocFreq / (double) (this.totalDocFreq);
+        double score = p_ab * Math.log(p_ab/(p_a*p_b));
+        return (float) score;
     }
 
     public CollocationScorer merge(CollocationScorer other) {
