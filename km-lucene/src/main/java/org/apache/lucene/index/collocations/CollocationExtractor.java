@@ -252,7 +252,7 @@ public class CollocationExtractor {
 						continue;
 					}
                     // public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq)
-					pt = new CollocationScorer(term.text(), terms[j], numDocsForTerm, numDocsForOtherTerm, 0);
+					pt = new CollocationScorer(term.text(), terms[j], numDocsForTerm, numDocsForOtherTerm, 0, 0);
 					phraseTerms.put(pt.coincidentalTerm, pt);
 				}
 				pt.incCoIncidenceDocCount();

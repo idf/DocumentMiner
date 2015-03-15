@@ -117,7 +117,7 @@ public class TermCollocationExtractor {
 
     public Map<String, ScoreMap> search(String queryString) throws ParseException, IOException, URISyntaxException {
         Timestamper timestamper = new Timestamper();
-        timestamper.loudStart();
+        timestamper.start();
 
         // query
         QueryParser queryParser = new QueryParser(Version.LUCENE_48, this.fieldName, new CustomAnalyzer(Version.LUCENE_48));
@@ -134,6 +134,8 @@ public class TermCollocationExtractor {
         for(int j=0; j<Math.min(this.k, topDocs.totalHits); j++) {
             this.liveDocs.set(topDocs.scoreDocs[j].doc);
         }
+        // pre-process
+        rakePreprocess(topDocs);
 
         // collocation
         List<Map<String, ScoreMap>> rets = terms.stream()
@@ -155,7 +157,7 @@ public class TermCollocationExtractor {
         }
 
         adjustK();
-        timestamper.loudEnd();
+        logger.info("Search ended, elapsed: "+timestamper.end());
         return ret;
     }
 
@@ -240,11 +242,11 @@ public class TermCollocationExtractor {
      */
     private void extract(Term t) throws IOException, ParseException {
         Timestamper timestamper = new Timestamper();
-        timestamper.loudStart();
+        timestamper.start();
         Map<String, CollocationScorer> termBScores = processTerm(t);
         termBScores = this.helper.filterByCollocationCount(termBScores, 5);
         ScoreMap.sortScores(termBScores);
-        timestamper.loudEnd();
+        logger.info("Elpased: "+timestamper.end());
     }
 
 
@@ -349,17 +351,17 @@ public class TermCollocationExtractor {
                 return;
             }
             if(top) {
-                /* top 100 strategy */
+                /* top k document sampling strategy */
                 int dfB = 0;
                 DocsAndPositionsEnum dpeB = MultiFields.getTermPositionsEnum(this.reader, null, this.fieldName, termB.bytes());
                 while (dpeB.nextDoc()!= DocsEnum.NO_MORE_DOCS) {
                     if(this.liveDocs.get(dpeB.docID()))
                         dfB ++;
                 }
-                pt = new CollocationScorer(term.text(), termB.text(), this.reader.docFreq(term),  this.reader.docFreq(termB), this.reader.totalTermFreq(termB), this.reader.numDocs(), this.k);
+                pt = new CollocationScorer(term.text(), termB.text(), this.reader.docFreq(term),  this.reader.docFreq(termB), this.reader.totalTermFreq(termB), this.reader.numDocs(), this.k, dfB);
             }
             else {
-                pt = new CollocationScorer(term.text(), termB.text(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.totalTermFreq(termB), this.reader.numDocs(), this.k);
+                pt = new CollocationScorer(term.text(), termB.text(), this.reader.docFreq(term), this.reader.docFreq(termB), this.reader.totalTermFreq(termB), this.reader.numDocs());
             }
             scores.put(pt.getCoincidentalTerm(), pt);
         }
@@ -389,10 +391,10 @@ public class TermCollocationExtractor {
 
         if (pt==null) {  // if not exist
             if(top) {
-                pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeMgr.index.docFreq(phraseB), this.rakeMgr.index.totalTermFreq(phraseB), this.reader.numDocs(), this.k);
+                pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeMgr.index.docFreq(phraseB), this.rakeMgr.index.totalTermFreq(phraseB), this.reader.numDocs(), this.k, this.rakeMgr.preIndex.docFreq(phraseB));
             }
             else {
-                pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeMgr.index.docFreq(phraseB), this.rakeMgr.index.totalTermFreq(phraseB), this.reader.numDocs(), this.k);
+                pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeMgr.index.docFreq(phraseB), this.rakeMgr.index.totalTermFreq(phraseB), this.reader.numDocs());
             }
             scores.put(pt.getCoincidentalTerm(), pt);
         }

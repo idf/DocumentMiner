@@ -39,6 +39,7 @@ public class CollocationScorer {
 
     private long termBTermFreq;  // information for filter
     private long sampleNum;
+    private long sampleBFreq;
 
     /**
      * @param coincidentalTerm
@@ -49,26 +50,26 @@ public class CollocationScorer {
      * @param termBDocFreq
      *            the document frequency of the other term eg "food"
      */
-    public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq, long termBTermFreq) {
+    public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq, long termBTermFreq, long totalDocFreq) {
         this.term = term;
         this.coincidentalTerm = coincidentalTerm;
         this.termADocFreq = termADocFreq;
         this.termBDocFreq = termBDocFreq;
         this.termBTermFreq = termBTermFreq;
-        this.totalDocFreq = 0;  // using simple score
+        this.totalDocFreq = totalDocFreq;  // using simple score
     }
 
-    public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq, long termBTermFreq, long totalDocFreq, long sampleNum) {
-        this(term, coincidentalTerm, termADocFreq, termBDocFreq, termBTermFreq);
-        this.totalDocFreq = totalDocFreq;
+    public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq, long termBTermFreq, long totalDocFreq, long sampleNum, long sampleBFreq) {
+        this(term, coincidentalTerm, termADocFreq, termBDocFreq, termBTermFreq, totalDocFreq);
         this.sampleNum = sampleNum;
+        this.sampleBFreq = sampleBFreq;
     }
 
     public float getScore() {
-        if(this.totalDocFreq==0)
+        if(this.sampleNum==0)
             return this.getSimpleScore();
         else
-            return this.getRelativeEntropyScore();
+            return this.getSimpleScore();
     }
 
     public int getCoIncidenceDocCount() {
@@ -90,9 +91,9 @@ public class CollocationScorer {
      * @return
      */
     private float getSimpleScore() {
-        float overallIntersectionPercent = coIncidenceDocCount / (float) (termADocFreq + termBDocFreq);
-        float termBIntersectionPercent = coIncidenceDocCount / (float) (termBDocFreq);
-        return (termBIntersectionPercent + overallIntersectionPercent) / 2;
+        float info = 1 / (float) (termADocFreq + termBDocFreq);
+        float colloc = coIncidenceDocCount / (float) (termBDocFreq);
+        return (colloc + info) / 2;
     }
 
     /**
@@ -116,8 +117,31 @@ public class CollocationScorer {
         double p_ab = this.coIncidenceDocCount / (double) this.sampleNum;
         double p_a = this.termADocFreq / (double) (this.totalDocFreq);
         double p_b = this.termBDocFreq / (double) (this.totalDocFreq);
-        double score = p_ab * Math.log(p_ab/(p_a*p_b));
+        double score = pointWiseRelativeEntroy(p_ab, p_a*p_b);
         return (float) score;
+    }
+
+    private double pointWiseRelativeEntroy(double p, double q) {
+        if(p==0 || q==0)
+            return 0;
+        return p*Math.log(p/q);
+    }
+
+    public double getCollocationness() {
+//        return Math.log(this.coIncidenceDocCount * 1e6 /  this.sampleNum);
+        double p = this.coIncidenceDocCount / (double) this.sampleNum;
+        double q = this.sampleBFreq / (double) this.sampleNum * 1;
+        return pointWiseRelativeEntroy(p, 1e-6);
+    }
+
+    public double getInformativeness() {
+//        return  Math.log(((double) (this.totalDocFreq) / this.termADocFreq) *
+//                ((double) (this.totalDocFreq) / this.termBDocFreq));
+        double p = this.sampleBFreq / (double) this.sampleNum * 1;
+        double q = this.termADocFreq / (double) this.totalDocFreq *
+                this.termBDocFreq / (double) this. totalDocFreq;
+        return pointWiseRelativeEntroy(p, q);
+
     }
 
     public CollocationScorer merge(CollocationScorer other) {

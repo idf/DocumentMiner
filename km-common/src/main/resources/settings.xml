@@ -9,9 +9,9 @@
     <colloTopK>500</colloTopK>
     <contentsPath>D:/Programming/java/kd/data/contents.txt</contentsPath>
     <dataFolder>D:/Programming/java/kd/data/</dataFolder>
-    <displayTopK>10</displayTopK>
+    <displayTopK>20</displayTopK>
     <driverSettings>
-        <clusteredIndexPath>D:/Programming/java/kd/data/expr/rakeIndex-post-clustered-9152.ser</clusteredIndexPath>
+        <clusteredIndexPath>D:/Programming/java/kd/data/expr/rakeIndex-post-clustered-weighted-2288.ser</clusteredIndexPath>
         <rootFolder>D:/Programming/java/kd/data/expr/</rootFolder>
     </driverSettings>
     <forumsPath>D:/Programming/java/kd/data/forums.txt</forumsPath>

@@ -59,7 +59,7 @@ public class TermCollocationHelper {
     }
 
     private void tabularDisplay(int i, Map.Entry<String, CollocationScorer> pair) {
-        String s = String.format("%d\t%s\t%.4f\t", i, pair.getKey(), pair.getValue().getScore());
+        String s = String.format("%d. %s\t%f\t%f", i, pair.getKey(), pair.getValue().getInformativeness(), pair.getValue().getCollocationness());
         System.out.println(s);
     }
 

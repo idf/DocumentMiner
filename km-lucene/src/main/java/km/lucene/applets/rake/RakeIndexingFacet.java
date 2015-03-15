@@ -45,7 +45,7 @@ public class RakeIndexingFacet implements Runnable {
     @Override
     public void run() {
         try {
-            basicIndexing();  // plug with different
+            threadedIndexing();  // plug with different
         }
         catch (IOException e) {
             ExceptionUtils.stifleCompileTime(e);
