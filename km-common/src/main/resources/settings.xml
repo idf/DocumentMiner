@@ -33,7 +33,7 @@
         <clusteredIndexPath>D:/Programming/java/kd/data/rake/clustered_index.ser</clusteredIndexPath>
         <rootFolder>D:/Programming/java/kd/data/rake/</rootFolder>
         <threadedIndexPath>D:/Programming/java/kd/data/rake/threaded_index.ser</threadedIndexPath>
-        <topPercent>0.75</topPercent>
+        <topPercent>0.5</topPercent>
     </rakeSettings>
     <rawHtmlFolder>D:/Programming/java/kd/html/</rawHtmlFolder>
     <slopSize>10</slopSize>
