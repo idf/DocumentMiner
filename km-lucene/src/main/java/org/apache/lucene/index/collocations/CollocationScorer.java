@@ -36,6 +36,7 @@ public class CollocationScorer {
     private int termADocFreq;
     private int termBDocFreq;
     private long totalDocFreq;
+    private long totalDocFreqForPhrase = 0;
 
     private long termBTermFreq;  // information for filter
     private long sampleNum;
@@ -59,17 +60,28 @@ public class CollocationScorer {
         this.totalDocFreq = totalDocFreq;  // using simple score
     }
 
+    /**
+     * Constructor for sampling strategy
+     */
     public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq, long termBTermFreq, long totalDocFreq, long sampleNum, long sampleBFreq) {
         this(term, coincidentalTerm, termADocFreq, termBDocFreq, termBTermFreq, totalDocFreq);
         this.sampleNum = sampleNum;
         this.sampleBFreq = sampleBFreq;
     }
 
+    /**
+     * Constructor for phrase scorer
+     */
+    public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq, long termBTermFreq, long totalDocFreq, long sampleNum, long sampleBFreq, long totalDocFreqForPhrase) {
+        this(term, coincidentalTerm, termADocFreq, termBDocFreq, termBTermFreq, totalDocFreq, sampleNum, sampleBFreq);
+        this.totalDocFreqForPhrase = totalDocFreqForPhrase;
+    }
+
     public float getScore() {
         if(this.sampleNum==0)
             return this.getSimpleScore();
         else
-            return this.getSimpleScore();
+            return this.getRelativeEntropyScore();
     }
 
     public int getCoIncidenceDocCount() {
@@ -113,11 +125,24 @@ public class CollocationScorer {
 
     }
 
+    private double p_a() {
+        return this.termADocFreq / (double) (this.totalDocFreq);
+    }
+
+    private double p_b() {
+        if(this.totalDocFreqForPhrase!=0) {
+            // return this.termBDocFreq / (double) (this.totalDocFreqForPhrase);  // df/|D_{cluster}|
+            return this.termBTermFreq / (double) (this.totalDocFreq); // tf/|D|
+        }
+        return this.termBDocFreq / (double) (this.totalDocFreq);
+    }
+
+    private double p_ab() {
+        return this.coIncidenceDocCount / (double) this.sampleNum;
+    }
+
     private float getRelativeEntropyScore() {
-        double p_ab = this.coIncidenceDocCount / (double) this.sampleNum;
-        double p_a = this.termADocFreq / (double) (this.totalDocFreq);
-        double p_b = this.termBDocFreq / (double) (this.totalDocFreq);
-        double score = pointWiseRelativeEntroy(p_ab, p_a*p_b);
+        double score = pointWiseRelativeEntroy(p_ab(), p_a()*p_b());
         return (float) score;
     }
 
@@ -129,7 +154,7 @@ public class CollocationScorer {
 
     public double getCollocationness() {
 //        return Math.log(this.coIncidenceDocCount * 1e6 /  this.sampleNum);
-        double p = this.coIncidenceDocCount / (double) this.sampleNum;
+        double p = p_ab();
         double q = this.sampleBFreq / (double) this.sampleNum * 1;
         return pointWiseRelativeEntroy(p, 1e-6);
     }
@@ -138,8 +163,7 @@ public class CollocationScorer {
 //        return  Math.log(((double) (this.totalDocFreq) / this.termADocFreq) *
 //                ((double) (this.totalDocFreq) / this.termBDocFreq));
         double p = this.sampleBFreq / (double) this.sampleNum * 1;
-        double q = this.termADocFreq / (double) this.totalDocFreq *
-                this.termBDocFreq / (double) this. totalDocFreq;
+        double q = p_a()*p_b();
         return pointWiseRelativeEntroy(p, q);
 
     }

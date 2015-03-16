@@ -391,7 +391,7 @@ public class TermCollocationExtractor {
 
         if (pt==null) {  // if not exist
             if(top) {
-                pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeMgr.index.docFreq(phraseB), this.rakeMgr.index.totalTermFreq(phraseB), this.reader.numDocs(), this.k, this.rakeMgr.preIndex.docFreq(phraseB));
+                pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeMgr.index.docFreq(phraseB), this.rakeMgr.index.totalTermFreq(phraseB), this.reader.numDocs(), this.k, this.rakeMgr.preIndex.docFreq(phraseB), this.rakeMgr.index.numDocs());
             }
             else {
                 pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeMgr.index.docFreq(phraseB), this.rakeMgr.index.totalTermFreq(phraseB), this.reader.numDocs());

@@ -95,5 +95,6 @@ public class Evaluator {
             System.out.println(tce.PHRASES_STR);
             tce.helper.display(Sorter.topEntries(sorts.get(tce.PHRASES_STR), topCollocations));
         }
+        System.out.println("=================================");
     }
 }

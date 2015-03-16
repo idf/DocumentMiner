@@ -29,7 +29,7 @@ public class Driver {
     final int[] LST_K = IntStream.range(0, UPPER)
             .map(e -> (int) Math.pow(2, e)* BASE)
             .toArray();
-    final boolean RE_RUN_CLUSTER = true;
+    final boolean RE_RUN_CLUSTER = false;
     final boolean RE_RUN_RAKE_INDEX = true;
 
     final String [] TERMS = {"ntu", "sce", "nbs", "nus", "soc", "smu", "computer", "hardware", "software", "degree", "school", "food"};
