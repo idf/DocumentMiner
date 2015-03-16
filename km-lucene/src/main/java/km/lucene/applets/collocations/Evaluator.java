@@ -25,7 +25,7 @@ public class Evaluator {
 
     public static void main(String[] args) throws Exception {
         Evaluator evaluator = new Evaluator();
-        evaluator.varyingScoreAlgo();
+        evaluator.varyingPostThreadCluster();
     }
 
     void varyingWindowSize() throws Exception {
@@ -62,15 +62,15 @@ public class Evaluator {
         System.out.println("Evaluation of per post, per thread, and per cluster");
 
         TermCollocationExtractor tce;
-        System.out.println("RAKE index per post");
+        System.out.println("per post");
         tce = driver.getTCE(indexPath, Config.settings.getRakeSettings().getBasicIndexPath());
         run(tce);
 
-        System.out.println("RAKE index per thread");
+        System.out.println("per thread");
         tce = driver.getTCE(indexPath, Config.settings.getRakeSettings().getThreadedIndexPath());
         run(tce);
 
-        System.out.println("RAKE index per cluster");
+        System.out.println("per cluster");
         tce = driver.getTCE(indexPath, baselineRakeIndex);
         run(tce);
     }
