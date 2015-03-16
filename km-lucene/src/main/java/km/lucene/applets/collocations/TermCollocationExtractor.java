@@ -311,7 +311,7 @@ public class TermCollocationExtractor {
         }
 
         // rake
-        rake4j.core.model.Document rake_doc = this.rakeMgr.analyze(this.searcher.doc(docID).get(FieldName.CONTENT));
+        Map<Integer, rake4j.core.model.Term> offset2phrase = this.rakeMgr.phrases(this.searcher.doc(docID).get(FieldName.CONTENT));
         // update scorer
         Set<Term> termsFound = new HashSet<>();  // only count once for the termB in one document
         Set<String> phraseFound = new HashSet<>();
@@ -321,14 +321,14 @@ public class TermCollocationExtractor {
             Integer endpos = position + this.slopSize;
             for(int curpos = startpos; curpos<=endpos; curpos++) {  // for term B
                 if(curpos!=position)
-                    incrementCollocationScore(term, termBScores, top, pos2term, termsFound, curpos);
+                    incrementCollocationScore_term(term, termBScores, top, pos2term, termsFound, curpos);
                 if(pos2offset.containsKey(curpos))
-                    incrementCollocationScore(term, phraseBScores, top, rake_doc, phraseFound, pos2offset.get(curpos).getLeft());
+                    incrementCollocationScore_phrase(term, phraseBScores, top, offset2phrase, phraseFound, pos2offset.get(curpos).getLeft());
             }
         }
     }
 
-    private void incrementCollocationScore(Term term, Map<String, CollocationScorer> scores, boolean top, Map<Integer, Term> map, Set<Term> termsFound, int cur_position) throws IOException {
+    private void incrementCollocationScore_term(Term term, Map<String, CollocationScorer> scores, boolean top, Map<Integer, Term> map, Set<Term> termsFound, int cur_position) throws IOException {
         // getting termB
         Term termB = map.get(cur_position);
 
@@ -371,11 +371,11 @@ public class TermCollocationExtractor {
             termsFound.add(termB);  // depends on whether to check the same doc multiple times
     }
 
-    private void incrementCollocationScore(Term term, Map<String, CollocationScorer> scores, boolean top, rake4j.core.model.Document doc, Set<String> phrasesFound, int cur_offset) throws IOException {
+    private void incrementCollocationScore_phrase(Term term, Map<String, CollocationScorer> scores, boolean top, Map<Integer, rake4j.core.model.Term> offset2phrase, Set<String> phrasesFound, int cur_offset) throws IOException {
         // get term B
-        if(!doc.getTermMap().containsKey(cur_offset))
+        if(!offset2phrase.containsKey(cur_offset))
             return ;
-        String phraseB = doc.getTermMap().get(cur_offset).getTermText();
+        String phraseB = offset2phrase.get(cur_offset).getTermText();
         this.logger.trace("collocation: "+phraseB);
 
         // filtering
@@ -391,7 +391,7 @@ public class TermCollocationExtractor {
 
         if (pt==null) {  // if not exist
             if(top) {
-                pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeMgr.index.docFreq(phraseB), this.rakeMgr.index.totalTermFreq(phraseB), this.reader.numDocs(), this.k, this.rakeMgr.preIndex.docFreq(phraseB), this.rakeMgr.index.numDocs());
+                pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeMgr.index.docFreq(phraseB), this.rakeMgr.index.totalTermFreq(phraseB), this.reader.numDocs(), this.k, this.rakeMgr.preIndex.docFreq(phraseB), this.rakeMgr.index.totalTermFreq());
             }
             else {
                 pt = new CollocationScorer(term.text(), phraseB, this.reader.docFreq(term), this.rakeMgr.index.docFreq(phraseB), this.rakeMgr.index.totalTermFreq(phraseB), this.reader.numDocs());

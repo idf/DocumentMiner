@@ -1,6 +1,7 @@
 package km.lucene.applets.collocations;
 
 import io.deepreader.java.commons.util.IOHandler;
+import io.deepreader.java.commons.util.Sorter;
 import km.common.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,10 +9,11 @@ import rake4j.core.IndexWriter;
 import rake4j.core.RakeAnalyzer;
 import rake4j.core.index.Index;
 import rake4j.core.model.Document;
+import rake4j.core.model.Term;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: Danyang
@@ -63,5 +65,11 @@ public class RakeCollocationMgr {
         this.rake.loadDocument(doc);
         this.rake.run();
         return doc;
+    }
+
+    public Map<Integer, Term> phrases(String text) {
+        Document doc = analyze(text);
+        float upper = doc.getTermMap().size() * Config.settings.getRakeSettings().getTopPercent();
+        return Sorter.topEntries(doc.getTermMap(), (int) (upper+0.5));
     }
 }

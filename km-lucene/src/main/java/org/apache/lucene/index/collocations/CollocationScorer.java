@@ -36,7 +36,7 @@ public class CollocationScorer {
     private int termADocFreq;
     private int termBDocFreq;
     private long totalDocFreq;
-    private long totalDocFreqForPhrase = 0;
+    private long totalSpaceOfPhrase = 0;  // either df or tf depends on how to calculate p_b for phrase
 
     private long termBTermFreq;  // information for filter
     private long sampleNum;
@@ -72,9 +72,9 @@ public class CollocationScorer {
     /**
      * Constructor for phrase scorer
      */
-    public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq, long termBTermFreq, long totalDocFreq, long sampleNum, long sampleBFreq, long totalDocFreqForPhrase) {
+    public CollocationScorer(String term, String coincidentalTerm, int termADocFreq, int termBDocFreq, long termBTermFreq, long totalDocFreq, long sampleNum, long sampleBFreq, long totalSpaceOfPhrase) {
         this(term, coincidentalTerm, termADocFreq, termBDocFreq, termBTermFreq, totalDocFreq, sampleNum, sampleBFreq);
-        this.totalDocFreqForPhrase = totalDocFreqForPhrase;
+        this.totalSpaceOfPhrase = totalSpaceOfPhrase;
     }
 
     public float getScore() {
@@ -130,9 +130,9 @@ public class CollocationScorer {
     }
 
     private double p_b() {
-        if(this.totalDocFreqForPhrase!=0) {
-            // return this.termBDocFreq / (double) (this.totalDocFreqForPhrase);  // df/|D_{cluster}|
-            return this.termBTermFreq / (double) (this.totalDocFreq); // tf/|D|
+        if(this.totalSpaceOfPhrase !=0) {
+            // return this.termBDocFreq / (double) (this.totalSpaceOfPhrase);  // df/|D_{cluster}|
+            return this.termBTermFreq / (double) (this.totalSpaceOfPhrase); // tf/|D|
         }
         return this.termBDocFreq / (double) (this.totalDocFreq);
     }
