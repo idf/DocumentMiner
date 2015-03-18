@@ -81,7 +81,7 @@ public class CollocationScorer {
         if(this.sampleNum==0)
             return this.getSimpleScore();
         else
-            return this.getSimpleScore();
+            return this.getRelativeEntropyScore();
     }
 
     public int getCoIncidenceDocCount() {
@@ -168,12 +168,20 @@ public class CollocationScorer {
 
     }
 
+    /**
+     * Merging Strategy
+     * Reference:
+     * https://github.com/idf/DocumentMiner/issues/23
+     *
+     * @param other
+     * @return
+     */
     public CollocationScorer merge(CollocationScorer other) {
         if(this.coincidentalTerm.equals(other.coincidentalTerm))
             this.coIncidenceDocCount += other.coIncidenceDocCount;
         if(!this.term.equals(other.term)) {
             this.term = this.term+" "+other.term;  // better algorithm; does not affect scoring process; but affecting exclusion
-            this.termADocFreq = Math.min(this.termADocFreq, other.termADocFreq);
+            this.termADocFreq = Math.min(this.termADocFreq, other.termADocFreq);  // avoid ordering problem 
         }
         return this;
     }
