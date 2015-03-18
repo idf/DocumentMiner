@@ -36,7 +36,7 @@
         <topPercent>0.5</topPercent>
     </rakeSettings>
     <rawHtmlFolder>D:/Programming/java/kd/html/</rawHtmlFolder>
-    <slopSize>10</slopSize>
+    <slopSize>3</slopSize>
     <sortedPostsPath>D:/Programming/java/kd/data/posts_sorted.txt</sortedPostsPath>
     <taxoindexPath>D:/Programming/java/kd/data/taxoindex</taxoindexPath>
     <thindexPath>D:/Programming/java/kd/data/thindex</thindexPath>

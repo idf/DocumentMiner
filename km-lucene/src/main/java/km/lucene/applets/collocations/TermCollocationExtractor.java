@@ -81,7 +81,7 @@ public class TermCollocationExtractor {
         String rakeIndexPath = args[3];
 
         TermCollocationExtractor tce = new TermCollocationExtractor(indexPath, mainIndexPath, taxoPath, rakeIndexPath);
-        Map<String, ScoreMap> sorts = tce.search("ntu sce");
+        Map<String, ScoreMap> sorts = tce.search("ntu");
         sorts.entrySet().forEach(e -> tce.helper.display(Sorter.topEntries(e.getValue(), tce.displayTopK, tce.helper.getComparator())));
     }
 

@@ -48,7 +48,7 @@ public class TermCollocationHelper {
         while(it.hasNext()) {
             Map.Entry<String, CollocationScorer> pair = (Map.Entry) it.next();
             i++;
-            tabularDisplay(i, pair);
+            fineGrainedDisplay(i, pair);
         }
     }
 

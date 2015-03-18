@@ -158,7 +158,7 @@ public class Settings {
     static String POSTINDEX_PATH = DATA_FOLDER+"postindex";
 
     static int COLLO_TOP_K = 500;
-    static int SLOP_SIZE = 10;
+    static int SLOP_SIZE = 3;
     static int DISPLAY_TOP_K = 10;
 
     // RAKE
