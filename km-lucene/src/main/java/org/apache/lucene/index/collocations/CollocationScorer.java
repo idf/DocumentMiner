@@ -81,7 +81,7 @@ public class CollocationScorer {
         if(this.sampleNum==0)
             return this.getSimpleScore();
         else
-            return this.getRelativeEntropyScore();
+            return this.getSimpleScore();
     }
 
     public int getCoIncidenceDocCount() {
@@ -171,8 +171,10 @@ public class CollocationScorer {
     public CollocationScorer merge(CollocationScorer other) {
         if(this.coincidentalTerm.equals(other.coincidentalTerm))
             this.coIncidenceDocCount += other.coIncidenceDocCount;
-        if(!this.term.equals(other.term))
+        if(!this.term.equals(other.term)) {
             this.term = this.term+" "+other.term;  // better algorithm; does not affect scoring process; but affecting exclusion
+            this.termADocFreq = Math.min(this.termADocFreq, other.termADocFreq);
+        }
         return this;
     }
 

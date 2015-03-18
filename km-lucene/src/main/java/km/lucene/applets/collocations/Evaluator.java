@@ -43,7 +43,7 @@ public class Evaluator {
     void varyingTopDocumentK() throws Exception {
         System.out.println("Evaluation of Varying Top Document K");
 
-        int [] topKs = new int[] {100, 300, 1000};
+        int [] topKs = new int[] {200, 600, 2000};
         TermCollocationExtractor tce = driver.getTCE(indexPath, baselineRakeIndex);
         for(int topK: topKs) {
             System.out.println(topK);
