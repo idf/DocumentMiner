@@ -9,7 +9,7 @@
     <colloTopK>500</colloTopK>
     <contentsPath>D:/Programming/java/kd/data/contents.txt</contentsPath>
     <dataFolder>D:/Programming/java/kd/data/</dataFolder>
-    <displayTopK>20</displayTopK>
+    <displayTopK>10</displayTopK>
     <driverSettings>
         <clusteredIndexPath>D:/Programming/java/kd/data/expr/rakeIndex-post-clustered-weighted-2288.ser</clusteredIndexPath>
         <rootFolder>D:/Programming/java/kd/data/expr/</rootFolder>
