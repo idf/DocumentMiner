@@ -27,7 +27,8 @@
                     <td>{{$index + 1}}</td>
                     <td><a ng-click="searchCtrl.search(entry.coincidentalTerm)">{{ entry.coincidentalTerm }}</a></td>
                     <td>{{ entry.coIncidenceDocCount }}</td>
-                    <td>{{ entry.termBDocFreq }}</td>
+                    <td ng-if="attr_name==='terms'">{{ entry.termBDocFreq }}</td>
+                    <td ng-if="attr_name!=='terms'">{{ entry.termBTermFreq }}</td>  <!-- tf is more meaningful for phrases -->
                 </tr>
                 </tbody>
             </table>
