@@ -6,7 +6,7 @@ Final Year Project
 ##Set Up
 Branch `develop`:
 ```bash
-git clone git@github.com:idf/TopicModeling.git
+git clone git@github.com:idf/DocumentMiner.git
 git checkout develop
 git submodule foreach git pull origin master
 ```
@@ -23,6 +23,7 @@ git submodule foreach git pull origin master
 1. phrase co-occurrences for term query;
 1. term co-occurrences for phrase query;
 1. phrase co-occurrences for phrase query.
+And many other more.
 
 ###Co-occurrence process
 * [README](https://github.com/idf/DocumentMiner/blob/develop/km-lucene/src/main/java/km/lucene/applets/collocations)
