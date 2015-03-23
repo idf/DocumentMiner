@@ -22,7 +22,7 @@ git submodule foreach git pull origin master
 1. term co-occurrences for term query;
 1. phrase co-occurrences for term query;
 1. term co-occurrences for phrase query;
-1. phrase co-occurrences for phrase query.
+1. phrase co-occurrences for phrase query.  
 And many more others.
 
 ###Co-occurrence process
@@ -30,7 +30,7 @@ And many more others.
 
 
 ##Configurations
-[Configurations](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/java/km/common/Config.java)
+[Configurations](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/java/km/common/Config.java)  
 [Configuration XML](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/resources/settings.xml)
 
 ##Search Engine Interface in AngularJS
@@ -41,6 +41,7 @@ In the directory of `bower.json`:
 ```bash
 bower install
 ```
-
+<!-- 
 ##Component Diagram
-![](/img/DocumentMinerComponent.png)
+![](/img/DocumentMinerComponent.png) 
+-->
