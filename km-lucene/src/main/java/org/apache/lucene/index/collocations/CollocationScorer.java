@@ -103,9 +103,10 @@ public class CollocationScorer {
      * @return
      */
     private float getSimpleScore() {
+        float lambda = 0.47f;
         float info = 1 / (float) (termADocFreq + termBDocFreq);
         float colloc = coIncidenceDocCount / (float) (termBDocFreq);
-        return (colloc + info) / 2;
+        return lambda*info+(1-lambda)*colloc;
     }
 
     /**
