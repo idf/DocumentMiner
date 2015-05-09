@@ -5,7 +5,6 @@ Final Year Project
 
 ## Set Up
 ### Source Code 
-Branch `develop`:
 Initial setup
 ```bash
 git clone git@github.com:idf/DocumentMiner.git
@@ -13,6 +12,7 @@ cd ./DocumentMiner
 git submodule init
 git submodule update --recursive 
 ```
+Normally, the `develop` branch is used.  
 
 Update 
 ```bash
@@ -20,7 +20,7 @@ git submodule foreach git pull origin master
 ```
 
 ### Java Dependencies
-Mananged by maven. <!-- TODO --> 
+This is a multi-module project, mananged by maven. You should configure `commons-util`, `km_*`, `rake4j` as module. The dependencies should be automatically resolved by maven, as indicated in pom.xml. 
 
 ### Web Dependencies 
 * To install [bower](cd ./km-web/src/main/webapp/)
@@ -33,6 +33,9 @@ bower install
 ## Configurations
 [Configurations](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/java/km/common/Config.java)  
 [Configuration XML](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/resources/settings.xml)
+
+## Constructing Index
+Run
 
 ## Indexes
 ###Submodules
