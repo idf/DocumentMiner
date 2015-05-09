@@ -25,13 +25,13 @@ import java.net.URISyntaxException;
 public class Settings {
     Settings() {}
     // Raw Data
-    static String DATA_FOLDER = "D:/Programming/java/kd/data/";
+    static String DATA_FOLDER = "/Users/Daniel/programming/java/DocumentMiner-data/data/";
     static String POSTS_PATH = DATA_FOLDER +"posts.txt";
     static String SORTED_POSTS_PATH = DATA_FOLDER +"posts_sorted.txt";
     static String FORUMS_PATH = DATA_FOLDER +"forums.txt";
     static String CONTENTS_PATH = DATA_FOLDER+"contents.txt";
     static String THREADS_PATH = DATA_FOLDER+"threads.txt";
-    static String RAW_HTML_FOLDER = "D:/Programming/java/kd/html/";
+    static String RAW_HTML_FOLDER = "/Users/Daniel/programming/java/DocumentMiner-data/html/";  // not used
 
     static MalletSettings malletSettings = new MalletSettings();
     static TopicSettings topicSettings = new TopicSettings();
@@ -223,7 +223,7 @@ public class Settings {
     public static class ClutoSettings {
         static String ROOT_FOLDER = DATA_FOLDER+"cluto/";
         static String DOCS_MAT = ROOT_FOLDER+"docs.mat";
-        static String VCLUSTER = "D:/Programming/java/kd/cluto/cluto-2.1.2/MSWIN-x86_64/vcluster.exe";
+        static String VCLUSTER = "/Users/Daniel/programming/java/DocumentMiner-data/cluto/cluto-2.1.2/MSWIN-Darwin-i386/vcluster";
         static String OUTPUT = ROOT_FOLDER+"docs-output.txt";
 
         public String getRootFolder() {

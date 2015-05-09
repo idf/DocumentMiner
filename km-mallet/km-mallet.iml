@@ -14,5 +14,16 @@
     <orderEntry type="module" module-name="km-common" />
     <orderEntry type="library" name="Maven: org.jsoup:jsoup:1.7.3" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.2.4" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/mallet-deps.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/lib/mallet-deps.jar!/src" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>

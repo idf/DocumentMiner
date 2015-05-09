@@ -29,13 +29,24 @@ Change into the  directory of `bower.json`, by `cd ./km-web/src/main/webapp/`
 bower install
 ```
 
+### Binary Dependencies
+Install [CLUTO](http://glaros.dtc.umn.edu/gkhome/cluto/cluto/download)
 
 ## Configurations
 [Configurations](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/java/km/common/Config.java)  
 [Configuration XML](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/resources/settings.xml)
 
 ## Constructing Index
+Please follow the steps below to run the topic modeling (need to fix dependencies):
+1. Manually add add mallet dependencies (km-mallet/lib/mallet_deps.jar) into the km-mallet module
+1. Download [stopwords](http://www.lextek.com/manuals/onix/stopwords2.html) to /mallet/stoplist/en.txt
+1. Run package km.crawler.postprocess.ToCSV, this takes the posts.txt as input and output as a csv format.
+1. Run package km.mallet.preprocess.DataImportUnigram, this takes the csv file generated previously, and output as mallet specific format.
+1. Run km.mallet.topic.TrainTopicUnigram, this takes the previous step generated file, output two files, keys and topics.
+
 Run
+1. Run package km.crawler.postprocess.SortPostPerThread, this will generate post_sorted.txt
+
 
 ## Indexes
 ###Submodules

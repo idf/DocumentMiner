@@ -1,48 +1,48 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <settings>
     <clutoSettings>
-        <docsMat>D:/Programming/java/kd/data/cluto/docs.mat</docsMat>
-        <OUTPUT>D:/Programming/java/kd/data/cluto/docs-output.txt</OUTPUT>
-        <rootFolder>D:/Programming/java/kd/data/cluto/</rootFolder>
-        <VCLUSTER>D:/Programming/java/kd/cluto/cluto-2.1.2/MSWIN-x86_64/vcluster.exe</VCLUSTER>
+        <docsMat>/Users/Daniel/programming/java/DocumentMiner-data/data/cluto/docs.mat</docsMat>
+        <OUTPUT>/Users/Daniel/programming/java/DocumentMiner-data/data/cluto/docs-output.txt</OUTPUT>
+        <rootFolder>/Users/Daniel/programming/java/DocumentMiner-data/data/cluto/</rootFolder>
+        <VCLUSTER>/Users/Daniel/programming/java/DocumentMiner-data/cluto/cluto-2.1.2/MSWIN-Darwin-i386/vcluster</VCLUSTER>
     </clutoSettings>
     <colloTopK>500</colloTopK>
-    <contentsPath>D:/Programming/java/kd/data/contents.txt</contentsPath>
-    <dataFolder>D:/Programming/java/kd/data/</dataFolder>
+    <contentsPath>/Users/Daniel/programming/java/DocumentMiner-data/data/contents.txt</contentsPath>
+    <dataFolder>/Users/Daniel/programming/java/DocumentMiner-data/data/</dataFolder>
     <displayTopK>10</displayTopK>
     <driverSettings>
-        <clusteredIndexPath>D:/Programming/java/kd/data/expr/rakeIndex-post-clustered-weighted-2288.ser</clusteredIndexPath>
-        <rootFolder>D:/Programming/java/kd/data/expr/</rootFolder>
+        <clusteredIndexPath>/Users/Daniel/programming/java/DocumentMiner-data/data/expr/rakeIndex-post-clustered-9152.ser</clusteredIndexPath>
+        <rootFolder>/Users/Daniel/programming/java/DocumentMiner-data/data/expr/</rootFolder>
     </driverSettings>
-    <forumsPath>D:/Programming/java/kd/data/forums.txt</forumsPath>
-    <indexPath>D:/Programming/java/kd/data/postindex</indexPath>
+    <forumsPath>/Users/Daniel/programming/java/DocumentMiner-data/data/forums.txt</forumsPath>
+    <indexPath>/Users/Daniel/programming/java/DocumentMiner-data/data/postindex</indexPath>
     <malletSettings>
-        <keysPath>D:/Programming/java/kd/data/mallet/50_keys.txt</keysPath>
-        <oac69Folder>D:/Programming/java/kd/data/mallet/69_OAC/</oac69Folder>
-        <postsFolder>D:/Programming/java/kd/data/mallet/posts/</postsFolder>
-        <postsMalletPath>D:/Programming/java/kd/data/mallet/posts.mallet</postsMalletPath>
-        <postsPath>D:/Programming/java/kd/data/mallet/posts.csv</postsPath>
-        <rootFolder>D:/Programming/java/kd/data/mallet/</rootFolder>
+        <keysPath>/Users/Daniel/programming/java/DocumentMiner-data/data/mallet/50_keys.txt</keysPath>
+        <oac69Folder>/Users/Daniel/programming/java/DocumentMiner-data/data/mallet/69_OAC/</oac69Folder>
+        <postsFolder>/Users/Daniel/programming/java/DocumentMiner-data/data/mallet/posts/</postsFolder>
+        <postsMalletPath>/Users/Daniel/programming/java/DocumentMiner-data/data/mallet/posts.mallet</postsMalletPath>
+        <postsPath>/Users/Daniel/programming/java/DocumentMiner-data/data/mallet/posts.csv</postsPath>
+        <rootFolder>/Users/Daniel/programming/java/DocumentMiner-data/data/mallet/</rootFolder>
         <topicCnt>50</topicCnt>
-        <topicsPath>D:/Programming/java/kd/data/mallet/50_topics.txt</topicsPath>
+        <topicsPath>/Users/Daniel/programming/java/DocumentMiner-data/data/mallet/50_topics.txt</topicsPath>
     </malletSettings>
-    <postindexPath>D:/Programming/java/kd/data/postindex</postindexPath>
-    <postsPath>D:/Programming/java/kd/data/posts.txt</postsPath>
+    <postindexPath>/Users/Daniel/programming/java/DocumentMiner-data/data/postindex</postindexPath>
+    <postsPath>/Users/Daniel/programming/java/DocumentMiner-data/data/posts.txt</postsPath>
     <rakeSettings>
-        <basicIndexPath>D:/Programming/java/kd/data/rake/basic_index.ser</basicIndexPath>
-        <clusteredIndexPath>D:/Programming/java/kd/data/rake/clustered_index.ser</clusteredIndexPath>
-        <rootFolder>D:/Programming/java/kd/data/rake/</rootFolder>
-        <threadedIndexPath>D:/Programming/java/kd/data/rake/threaded_index.ser</threadedIndexPath>
-        <topPercent>0.5</topPercent>
+        <basicIndexPath>/Users/Daniel/programming/java/DocumentMiner-data/data/rake/basic_index.ser</basicIndexPath>
+        <clusteredIndexPath>/Users/Daniel/programming/java/DocumentMiner-data/data/rake/clustered_index.ser</clusteredIndexPath>
+        <rootFolder>/Users/Daniel/programming/java/DocumentMiner-data/data/rake/</rootFolder>
+        <threadedIndexPath>/Users/Daniel/programming/java/DocumentMiner-data/data/rake/threaded_index.ser</threadedIndexPath>
+        <topPercent>0.75</topPercent>
     </rakeSettings>
-    <rawHtmlFolder>D:/Programming/java/kd/html/</rawHtmlFolder>
+    <rawHtmlFolder>/Users/Daniel/programming/java/DocumentMiner-data/html/</rawHtmlFolder>
     <slopSize>3</slopSize>
-    <sortedPostsPath>D:/Programming/java/kd/data/posts_sorted.txt</sortedPostsPath>
-    <taxoindexPath>D:/Programming/java/kd/data/taxoindex</taxoindexPath>
-    <thindexPath>D:/Programming/java/kd/data/thindex</thindexPath>
-    <threadsPath>D:/Programming/java/kd/data/threads.txt</threadsPath>
+    <sortedPostsPath>/Users/Daniel/programming/java/DocumentMiner-data/data/posts_sorted.txt</sortedPostsPath>
+    <taxoindexPath>/Users/Daniel/programming/java/DocumentMiner-data/data/taxoindex</taxoindexPath>
+    <thindexPath>/Users/Daniel/programming/java/DocumentMiner-data/data/thindex</thindexPath>
+    <threadsPath>/Users/Daniel/programming/java/DocumentMiner-data/data/threads.txt</threadsPath>
     <topicSettings>
-        <rootFolder>D:/Programming/java/kd/data/topic/</rootFolder>
-        <termsPath>D:/Programming/java/kd/data/topic/terms.json</termsPath>
+        <rootFolder>/Users/Daniel/programming/java/DocumentMiner-data/data/topic/</rootFolder>
+        <termsPath>/Users/Daniel/programming/java/DocumentMiner-data/data/topic/terms.json</termsPath>
     </topicSettings>
 </settings>
