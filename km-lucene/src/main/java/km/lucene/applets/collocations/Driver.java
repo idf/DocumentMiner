@@ -25,8 +25,9 @@ import java.util.stream.IntStream;
 public class Driver {
     final int DOC_NUM = 327454;
     final int BASE = (int) Math.sqrt(DOC_NUM);  // 572
-    final int UPPER = 4;  // 5th, 9152 would be 7 hours  // (int) (Math.log(BASE)/Math.log(2))
-    final int[] LST_K = IntStream.range(0, UPPER)
+    final int LOWER = 2;  // 2288
+    final int UPPER = 3;  // 5th, 9152 would be 7 hours  // (int) (Math.log(BASE)/Math.log(2))
+    final int[] LST_K = IntStream.range(LOWER, UPPER)
             .map(e -> (int) Math.pow(2, e)* BASE)
             .toArray();
     final boolean RE_RUN_CLUSTER = false;

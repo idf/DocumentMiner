@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.File;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 
 /**
@@ -223,7 +224,7 @@ public class Settings {
     public static class ClutoSettings {
         static String ROOT_FOLDER = DATA_FOLDER+"cluto/";
         static String DOCS_MAT = ROOT_FOLDER+"docs.mat";
-        static String VCLUSTER = "/Users/Daniel/programming/java/DocumentMiner-data/cluto/cluto-2.1.2/MSWIN-Darwin-i386/vcluster";
+        static String VCLUSTER = "/Users/Daniel/programming/java/DocumentMiner-data/cluto/cluto-2.1.2/Darwin-i386/vcluster";
         static String OUTPUT = ROOT_FOLDER+"docs-output.txt";
 
         public String getRootFolder() {
@@ -466,6 +467,8 @@ public class Settings {
      */
     public static void main(String[] args) {
         try {
+            // classes and resources are extracted on the file system, so you can directly get a file
+            // Read the file directly may cause trouble when you pack the files source into jar or war
             File file = new File(Settings.class.getResource("/settings.xml").toURI());
             JAXBContext jaxbContext = JAXBContext.newInstance(Settings.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -482,16 +485,23 @@ public class Settings {
 
     }
 
+    /**
+     * Notice the difference of opening a file, cannot directly open a file when paced in jar
+     * When you get a resource from classloader you have to specify the path that the resource has inside the jar, that
+     * is the real package hierarchy.
+     * @return
+     */
     static Settings newInstance() {
         try {
-            File file = new File(Settings.class.getResource("/settings.xml").toURI());
+            // when packed to jar, use classloader to get the file input stream
+            InputStream file = Settings.class.getClassLoader().getResourceAsStream("settings.xml");
             JAXBContext jaxbContext = JAXBContext.newInstance(Settings.class);
 
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             Settings settingBuilder = (Settings) jaxbUnmarshaller.unmarshal(file);
             return settingBuilder;
 
-        } catch (JAXBException | URISyntaxException e) {
+        } catch (JAXBException e) {
             System.out.println(Displayer.display(e));
             return null;
         }

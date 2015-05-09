@@ -30,22 +30,34 @@ bower install
 ```
 
 ### Binary Dependencies
-Install [CLUTO](http://glaros.dtc.umn.edu/gkhome/cluto/cluto/download)
+Download [CLUTO](http://glaros.dtc.umn.edu/gkhome/cluto/cluto/download)
 
 ## Configurations
 [Configurations](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/java/km/common/Config.java)  
 [Configuration XML](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/resources/settings.xml)
+* the logic of configuration is controlled by [Settings.java](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/java/km/common/Settings.java)
 
-## Constructing Index
-Please follow the steps below to run the topic modeling (need to fix dependencies):
+## Generate Offline Data 
+### Topic Modeling 
 1. Manually add add mallet dependencies (km-mallet/lib/mallet_deps.jar) into the km-mallet module
 1. Download [stopwords](http://www.lextek.com/manuals/onix/stopwords2.html) to /mallet/stoplist/en.txt
-1. Run package km.crawler.postprocess.ToCSV, this takes the posts.txt as input and output as a csv format.
-1. Run package km.mallet.preprocess.DataImportUnigram, this takes the csv file generated previously, and output as mallet specific format.
+1. Run km.crawler.postprocess.ToCSV, this takes the posts.txt as input and output as a csv format.
+1. Run km.mallet.preprocess.DataImportUnigram, this takes the csv file generated previously, and output as mallet specific format.
 1. Run km.mallet.topic.TrainTopicUnigram, this takes the previous step generated file, output two files, keys and topics.
 
-Run
-1. Run package km.crawler.postprocess.SortPostPerThread, this will generate post_sorted.txt
+### Indexing
+1. Run km.crawler.postprocess.SortPostPerThread, this will generate post_sorted.txt
+1. Run km.lucene.indexing.PostIndexer, this will generate post index.
+
+### Clustering
+1. Run km.lucene.applets.collocations.Driver to get RAKE index based on post clustering. 
+* It may takes some time.
+
+### Collocation Analysis
+1. Run km.lucene.applets.collocations.TermCollocationExtractor to see the collocation results in CLI.
+
+### Web
+1. Install Glassfish server [guide](http://docs.oracle.com/cd/E26576_01/doc.312/e24935/installing.htm#GSING00025)
 
 
 ## Indexes

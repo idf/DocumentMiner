@@ -35,7 +35,7 @@ public class Index2ClutoFormatter implements Runnable {
 
     protected Logger logger = LoggerFactory.getLogger(Index2ClutoFormatter.class);
     public static void main(String[] args) {
-        new Index2ClutoFormatter(Config.settings.getThindexPath(),
+        new Index2ClutoFormatter(Config.settings.getThindexPath(),  // or getPostindexPath(), which is set by Driver
                 Config.settings.getClutoSettings().getDocsMat())
                 .run();
     }
@@ -87,6 +87,7 @@ public class Index2ClutoFormatter implements Runnable {
             m++;
         assert m>0;
         int n = reader.numDocs();
+        logger.info("Number of files: "+n);
         List<List<Pair<Integer, Float>>> docs = new ArrayList<>(n);
         for(int i=0; i<n; i++) {
             docs.add(new ArrayList<>());

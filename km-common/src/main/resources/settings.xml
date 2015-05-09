@@ -4,7 +4,7 @@
         <docsMat>/Users/Daniel/programming/java/DocumentMiner-data/data/cluto/docs.mat</docsMat>
         <OUTPUT>/Users/Daniel/programming/java/DocumentMiner-data/data/cluto/docs-output.txt</OUTPUT>
         <rootFolder>/Users/Daniel/programming/java/DocumentMiner-data/data/cluto/</rootFolder>
-        <VCLUSTER>/Users/Daniel/programming/java/DocumentMiner-data/cluto/cluto-2.1.2/MSWIN-Darwin-i386/vcluster</VCLUSTER>
+        <VCLUSTER>/Users/Daniel/programming/java/DocumentMiner-data/cluto/cluto-2.1.2/Darwin-i386/vcluster</VCLUSTER>
     </clutoSettings>
     <colloTopK>500</colloTopK>
     <contentsPath>/Users/Daniel/programming/java/DocumentMiner-data/data/contents.txt</contentsPath>
