@@ -11,7 +11,7 @@
     <dataFolder>/Users/Daniel/programming/java/DocumentMiner-data/data/</dataFolder>
     <displayTopK>10</displayTopK>
     <driverSettings>
-        <clusteredIndexPath>/Users/Daniel/programming/java/DocumentMiner-data/data/expr/rakeIndex-post-clustered-9152.ser</clusteredIndexPath>
+        <clusteredIndexPath>/Users/Daniel/programming/java/DocumentMiner-data/data/expr/rakeIndex-post-clustered-weighted-2288.ser</clusteredIndexPath>
         <rootFolder>/Users/Daniel/programming/java/DocumentMiner-data/data/expr/</rootFolder>
     </driverSettings>
     <forumsPath>/Users/Daniel/programming/java/DocumentMiner-data/data/forums.txt</forumsPath>

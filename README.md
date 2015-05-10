@@ -29,6 +29,11 @@ Change into the  directory of `bower.json`, by `cd ./km-web/src/main/webapp/`
 bower install
 ```
 
+Additional dependencies
+```bash
+wget https://bootswatch.com/yeti/bootstrap.css -O bower_components/bootstrap/dist/css/bootstrap-yeti.css
+```
+
 ### Binary Dependencies
 Download [CLUTO](http://glaros.dtc.umn.edu/gkhome/cluto/cluto/download)
 
@@ -57,7 +62,7 @@ Download [CLUTO](http://glaros.dtc.umn.edu/gkhome/cluto/cluto/download)
 1. Run km.lucene.applets.collocations.TermCollocationExtractor to see the collocation results in CLI.
 
 ### Web
-1. Install Glassfish server [guide](http://docs.oracle.com/cd/E26576_01/doc.312/e24935/installing.htm#GSING00025)
+1. Install Glassfish server [download Java EE](http://www.oracle.com/technetwork/java/javaee/downloads/java-ee-sdk-7-downloads-1956236.html)
 
 
 ## Indexes
