@@ -22,8 +22,9 @@ git submodule foreach git pull origin master
 ### Java Dependencies
 This is a multi-module project, mananged by maven. You should configure `commons-util`, `km_*`, `rake4j` as module. The dependencies should be automatically resolved by maven, as indicated in pom.xml. 
 
-### Web Dependencies 
-* To install [bower](cd ./km-web/src/main/webapp/)
+### Web Dependencies
+Web dependencies are managed by bower  
+* To install [bower](cd ./km-web/src/main/webapp/)  
 Change into the  directory of `bower.json`, by `cd ./km-web/src/main/webapp/`
 ```bash
 bower install
@@ -35,35 +36,36 @@ wget https://bootswatch.com/yeti/bootstrap.css -O bower_components/bootstrap/dis
 ```
 
 ### Binary Dependencies
-Download [CLUTO](http://glaros.dtc.umn.edu/gkhome/cluto/cluto/download)
+Download [CLUTO](http://glaros.dtc.umn.edu/gkhome/cluto/cluto/download), and specify the path to CLUTO in configuration file.
 
-## Configurations
+### Configurations
 [Configurations](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/java/km/common/Config.java)  
-[Configuration XML](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/resources/settings.xml)
+[Configuration XML](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/resources/settings.xml)  
 * the logic of configuration is controlled by [Settings.java](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/java/km/common/Settings.java)
 
-## Generate Offline Data 
+## Offline Components
 ### Topic Modeling 
 1. Manually add add mallet dependencies (km-mallet/lib/mallet_deps.jar) into the km-mallet module
 1. Download [stopwords](http://www.lextek.com/manuals/onix/stopwords2.html) to /mallet/stoplist/en.txt
-1. Run km.crawler.postprocess.ToCSV, this takes the posts.txt as input and output as a csv format.
-1. Run km.mallet.preprocess.DataImportUnigram, this takes the csv file generated previously, and output as mallet specific format.
-1. Run km.mallet.topic.TrainTopicUnigram, this takes the previous step generated file, output two files, keys and topics.
+1. Run km.crawler.postprocess.ToCSV, which takes the posts.txt as input and output as a csv format.
+1. Run km.mallet.preprocess.DataImportUnigram, which takes the csv file generated previously, and output as mallet specific format.
+1. Run km.mallet.topic.TrainTopicUnigram, which takes the previous step generated file, output two files, keys and topics.
 
 ### Indexing
-1. Run km.crawler.postprocess.SortPostPerThread, this will generate post_sorted.txt
-1. Run km.lucene.indexing.PostIndexer, this will generate post index.
+1. Run km.crawler.postprocess.SortPostPerThread, which will generate post_sorted.txt
+1. Run km.lucene.indexing.PostIndexer, which will generate post index.
 
 ### Clustering
 1. Run km.lucene.applets.collocations.Driver to get RAKE index based on post clustering. 
 * It may takes some time.
 
+## Online Components
 ### Collocation Analysis
 1. Run km.lucene.applets.collocations.TermCollocationExtractor to see the collocation results in CLI.
 
 ### Web
 1. Install Glassfish server [download Java EE](http://www.oracle.com/technetwork/java/javaee/downloads/java-ee-sdk-7-downloads-1956236.html)
-
+1. Then start the server with the km-web war deployed. 
 
 ## Indexes
 ###Submodules
