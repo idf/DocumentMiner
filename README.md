@@ -18,15 +18,16 @@ bower install
 
 Additional dependencies
 ```bash
-wget https://bootswatch.com/yeti/bootstrap.css -O bower_components/bootstrap/dist/css/bootstrap-yeti.css
+wget https://bootswatch.com/yeti/bootstrap.css -O \
+bower_components/bootstrap/dist/css/bootstrap-yeti.css
 ```
 
 ### Binary Dependencies
 Download [CLUTO](http://glaros.dtc.umn.edu/gkhome/cluto/cluto/download), and specify the path to CLUTO in configuration file.
 
 ### Configurations
-[km-common/src/main/java/km/common/Config.java]
-[km-common/src/main/resources/settings.xml]
+[km-common/src/main/java/km/common/Config.java]  
+[km-common/src/main/resources/settings.xml]  
 * the logic of configuration is controlled by [km-common/src/main/java/km/common/Settings.java]
 
 ## Offline Components
