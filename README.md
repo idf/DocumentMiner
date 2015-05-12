@@ -4,20 +4,6 @@ Document Miner
 Final Year Project
 
 ## Set Up
-### Source Code 
-Initial setup
-```bash
-git clone git@github.com:idf/DocumentMiner.git
-cd ./DocumentMiner
-git submodule init
-git submodule update --recursive 
-```
-Normally, the `develop` branch is used.  
-
-Update 
-```bash
-git submodule foreach git pull origin master
-```
 
 ### Java Dependencies
 This is a multi-module project, mananged by maven. You should configure `commons-util`, `km_*`, `rake4j` as module. The dependencies should be automatically resolved by maven, as indicated in pom.xml. 
@@ -39,9 +25,9 @@ wget https://bootswatch.com/yeti/bootstrap.css -O bower_components/bootstrap/dis
 Download [CLUTO](http://glaros.dtc.umn.edu/gkhome/cluto/cluto/download), and specify the path to CLUTO in configuration file.
 
 ### Configurations
-[Configurations](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/java/km/common/Config.java)  
-[Configuration XML](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/resources/settings.xml)  
-* the logic of configuration is controlled by [Settings.java](https://github.com/idf/DocumentMiner/blob/develop/km-common/src/main/java/km/common/Settings.java)
+[km-common/src/main/java/km/common/Config.java]
+[km-common/src/main/resources/settings.xml]
+* the logic of configuration is controlled by [km-common/src/main/java/km/common/Settings.java]
 
 ## Offline Components
 ### Topic Modeling 
@@ -67,13 +53,6 @@ Download [CLUTO](http://glaros.dtc.umn.edu/gkhome/cluto/cluto/download), and spe
 1. Install Glassfish server [download Java EE](http://www.oracle.com/technetwork/java/javaee/downloads/java-ee-sdk-7-downloads-1956236.html)
 1. Then start the server with the km-web war deployed. 
 
-## Indexes
-###Submodules
-[.gitmodules](https://github.com/idf/DocumentMiner/blob/develop/.gitmodules)  
-
-### Utils
-* [LuceneUtils](https://github.com/idf/DocumentMiner/blob/develop/km-lucene/src/main/java/util/LuceneUtils.java)
-
 ## Features
 1. term co-occurrences for term query;
 1. phrase co-occurrences for term query;
@@ -81,12 +60,10 @@ Download [CLUTO](http://glaros.dtc.umn.edu/gkhome/cluto/cluto/download), and spe
 1. phrase co-occurrences for phrase query.  
 And many more others.
 
-### Co-occurrence process
-* [README](https://github.com/idf/DocumentMiner/blob/develop/km-lucene/src/main/java/km/lucene/applets/collocations)
 
 ## Search Engine Interface in AngularJS
 * Through Web Service: JavaXS
-* Web dependencies: [bower.json](https://github.com/idf/DocumentMiner/blob/develop/km-web/src/main/webapp/bower.json)
+* Web dependencies: [km-web/src/main/webapp/bower.json]
 
 ## Component Diagram
 ![](/img/DocumentMinerComponent.png) 
